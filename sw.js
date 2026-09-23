@@ -1,5 +1,5 @@
 // Offline cache: serve from cache, refresh in the background. Bump VERSION to drop old caches.
-const VERSION = 'sitges26-v4';
+const VERSION = 'sitges26-v5';
 const SHELL = ['./', 'index.html', 'data/schedule.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {

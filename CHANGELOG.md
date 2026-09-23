@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-09-23
+
+### Added
+- Films view: search all films by title or director, filter by section, and see every screening.
+- Watchlist: add films from the Films view or the details panel, and flag must-see films. Each film shows if a marked session covers it, how many screenings are still free, or why it cannot fit.
+- Sessions that show a watchlist film have a ◆ marker on the grid.
+- Sync also moves the watchlist.
+- Film synopsis in Catalan in the session details panel, for every film that has one (297 of the 421 films in the programme).
+
+### Changed
+- Sessions whose name is not the film's title (for example "Sessió Especial", "Estrena Llargmetratge" or a retrospective cycle) now list the film they show, like multi-film sessions.
+
 ## [1.4.0] - 2026-09-23
 
 ### Added
@@ -55,7 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sitges Film Festival colours and fonts.
 - Installable on Android as an app (PWA), with offline support.
 
-[Unreleased]: https://github.com/dbeltra/sitges-planner/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/dbeltra/sitges-planner/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/dbeltra/sitges-planner/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/dbeltra/sitges-planner/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/dbeltra/sitges-planner/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/dbeltra/sitges-planner/compare/v1.1.0...v1.2.0

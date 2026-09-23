@@ -171,9 +171,52 @@
   .sheet li a { font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
   .sheet li a:hover { color: var(--red); border-color: var(--red); }
   .sheet li small { display: block; color: var(--muted); font-size: 12px; }
+  .sheet .syn { margin: 4px 0 0; max-width: 62ch; font-size: 13px; line-height: 1.5; }
+  .sheet ol { gap: 12px; }
   .sheet .notes .note { display: block; font-weight: 700; font-size: 13px; }
   .sheet .notes .warn { color: var(--clash); } .sheet .notes .tight { color: var(--tight); }
   .sheet .notes .repeat { color: #6B55B0; } .sheet .notes .gap { color: var(--muted); font-weight: 500; }
+
+  /* Films view */
+  #watchCount:not(:empty) { margin-left: 5px; padding: 0 5px; background: var(--red); color: #fff; font-size: 10px; }
+  .films { width: min(760px, calc(100% - 32px)); height: min(88%, 900px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
+  .films[open] { display: flex; flex-direction: column; }
+  .films::backdrop { background: rgb(0 0 0 / .55); }
+  .films-head { display: grid; gap: 10px; padding: 16px 20px 10px; border-bottom: 1px solid var(--line); }
+  .films-top { display: flex; justify-content: space-between; align-items: center; }
+  .films h2:focus { outline: none; }
+  .films h2 { margin: 0; font: 700 26px/1 var(--display); text-transform: uppercase; }
+  .films-close { width: 32px; height: 32px; border: 0; background: none; font-size: 18px; cursor: pointer; }
+  .tabs { display: flex; gap: 0; }
+  .tabs button { padding: 7px 12px; border: 1px solid var(--ink); background: none; font-weight: 700; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+  .tabs button + button { border-left: 0; }
+  .tabs button[aria-selected="true"] { background: var(--ink); color: var(--surface); }
+  .films-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .films-filters input, .films-filters select { flex: 1 1 200px; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); border-radius: 0; background: var(--ground); font: inherit; }
+  .films-summary { margin: 0; min-height: 1.35em; font-size: 12px; color: var(--muted); }
+  .films-summary b { color: var(--ink); }
+  .film-list { flex: 1; overflow: auto; margin: 0; padding: 0 20px 20px; list-style: none; }
+  .film { display: grid; grid-template-columns: 54px 1fr auto; gap: 4px 12px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
+  .film img { grid-row: span 3; width: 54px; aspect-ratio: 291 / 434; object-fit: cover; background: var(--ground); }
+  .film .ft { font: 600 15px/1.15 var(--display); }
+  .film .fd { font-size: 12px; color: var(--muted); }
+  .film .fs { display: flex; flex-wrap: wrap; gap: 4px; grid-column: 2 / -1; }
+  .film .fs button { padding: 2px 6px; border: 1px solid var(--line); background: var(--ground); font: 600 11px/1.4 var(--body); font-variant-numeric: tabular-nums; cursor: pointer; }
+  .film .fs button:hover { border-color: var(--ink); }
+  .film .fs button.on { background: var(--mine-bg); color: var(--mine-ink); border-color: var(--mine-bg); }
+  .film .fs button.off { opacity: .5; text-decoration: line-through; }
+  .film .fsec { font: 700 9.5px/1.3 var(--body); text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .film .acts { display: flex; gap: 4px; grid-row: 1 / span 2; grid-column: 3; }
+  .film .acts button { min-width: 34px; height: 30px; padding: 0 8px; border: 1px solid var(--ink); background: none; font-weight: 700; cursor: pointer; }
+  .film .acts button.on { background: var(--ink); color: var(--surface); }
+  .film .acts .must.on { background: var(--red); border-color: var(--red); color: #fff; }
+  .film .st { grid-column: 2 / -1; font-size: 12px; font-weight: 600; }
+  .film .st.covered { color: #2E7D32; } .film .st.open { color: var(--muted); } .film .st.blocked { color: var(--clash); }
+  .film-list .empty { padding: 30px 0; color: var(--muted); text-align: center; }
+  .s .t .wl { color: var(--red); font-size: 10px; margin-left: auto; }
+  .s .t .wl + .info { margin-left: 2px; }
+  .sheet .wbtn { margin-left: 6px; padding: 1px 7px; border: 1px solid var(--ink); background: none; font: 700 10px/1.6 var(--body); letter-spacing: .5px; text-transform: uppercase; cursor: pointer; vertical-align: 2px; }
+  .sheet .wbtn.on { background: var(--ink); color: var(--surface); }
 
   /* Sync */
   #syncDialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
@@ -208,6 +251,9 @@
     .col { min-width: 150px; }
     .next { padding: 5px 12px; font-size: 12px; }
     .sheet { width: 100%; max-width: 100%; max-height: 88%; margin: auto 0 0; }
+    .films { width: 100%; max-width: 100%; height: 100%; max-height: 100%; }
+    .films-head { padding: 12px 12px 8px; }
+    .film-list { padding: 0 12px 16px; }
   }
   @media (prefers-reduced-motion: reduce) { .s { transition: none; } }
 </style>
@@ -218,6 +264,7 @@
   <div class="controls">
     <label><input type="checkbox" id="only"> <span class="long">Only my sessions</span><span class="short">Only mine</span></label>
     <button type="button" id="walkOpen" class="walk-open"><span class="long">Walk times</span><span class="short">Walk</span></button>
+    <button type="button" id="filmsOpen" class="walk-open">Films<span id="watchCount"></span></button>
     <button type="button" id="syncOpen" class="walk-open">Sync</button>
   </div>
 </div>
@@ -239,6 +286,24 @@
   </form>
 </dialog>
 <dialog id="sheet" class="sheet" aria-labelledby="sheetTitle"></dialog>
+<dialog id="filmsDialog" class="films" aria-labelledby="filmsTitle">
+  <div class="films-head">
+    <div class="films-top">
+      <h2 id="filmsTitle" tabindex="-1" autofocus>Films</h2>
+      <form method="dialog"><button type="submit" class="films-close" aria-label="Close">✕</button></form>
+    </div>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabAll" data-tab="all" aria-selected="true">All films</button>
+      <button type="button" role="tab" id="tabWatch" data-tab="watch" aria-selected="false">My watchlist</button>
+    </div>
+    <div class="films-filters">
+      <input type="search" id="filmSearch" placeholder="Search title or director" aria-label="Search title or director">
+      <select id="filmSection" aria-label="Section"></select>
+    </div>
+    <p id="filmsSummary" class="films-summary" aria-live="polite"></p>
+  </div>
+  <ul id="filmList" class="film-list"></ul>
+</dialog>
 <dialog id="syncDialog" aria-labelledby="syncTitle">
   <form method="dialog">
     <h2 id="syncTitle">Sync</h2>
@@ -302,6 +367,13 @@ const days = Object.keys(byDay).sort();
 const ORDER = ['Cinema Casino Prado', 'Cinema Escorxador', 'Mercat Vell', 'Sala Auditori Meliá', 'Brigadoon', 'Sala Tramuntana Meliá'];
 const SHORT = { 'Cinema Casino Prado': 'Prado', 'Cinema Escorxador': 'Escorxador', 'Sala Auditori Meliá': 'Auditori', 'Sala Tramuntana Meliá': 'Tramuntana' };
 const locations = [...new Set(SCHEDULE.map(s => s.location))].sort((a, b) => (ORDER.indexOf(a) + 1 || 99) - (ORDER.indexOf(b) + 1 || 99));
+// Watchlist: film page URL -> 1 (want) or 2 (must-see). Films are keyed by URL, as in the repeat warnings.
+let watch = store.get('watch', {});
+const saveWatch = () => store.set('watch', watch);
+const filmIndex = {};
+for (const s of SCHEDULE) for (const f of s.films) (filmIndex[f.url] ??= { ...f, sessions: [] }).sessions.push(s);
+for (const f of Object.values(filmIndex)) f.sessions.sort((a, b) => a.start.localeCompare(b.start));
+const allFilms = Object.values(filmIndex).sort((a, b) => a.title.localeCompare(b.title, 'ca'));
 let current, view = null; // view: what the grid was drawn with, so the now line can move without a redraw
 
 // ?now=2026-10-08T21:30 pretends it is that time, to try the festival-day features early.
@@ -334,6 +406,10 @@ function analyse() {
   });
   return info;
 }
+
+// List the films when a session has several, or when its name is not the film's (e.g. "Sessió Especial").
+const norm = t => t.replace(/\s+/g, ' ').trim().toLocaleLowerCase('ca');
+const listFilms = s => s.films.length > 1 || (s.films.length === 1 && norm(s.films[0].title) !== norm(s.title));
 
 function notesHtml(s, i) {
   if (!i) return '';
@@ -410,11 +486,12 @@ function render(day) {
   grid.insertAdjacentHTML('beforeend', `<div class="col axis" style="${height}">${lines(true)}</div>`);
   for (const loc of shown) {
     const blocks = list.filter(s => s.location === loc).map(s => {
-      const multi = s.films.length > 1;
+      const multi = listFilms(s);
       const filmLine = f => `${f.title}${f.directors.length ? ' — ' + f.directors.join(', ') : ''}`;
       const credits = multi ? s.films.map(filmLine).join('\n') : (s.films[0]?.directors || []).join(', ');
       const creditsHtml = multi ? `<ul>${s.films.map(f => `<li>${esc(filmLine(f))}</li>`).join('')}</ul>` : credits ? `<div class="who">${esc(credits)}</div>` : '';
-      const open = `<button type="button" class="info" data-info="${s.id}" title="Details" aria-label="Details for ${esc(s.title)}">ⓘ</button>`;
+      const wl = s.films.some(f => watch[f.url]) ? `<span class="wl" title="On your watchlist" aria-label="On your watchlist">◆</span>` : '';
+      const open = `${wl}<button type="button" class="info" data-info="${s.id}" title="Details" aria-label="Details for ${esc(s.title)}">ⓘ</button>`;
       const i = info[s.id];
       const notes = notesHtml(s, i);
       const cls = ['s', i && 'on', i?.repeat.length && 'repeat', i?.tight.length && 'tight', i?.clash.length && 'clash'].filter(Boolean).join(' ');
@@ -543,7 +620,7 @@ function openSheet(id) {
   const on = marked.has(id);
   const notes = notesHtml(s, analyse()[id]);
   const posters = s.films.filter(f => f.image).map(f => `<img src="${esc(f.image)}" alt="" loading="lazy">`).join('');
-  const films = s.films.map(f => `<li><a href="https://sitgesfilmfestival.com${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)} ↗</a>${f.directors.length ? `<small>${esc(f.directors.join(', '))}</small>` : ''}</li>`).join('');
+  const films = s.films.map(f => `<li><a href="https://sitgesfilmfestival.com${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)} ↗</a><button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? '✓ Watchlist' : '+ Watchlist'}</button>${f.directors.length ? `<small>${esc(f.directors.join(', '))}</small>` : ''}${f.synopsis ? f.synopsis.split('\n').map(p => `<p class="syn">${esc(p)}</p>`).join('') : ''}</li>`).join('');
   sheet.innerHTML = `<form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
     ${posters ? `<div class="posters">${posters}</div>` : ''}
     <h2 id="sheetTitle" tabindex="-1" autofocus>${esc(s.title)}</h2>
@@ -557,6 +634,8 @@ function openSheet(id) {
 }
 sheet.onclick = e => {
   const b = e.target.closest('[data-mark]');
+  const w = e.target.closest('[data-watch]');
+  if (w) { toggleWatch(w.dataset.watch); openSheet(+sheet.querySelector('[data-mark]').dataset.mark); return; }
   if (b) { const id = +b.dataset.mark; marked.has(id) ? marked.delete(id) : marked.add(id); store.set('marked', [...marked]); render(current); openSheet(id); }
   else if (e.target === sheet) sheet.close(); // tap on the backdrop
 };
@@ -566,9 +645,10 @@ const syncDialog = document.getElementById('syncDialog');
 const b64 = { enc: str => btoa(String.fromCharCode(...new TextEncoder().encode(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
               dec: code => new TextDecoder().decode(Uint8Array.from(atob(code.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))) };
 const walkOverrides = () => Object.fromEntries(Object.entries(walkTimes).filter(([k, v]) => v !== DEFAULT_WALK[k]));
-const planCode = () => b64.enc(JSON.stringify({ v: 1, m: [...marked], h: [...hiddenVenues], w: walkOverrides() }));
+const planCode = () => b64.enc(JSON.stringify({ v: 1, m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch }));
 const planLink = () => `${location.origin}${location.pathname}?import=${planCode()}`;
-const describe = p => `${p.m.length} marked session${p.m.length === 1 ? '' : 's'}, ${p.h.length} hidden venue${p.h.length === 1 ? '' : 's'}, ${Object.keys(p.w).length} edited walk time${Object.keys(p.w).length === 1 ? '' : 's'}`;
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const describe = p => `${plural(p.m.length, 'marked session')}, ${plural(Object.keys(p.l || {}).length, 'watchlist film')}, ${plural(p.h.length, 'hidden venue')}, ${plural(Object.keys(p.w).length, 'edited walk time')}`;
 function parsePlan(text) {
   const raw = text.trim();
   if (!raw) return null;
@@ -577,7 +657,8 @@ function parsePlan(text) {
   try {
     const p = JSON.parse(b64.dec(code));
     if (p.v !== 1 || !Array.isArray(p.m) || !Array.isArray(p.h) || typeof p.w !== 'object') return null;
-    return { m: p.m.filter(id => byId[id]), h: p.h.filter(l => locations.includes(l)), w: Object.fromEntries(Object.entries(p.w).filter(([k, v]) => k in DEFAULT_WALK && Number.isFinite(v) && v >= 0)) };
+    const l = p.l && typeof p.l === 'object' ? Object.fromEntries(Object.entries(p.l).filter(([u, v]) => filmIndex[u] && (v === 1 || v === 2))) : {};
+    return { m: p.m.filter(id => byId[id]), h: p.h.filter(l => locations.includes(l)), w: Object.fromEntries(Object.entries(p.w).filter(([k, v]) => k in DEFAULT_WALK && Number.isFinite(v) && v >= 0)), l };
   } catch { return null; }
 }
 const syncInput = document.getElementById('syncInput'), syncPreview = document.getElementById('syncPreview'), syncImport = document.getElementById('syncImport');
@@ -587,7 +668,7 @@ function previewImport() {
   syncPreview.textContent = !syncInput.value.trim() ? '' : p ? `This replaces your plan with ${describe(p)}.` : 'This is not a valid plan code or link. Copy it again from the other device.';
 }
 function openSync(prefill = '') {
-  document.getElementById('syncSummary').textContent = `This device: ${describe({ m: [...marked], h: [...hiddenVenues], w: walkOverrides() })}.`;
+  document.getElementById('syncSummary').textContent = `This device: ${describe({ m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch })}.`;
   document.getElementById('syncCode').value = planCode();
   syncInput.value = prefill;
   previewImport();
@@ -612,6 +693,7 @@ syncImport.onclick = () => {
   marked.clear(); p.m.forEach(id => marked.add(id));
   hiddenVenues.clear(); p.h.forEach(l => hiddenVenues.add(l));
   walkTimes = { ...DEFAULT_WALK, ...p.w };
+  watch = p.l; saveWatch(); updateWatchCount();
   store.set('marked', [...marked]); store.set('hiddenVenues', [...hiddenVenues]); store.set('walkTimes', walkOverrides());
   render(current);
   syncPreview.textContent = `Imported: ${describe(p)}.`;
@@ -619,6 +701,101 @@ syncImport.onclick = () => {
   document.getElementById('syncSummary').textContent = `This device: ${describe(p)}.`;
   document.getElementById('syncCode').value = planCode();
 };
+
+// Films view: all films or the watchlist, with the status of each watchlist film.
+const filmsDialog = document.getElementById('filmsDialog');
+const filmSearch = document.getElementById('filmSearch'), filmSection = document.getElementById('filmSection');
+let filmsTab = 'all';
+const updateWatchCount = () => { const n = Object.keys(watch).length; document.getElementById('watchCount').textContent = n || ''; };
+function toggleWatch(url, level) {
+  if (level === undefined) level = watch[url] ? 0 : 1;
+  if (level) watch[url] = level; else delete watch[url];
+  saveWatch(); updateWatchCount(); render(current);
+}
+{
+  const count = {};
+  for (const f of allFilms) for (const x of f.sections) count[x] = (count[x] || 0) + 1;
+  filmSection.innerHTML = '<option value="">All sections</option>' + Object.keys(count).sort((a, b) => a.localeCompare(b, 'ca'))
+    .map(x => `<option value="${esc(x)}">${esc(x)} (${count[x]})</option>`).join('');
+}
+const when = s => `${dayLabel(s.start)} ${hhmm(toDate(s.start))}`;
+
+// Why a screening can't be added: hidden venue, or it overlaps / leaves too little walk time with a marked session.
+function blockedBy(s, mine) {
+  if (hiddenVenues.has(s.location)) return `${venue(s.location)} is hidden`;
+  for (const o of mine) {
+    if (o === s) continue;
+    const [a, b] = o.start < s.start ? [o, s] : [s, o];
+    const gap = (toDate(b.start) - toDate(a.end)) / 60000;
+    if (gap < 0) return `overlaps ${o.title}`;
+    if (gap < need(a.location, b.location)) return `too close to ${o.title}`;
+  }
+  return null;
+}
+function filmStatus(f, mine) {
+  const seen = f.sessions.find(s => marked.has(s.id));
+  if (seen) return { key: 'covered', rank: 2, text: `✓ Covered · ${when(seen)} · ${venue(seen.location)}` };
+  const reasons = f.sessions.map(s => [s, blockedBy(s, mine)]);
+  const free = reasons.filter(([, r]) => !r).length;
+  if (free) return { key: 'open', rank: 1, text: `Not planned yet · ${free} of ${plural(f.sessions.length, 'screening')} free` };
+  return { key: 'blocked', rank: 0, text: `⚠ Cannot fit: ${reasons.map(([s, r]) => `${when(s)} ${r}`).join('; ')}` };
+}
+
+function renderFilms() {
+  const q = norm(filmSearch.value), sec = filmSection.value;
+  const mine = [...marked].map(id => byId[id]).filter(Boolean);
+  document.getElementById('tabWatch').textContent = `My watchlist (${Object.keys(watch).length})`;
+  document.querySelectorAll('.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === filmsTab));
+  let list = allFilms.filter(f => (filmsTab === 'all' || watch[f.url]) && (!sec || f.sections.includes(sec))
+    && (!q || norm(f.title).includes(q) || f.directors.some(d => norm(d).includes(q))));
+  const status = new Map(list.filter(f => watch[f.url]).map(f => [f, filmStatus(f, mine)]));
+  if (filmsTab === 'watch') list.sort((a, b) => (watch[b.url] - watch[a.url]) || (status.get(a).rank - status.get(b).rank) || a.title.localeCompare(b.title, 'ca'));
+
+  const wl = allFilms.filter(f => watch[f.url]).map(f => filmStatus(f, mine).key);
+  const n = k => wl.filter(x => x === k).length;
+  document.getElementById('filmsSummary').innerHTML = filmsTab === 'watch'
+    ? (wl.length ? `<b>${n('covered')} of ${wl.length}</b> covered · ${n('open')} not planned · ${n('blocked') ? `<b>${n('blocked')}</b>` : 'none'} cannot fit` : '')
+    : `${plural(list.length, 'film')}${wl.length ? ` · ${wl.length} on your watchlist` : ''}`;
+
+  document.getElementById('filmList').innerHTML = list.length ? list.map(f => {
+    const w = watch[f.url], st = status.get(f);
+    const shows = f.sessions.map(s => {
+      const r = !marked.has(s.id) && blockedBy(s, mine);
+      return `<button type="button" data-goto="${s.id}" class="${marked.has(s.id) ? 'on' : r ? 'off' : ''}" title="${esc(`${s.title} · ${s.location}${r ? ` · ${r}` : ''}`)}">${marked.has(s.id) ? '★ ' : ''}${when(s)} · ${esc(venue(s.location))}</button>`;
+    }).join('');
+    return `<li class="film">
+      ${f.image ? `<img src="${esc(f.image)}" alt="" loading="lazy">` : '<span></span>'}
+      <div class="ft">${esc(f.title)}</div>
+      <div class="acts">
+        ${w ? `<button type="button" class="must${w === 2 ? ' on' : ''}" data-must="${esc(f.url)}" title="Must-see" aria-label="Must-see" aria-pressed="${w === 2}">!</button>` : ''}
+        <button type="button" class="${w ? 'on' : ''}" data-wl="${esc(f.url)}" aria-pressed="${!!w}" aria-label="${w ? 'Remove from watchlist' : 'Add to watchlist'}">${w ? '✓' : '+'}</button>
+      </div>
+      <div class="fd">${esc(f.directors.join(', '))}${f.sections.length ? ` <span class="fsec">· ${esc(f.sections.join(' · '))}</span>` : ''}</div>
+      ${st ? `<div class="st ${st.key}">${esc(st.text)}</div>` : ''}
+      <div class="fs">${shows}</div>
+    </li>`;
+  }).join('') : `<li class="empty">${filmsTab === 'watch' && !Object.keys(watch).length ? 'Your watchlist is empty. Add films with + in All films.' : 'No films match.'}</li>`;
+}
+document.getElementById('filmsOpen').onclick = () => { renderFilms(); filmsDialog.showModal(); };
+filmSearch.oninput = filmSection.onchange = renderFilms;
+filmsDialog.onclick = e => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { filmsTab = tab.dataset.tab; document.getElementById('filmList').scrollTop = 0; return renderFilms(); }
+  const add = e.target.closest('[data-wl]');
+  if (add) { toggleWatch(add.dataset.wl); return renderFilms(); }
+  const must = e.target.closest('[data-must]');
+  if (must) { toggleWatch(must.dataset.must, watch[must.dataset.must] === 2 ? 1 : 2); return renderFilms(); }
+  const go = e.target.closest('[data-goto]');
+  if (go) {
+    const id = +go.dataset.goto;
+    filmsDialog.close();
+    if (hiddenVenues.has(byId[id].location)) setVenue(byId[id].location, false);
+    render(festDay(byId[id].start));
+    document.querySelector(`.s[data-id="${id}"]`)?.scrollIntoView({ block: 'center', inline: 'center' });
+    openSheet(id);
+  }
+};
+updateWatchCount();
 
 document.getElementById('next').onclick = e => {
   const id = +e.currentTarget.dataset.id;
