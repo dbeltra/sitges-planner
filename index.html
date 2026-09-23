@@ -21,7 +21,7 @@
     --ground: #ECE6DC; --surface: #FFFFFF; --ink: #000000; --muted: #5E5850; --line: #D2CABD; --line-soft: #DDD6CA;
     --red: #FF0042; --gold: #B78B4B; --yellow: #FFED00;
     --mine-bg: #000000; --mine-ink: #FFFFFF; --mine-muted: #B7B3AB;
-    --clash: #FF0042; --tight: #F34B15; --repeat: #9B85D6; --band: rgb(255 0 66 / .08); --band-edge: rgb(255 0 66 / .55);
+    --clash: #FF0042; --tight: #F34B15; --repeat: #9B85D6; --rest: #0071B3; --band: rgb(255 0 66 / .08); --band-edge: rgb(255 0 66 / .55);
     --stripe-l: .55; --stripe-c: .16;
     --display: "Clash Display", "Arial Black", Arial, sans-serif;
     --body: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -36,7 +36,7 @@
   /* Top bar: black, red letter-spaced dates, white controls */
   .topbar { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; justify-content: space-between; padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px; background: #000; color: #fff; }
   .dates { font: 700 13px/1 var(--body); letter-spacing: 3px; text-transform: uppercase; color: var(--red); white-space: nowrap; }
-  .dates span { color: var(--gold); letter-spacing: 1px; text-transform: none; margin-left: 14px; }
+  .dates span + span { color: var(--gold); letter-spacing: 1px; text-transform: none; margin-left: 14px; }
   .controls { display: flex; gap: 18px; align-items: center; font-weight: 600; }
   .controls label { display: flex; gap: 7px; align-items: center; white-space: nowrap; cursor: pointer; }
   .controls input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--red); }
@@ -48,6 +48,15 @@
   dialog h2 { margin: 0; font: 700 26px/1 var(--display); text-transform: uppercase; }
   dialog p { margin: 0; color: var(--muted); max-width: 60ch; }
   .walk-rows { display: grid; gap: 2px; }
+  .rest-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px; background: var(--ground); font-size: 12px; }
+  .rest-row input { width: 64px; padding: 4px 6px; border: 1px solid var(--line); background: var(--surface); font-variant-numeric: tabular-nums; text-align: right; }
+  .rest-row small { color: var(--muted); }
+  .clear-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .clear-row button { padding: 8px 12px; border: 1px solid var(--clash); border-radius: 0; background: none; color: var(--clash); font-weight: 700; font-size: 12px; cursor: pointer; }
+  .clear-row button:disabled { border-color: var(--line); color: var(--muted); cursor: default; }
+  .clear-row button.confirm { background: var(--clash); color: #fff; }
+  .clear-row button.undo { border-color: var(--ink); color: var(--ink); }
+  .set-h { margin: 4px 0 -6px; font: 700 11px/1 var(--body); letter-spacing: 1.63px; text-transform: uppercase; }
   .walk-rows label { display: grid; grid-template-columns: 1fr auto 1fr 56px auto; gap: 8px; align-items: center; padding: 5px 8px; background: var(--ground); font-size: 12px; font-weight: 500; }
   .walk-rows label.changed { box-shadow: inset 3px 0 0 var(--red); }
   .walk-rows label span:nth-child(2) { color: var(--muted); }
@@ -81,6 +90,7 @@
   .sw.mine { background: var(--mine-bg); box-shadow: inset 0 0 0 2px var(--yellow); }
   .sw.clash { background: var(--clash); }
   .sw.tight { background: var(--tight); }
+  .sw.rest { background: var(--rest); }
   .sw.repeat { background: none; outline: 2px dashed var(--repeat); outline-offset: -2px; }
   .status .hint { margin-left: auto; }
 
@@ -104,8 +114,8 @@
   .hour.half { border-top-style: dashed; opacity: .7; }
   .axis .hour { border: 0; }
   .axis .hour span { position: absolute; top: -7px; right: 8px; font: 600 11px/1 var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
-  .axis .midnight span { color: var(--red); font-weight: 700; }
-  .col .midnight { border-top: 1px solid var(--red); }
+  .axis .midnight span { color: var(--ink); font-weight: 700; }
+  .col .midnight { border-top: 1px dashed var(--ink); opacity: .45; }
 
   /* Session blocks */
   .s { position: absolute; left: 4px; right: 4px; overflow: hidden; padding: 5px 7px 5px 10px; cursor: pointer;
@@ -124,6 +134,8 @@
   .s .note.warn { color: var(--clash); }
   .s .note.tight { color: var(--tight); }
   .s .note.repeat { color: var(--repeat); }
+  .s .note.rest { color: #5AB0F0; }
+  .s:not(.on) .note.rest, .sheet .notes .rest { color: var(--rest); }
   .s .note.gap { font-weight: 500; color: var(--muted); }
 
   .s.on { background: var(--mine-bg); color: var(--mine-ink); box-shadow: inset 0 0 0 2px var(--yellow); }
@@ -133,6 +145,7 @@
   .s.on .t { justify-content: flex-start; }
   .s.on .t a { margin-left: auto; }
   .s.on .sec { color: oklch(.78 .12 var(--h)); }
+  .s.on.rest { box-shadow: inset 0 0 0 3px var(--rest); }
   .s.on.tight { box-shadow: inset 0 0 0 3px var(--tight); }
   .s.on.clash { box-shadow: inset 0 0 0 3px var(--clash); }
   .s.on.repeat { outline: 2px dashed var(--repeat); outline-offset: 2px; }
@@ -242,7 +255,8 @@
     nav button small { font-size: 8.5px; letter-spacing: 1px; }
     nav button strong { font-size: 19px; }
     nav button[aria-pressed="true"] small::before { content: none; }
-    .controls { width: 100%; justify-content: space-between; font-size: 12px; }
+    .controls { width: 100%; gap: 6px; font-size: 12px; }
+    .controls label { margin-right: auto; }
     .walk-open { padding: 2px 8px; font-size: 12px; }
     .status { flex-wrap: nowrap; gap: 12px; padding: 4px 12px; overflow-x: auto; scrollbar-width: none; white-space: nowrap; font-size: 11.5px; }
     .hidden-venues { flex-wrap: nowrap; }
@@ -260,28 +274,39 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="dates">8-18 octubre 2026<span>59a edició</span></div>
+  <div class="dates"><span data-i18n="dates">8-18 octubre 2026</span><span data-i18n="edition">59a edició</span></div>
   <div class="controls">
-    <label><input type="checkbox" id="only"> <span class="long">Only my sessions</span><span class="short">Only mine</span></label>
-    <button type="button" id="walkOpen" class="walk-open"><span class="long">Walk times</span><span class="short">Walk</span></button>
-    <button type="button" id="filmsOpen" class="walk-open">Films<span id="watchCount"></span></button>
-    <button type="button" id="syncOpen" class="walk-open">Sync</button>
+    <label><input type="checkbox" id="only"> <span class="long" data-i18n="onlyLong">Only my sessions</span><span class="short" data-i18n="onlyShort">Only mine</span></label>
+    <button type="button" id="walkOpen" class="walk-open"><span class="long" data-i18n="settings">Settings</span><span class="short" data-i18n="settingsShort">Settings</span></button>
+    <button type="button" id="filmsOpen" class="walk-open"><span data-i18n="films">Films</span><span id="watchCount"></span></button>
+    <button type="button" id="syncOpen" class="walk-open"><span class="long" data-i18n="sync">Sync</span><span class="short" data-i18n="syncShort">Sync</span></button>
   </div>
 </div>
 <header>
   <div class="brand">Sitges</div>
-  <nav id="days" aria-label="Festival days"></nav>
+  <nav id="days" data-i18n-attr="aria-label:festivalDays"></nav>
 </header>
 <div class="status" id="status"></div>
 <button type="button" id="next" class="next" hidden></button>
 <dialog id="walkDialog" aria-labelledby="walkTitle">
   <form method="dialog">
-    <h2 id="walkTitle">Walk times</h2>
-    <p>Minutes you need to go from one venue to the other, in both directions. A change of location with less free time than this shows as tight.</p>
+    <h2 id="walkTitle" data-i18n="settings">Settings</h2>
+    <label class="rest-row" for="lang"><span><b data-i18n="language">Language</b></span>
+      <select id="lang"><option value="ca">Català</option><option value="en">English</option></select></label>
+    <label class="rest-row" for="minRest"><span data-i18n-html="restHelp"></span>
+      <span><input type="number" id="minRest" min="0" max="16" step="0.5"> <small data-i18n="hours">hours</small></span></label>
+    <h3 class="set-h" data-i18n="walkTimes">Walk times</h3>
+    <p data-i18n="walkHelp"></p>
     <div id="walkRows" class="walk-rows"></div>
+    <h3 class="set-h" data-i18n="replan">Replan</h3>
+    <p data-i18n="replanHelp"></p>
+    <div class="clear-row">
+      <button type="button" id="clearMarks"></button>
+      <button type="button" id="clearWatch"></button>
+    </div>
     <div class="walk-actions">
-      <button type="button" id="walkReset">Reset to defaults</button>
-      <button type="submit" class="primary">Done</button>
+      <button type="button" id="walkReset" data-i18n="reset">Reset to defaults</button>
+      <button type="submit" class="primary" data-i18n="done">Done</button>
     </div>
   </form>
 </dialog>
@@ -289,16 +314,16 @@
 <dialog id="filmsDialog" class="films" aria-labelledby="filmsTitle">
   <div class="films-head">
     <div class="films-top">
-      <h2 id="filmsTitle" tabindex="-1" autofocus>Films</h2>
-      <form method="dialog"><button type="submit" class="films-close" aria-label="Close">✕</button></form>
+      <h2 id="filmsTitle" tabindex="-1" autofocus data-i18n="films">Films</h2>
+      <form method="dialog"><button type="submit" class="films-close" data-i18n-attr="aria-label:close">✕</button></form>
     </div>
     <div class="tabs" role="tablist">
-      <button type="button" role="tab" id="tabAll" data-tab="all" aria-selected="true">All films</button>
+      <button type="button" role="tab" id="tabAll" data-tab="all" aria-selected="true" data-i18n="tabAll">All films</button>
       <button type="button" role="tab" id="tabWatch" data-tab="watch" aria-selected="false">My watchlist</button>
     </div>
     <div class="films-filters">
-      <input type="search" id="filmSearch" placeholder="Search title or director" aria-label="Search title or director">
-      <select id="filmSection" aria-label="Section"></select>
+      <input type="search" id="filmSearch" data-i18n-attr="placeholder:searchFilms,aria-label:searchFilms">
+      <select id="filmSection" data-i18n-attr="aria-label:section"></select>
     </div>
     <p id="filmsSummary" class="films-summary" aria-live="polite"></p>
   </div>
@@ -306,24 +331,24 @@
 </dialog>
 <dialog id="syncDialog" aria-labelledby="syncTitle">
   <form method="dialog">
-    <h2 id="syncTitle">Sync</h2>
-    <p>Your plan is saved only on this device. To move it, send it from this device and open it on the other one.</p>
+    <h2 id="syncTitle" data-i18n="syncTitle">Sync</h2>
+    <p data-i18n="syncHelp"></p>
     <section class="sync-part">
-      <h3>Send this plan</h3>
+      <h3 data-i18n="sendPlan">Send this plan</h3>
       <p id="syncSummary" class="sync-summary"></p>
-      <textarea id="syncCode" readonly rows="3" aria-label="Plan code"></textarea>
+      <textarea id="syncCode" readonly rows="3" data-i18n-attr="aria-label:planCode"></textarea>
       <div class="walk-actions">
-        <button type="button" id="syncCopy">Copy code</button>
-        <button type="button" id="syncShare" class="primary">Share link</button>
+        <button type="button" id="syncCopy" data-i18n="copyCode">Copy code</button>
+        <button type="button" id="syncShare" class="primary" data-i18n="shareLink">Share link</button>
       </div>
     </section>
     <section class="sync-part">
-      <h3>Receive a plan</h3>
-      <textarea id="syncInput" rows="3" placeholder="Paste a code or a link" aria-label="Code or link to import"></textarea>
+      <h3 data-i18n="receivePlan">Receive a plan</h3>
+      <textarea id="syncInput" rows="3" data-i18n-attr="placeholder:pastePlan,aria-label:pastePlan"></textarea>
       <p id="syncPreview" class="sync-summary" aria-live="polite"></p>
       <div class="walk-actions">
-        <button type="submit">Close</button>
-        <button type="button" id="syncImport" class="primary" disabled>Replace my plan</button>
+        <button type="submit" data-i18n="close">Close</button>
+        <button type="button" id="syncImport" class="primary" disabled data-i18n="replacePlan">Replace my plan</button>
       </div>
     </section>
   </form>
@@ -340,10 +365,121 @@ const dur = m => m < 60 ? `${m}′` : `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 
 const hue = str => [...str].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+// ---------- Texts ----------
+// Plural entries pick a form with Intl.PluralRules; `zero` is used when the count is 0. A function entry gets the values (Catalan grammar).
+const STR = {
+  ca: {
+    title: 'Planificador Sitges 2026', dates: '8-18 octubre 2026', edition: '59a edició',
+    onlyLong: 'Només les meves sessions', onlyShort: 'Les meves', settings: 'Configuració', settingsShort: 'Ajustos', films: 'Pel·lícules', sync: 'Sincronitza', syncShort: 'Sinc.',
+    festivalDays: 'Dies del festival', language: 'Idioma',
+    restHelp: "<b>Descans mínim</b> entre l'última sessió d'una nit i la primera de l'endemà. Inclou-hi el trajecte d'anada i tornada a casa.",
+    hours: 'hores', walkTimes: 'Temps a peu',
+    walkHelp: "Minuts que necessites per anar d'una sala a l'altra, en tots dos sentits. Un canvi de sala amb menys temps lliure es marca com a just.",
+    reset: 'Restableix els valors per defecte', done: 'Fet', close: 'Tanca',
+    tabAll: 'Totes les pel·lícules', tabWatch: 'La meva llista ({n})', searchFilms: 'Cerca per títol o director', section: 'Secció', allSections: 'Totes les seccions',
+    syncTitle: 'Sincronització', syncHelp: "El teu pla només es desa en aquest dispositiu. Per passar-lo a un altre, envia'l des d'aquí i obre'l a l'altre.",
+    sendPlan: 'Envia aquest pla', planCode: 'Codi del pla', copyCode: 'Copia el codi', shareLink: "Comparteix l'enllaç",
+    receivePlan: 'Rep un pla', pastePlan: 'Enganxa un codi o un enllaç', replacePlan: 'Substitueix el meu pla',
+    ofMarked: ' de {total} sessions marcades', mine: 'Meves',
+    overlaps: { zero: 'Cap solapament', one: '{n} solapament', other: '{n} solapaments' },
+    tight: { zero: 'Cap canvi just', one: '{n} canvi just', other: '{n} canvis justos' },
+    tightShort: { zero: 'Cap just', one: '{n} just', other: '{n} justos' },
+    repeats: { zero: 'Cap pel·lícula repetida', one: '{n} pel·lícula repetida', other: '{n} pel·lícules repetides' },
+    repeatsShort: { zero: 'Cap repetida', one: '{n} repetida', other: '{n} repetides' },
+    nights: { zero: 'Cap nit curta', one: '{n} nit curta', other: '{n} nits curtes' },
+    hidden: 'Amagades:', showAgain: 'Torna a mostrar {v}', hide: 'Amaga {v}',
+    hint: 'Toca una sessió per marcar-la · ⓘ mostra els detalls · ✕ amaga una sala',
+    onWatchlist: 'A la teva llista', details: 'Detalls', detailsFor: 'Detalls de {t}',
+    noteOverlap: 'Se solapa amb {t} · {v}', noteTight: 'Només {g}′ per arribar a {v} (a peu {w}′)',
+    noteRepeat: 'Repetida: {f} també {when} · {v}', noteRepeatIn: ' a {t}',
+    noteRestBefore: 'Només {d} de descans abans de {t} ({when})', noteRestAfter: v => `Només ${v.d} de descans després de ${v.t} (acaba a ${caAt(v.e)})`,
+    gapFree: '→ {d} lliures fins a {t}', gapTomorrow: '→ {d} fins a {t} demà',
+    now: 'Ara', next: 'Següent', ends: v => `acaba a ${caAt(v.e)}`, inTime: "d'aquí a {d}", leaveNow: 'Surt ara', leaveBy: v => `Surt ${caDe(v.v)} abans de ${caAt(v.h)}`,
+    watchOn: '✓ A la llista', watchAdd: '+ Llista', mark: '☆ Marca', unmark: '★ Desmarca',
+    markedSessions: { one: '{n} sessió marcada', other: '{n} sessions marcades' },
+    watchFilms: { one: '{n} pel·lícula a la llista', other: '{n} pel·lícules a la llista' },
+    hiddenVenues: { one: '{n} sala amagada', other: '{n} sales amagades' },
+    walkEdits: { one: '{n} temps a peu editat', other: '{n} temps a peu editats' },
+    replacesWith: 'Això substituirà el teu pla per: {d}.', invalidPlan: "Això no és un codi ni un enllaç de pla vàlid. Torna'l a copiar de l'altre dispositiu.",
+    thisDevice: 'Aquest dispositiu: {d}.', imported: 'Importat: {d}.', copied: 'Copiat', selectCopy: 'Selecciona i copia', shareTitle: 'El meu pla del Sitges 2026',
+    isHidden: '{v} està amagada', overlapsWith: 'se solapa amb {t}', tooClose: 'massa a prop de {t}',
+    covered: '✓ Coberta · {when} · {v}', notPlanned: { one: 'Encara no planificada · {free} de {n} passi lliure', other: 'Encara no planificada · {free} de {n} passis lliures' },
+    cannotFit: '⚠ No hi cap: {r}',
+    watchSummary: '<b>{c} de {n}</b> cobertes · {o} sense planificar · {b}',
+    noFit: { zero: 'totes hi caben', one: '{n} no hi cap', other: '{n} no hi caben' },
+    filmCount: { one: '{n} pel·lícula', other: '{n} pel·lícules' }, onYourList: ' · {n} a la teva llista',
+    mustSee: 'Imprescindible', addToList: 'Afegeix a la llista', removeFromList: 'Treu de la llista',
+    emptyList: 'La teva llista és buida. Afegeix-hi pel·lícules amb + a Totes les pel·lícules.', noMatch: 'Cap pel·lícula coincideix.',
+    replan: 'Tornar a planificar', replanHelp: 'Les sales amagades, els temps a peu i la configuració es mantenen.',
+    clearMarks: { zero: 'Cap sessió marcada', one: 'Esborra {n} sessió marcada', other: 'Esborra {n} sessions marcades' },
+    clearWatch: { zero: 'La llista és buida', one: 'Buida la llista ({n} pel·lícula)', other: 'Buida la llista ({n} pel·lícules)' },
+    confirmAgain: 'Toca de nou per confirmar', undoClear: 'Esborrat · Desfés',
+  },
+  en: {
+    title: 'Sitges 2026 Planner', dates: '8–18 October 2026', edition: '59th edition',
+    onlyLong: 'Only my sessions', onlyShort: 'Only mine', settings: 'Settings', settingsShort: 'Settings', films: 'Films', sync: 'Sync', syncShort: 'Sync',
+    festivalDays: 'Festival days', language: 'Language',
+    restHelp: '<b>Minimum rest</b> between your last session of a night and your first one the next day. Include your trip home and back.',
+    hours: 'hours', walkTimes: 'Walk times',
+    walkHelp: 'Minutes you need to go from one venue to the other, in both directions. A change of location with less free time than this shows as tight.',
+    reset: 'Reset to defaults', done: 'Done', close: 'Close',
+    tabAll: 'All films', tabWatch: 'My watchlist ({n})', searchFilms: 'Search title or director', section: 'Section', allSections: 'All sections',
+    syncTitle: 'Sync', syncHelp: 'Your plan is saved only on this device. To move it, send it from this device and open it on the other one.',
+    sendPlan: 'Send this plan', planCode: 'Plan code', copyCode: 'Copy code', shareLink: 'Share link',
+    receivePlan: 'Receive a plan', pastePlan: 'Paste a code or a link', replacePlan: 'Replace my plan',
+    ofMarked: ' of {total} sessions marked', mine: 'Mine',
+    overlaps: { zero: 'No overlaps', one: '{n} overlap', other: '{n} overlaps' },
+    tight: { zero: 'No tight changes', one: '{n} tight change', other: '{n} tight changes' },
+    tightShort: { zero: 'No tight', one: '{n} tight', other: '{n} tight' },
+    repeats: { zero: 'No repeated films', one: '{n} repeated film', other: '{n} repeated films' },
+    repeatsShort: { zero: 'No repeat', one: '{n} repeat', other: '{n} repeats' },
+    nights: { zero: 'No short nights', one: '{n} short night', other: '{n} short nights' },
+    hidden: 'Hidden:', showAgain: 'Show {v} again', hide: 'Hide {v}',
+    hint: 'Click a session to mark it · ⓘ shows details · ✕ hides a venue',
+    onWatchlist: 'On your watchlist', details: 'Details', detailsFor: 'Details for {t}',
+    noteOverlap: 'Overlaps {t} · {v}', noteTight: 'Only {g}′ to reach {v} (walk {w}′)',
+    noteRepeat: 'Repeat: {f} also {when} · {v}', noteRepeatIn: ' in {t}',
+    noteRestBefore: 'Only {d} rest before {t} ({when})', noteRestAfter: 'Only {d} rest after {t} (ends {e})',
+    gapFree: '→ {d} free until {t}', gapTomorrow: '→ {d} until {t} tomorrow',
+    now: 'Now', next: 'Next', ends: 'ends {e}', inTime: 'in {d}', leaveNow: 'Leave now', leaveBy: 'Leave {v} by {h}',
+    watchOn: '✓ Watchlist', watchAdd: '+ Watchlist', mark: '☆ Mark', unmark: '★ Unmark',
+    markedSessions: { one: '{n} marked session', other: '{n} marked sessions' },
+    watchFilms: { one: '{n} watchlist film', other: '{n} watchlist films' },
+    hiddenVenues: { one: '{n} hidden venue', other: '{n} hidden venues' },
+    walkEdits: { one: '{n} edited walk time', other: '{n} edited walk times' },
+    replacesWith: 'This replaces your plan with {d}.', invalidPlan: 'This is not a valid plan code or link. Copy it again from the other device.',
+    thisDevice: 'This device: {d}.', imported: 'Imported: {d}.', copied: 'Copied', selectCopy: 'Select and copy', shareTitle: 'My Sitges 2026 plan',
+    isHidden: '{v} is hidden', overlapsWith: 'overlaps {t}', tooClose: 'too close to {t}',
+    covered: '✓ Covered · {when} · {v}', notPlanned: { one: 'Not planned yet · {free} of {n} screening free', other: 'Not planned yet · {free} of {n} screenings free' },
+    cannotFit: '⚠ Cannot fit: {r}',
+    watchSummary: '<b>{c} of {n}</b> covered · {o} not planned · {b}',
+    noFit: { zero: 'all fit', one: '{n} cannot fit', other: '{n} cannot fit' },
+    filmCount: { one: '{n} film', other: '{n} films' }, onYourList: ' · {n} on your watchlist',
+    mustSee: 'Must-see', addToList: 'Add to watchlist', removeFromList: 'Remove from watchlist',
+    emptyList: 'Your watchlist is empty. Add films with + in All films.', noMatch: 'No films match.',
+    replan: 'Replan', replanHelp: 'Hidden venues, walk times and settings stay.',
+    clearMarks: { zero: 'No marked sessions', one: 'Clear {n} marked session', other: 'Clear {n} marked sessions' },
+    clearWatch: { zero: 'Watchlist is empty', one: 'Clear watchlist ({n} film)', other: 'Clear watchlist ({n} films)' },
+    confirmAgain: 'Tap again to confirm', undoClear: 'Cleared · Undo',
+  },
+};
+const LOCALE = { ca: 'ca', en: 'en-GB' };
+const caDe = v => /^[aeiouàèéíòóú]/i.test(v) ? `d'${v}` : `de ${v}`;
+const caAt = h => `${h.startsWith('01:') ? 'la' : 'les'} ${h}`;
+let LANG;
+const fill = (str, vars) => str.replace(/\{(\w+)\}/g, (m, k) => k in vars ? vars[k] : m);
+const t = (key, vars = {}) => { const v = STR[LANG][key] ?? STR.en[key] ?? key; return typeof v === 'function' ? v(vars) : fill(v, vars); };
+function tn(key, count, vars = {}) {
+  const forms = STR[LANG][key] ?? STR.en[key];
+  const form = count === 0 && forms.zero ? forms.zero : forms[new Intl.PluralRules(LOCALE[LANG]).select(count)] ?? forms.other;
+  return fill(form, { n: count, ...vars });
+}
+
 const store = {
   get(k, d) { try { return JSON.parse(localStorage.getItem('sitges26:' + k)) ?? d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem('sitges26:' + k, JSON.stringify(v)); } catch {} },
 };
+LANG = STR[store.get('lang')] ? store.get('lang') : /^(ca|es)\b/i.test(navigator.language || '') ? 'ca' : 'en';
 const marked = new Set(store.get('marked', []));
 const pair = (a, b) => [a, b].sort().join('|');
 const PRADO = 'Cinema Casino Prado', ESCORXADOR = 'Cinema Escorxador', MERCAT = 'Mercat Vell';
@@ -358,6 +494,8 @@ const FALLBACK_WALK = 15; // ponytail: only for a venue missing from the table
 let walkTimes = { ...DEFAULT_WALK, ...store.get('walkTimes', {}) };
 const need = (a, b) => a === b ? 0 : walkTimes[pair(a, b)] ?? FALLBACK_WALK;
 let only = store.get('only', false);
+const DEFAULT_REST = 8; // hours between the last session of a night and the first one of the next day
+let minRest = store.get('minRest', DEFAULT_REST);
 const hiddenVenues = new Set(store.get('hiddenVenues', []));
 
 const byId = Object.fromEntries(SCHEDULE.map(s => [s.id, s]));
@@ -381,13 +519,13 @@ const NOW_OVERRIDE = new URLSearchParams(location.search).get('now');
 const nowOffset = NOW_OVERRIDE && !isNaN(new Date(NOW_OVERRIDE)) ? new Date(NOW_OVERRIDE) - Date.now() : 0;
 const now = () => new Date(Date.now() + nowOffset);
 const nowDay = () => festDay(now());
-const dayLabel = d => toDate(d).toLocaleDateString('ca', { weekday: 'short', day: 'numeric' }).replace('.', '');
+const dayLabel = d => toDate(d).toLocaleDateString(LOCALE[LANG], { weekday: 'short', day: 'numeric' }).replace('.', '');
 const venue = l => SHORT[l] || l;
 
 // For each marked session: sessions it overlaps, a too-short location change, films also marked in another session, and the free time to the next one.
 function analyse() {
   const list = [...marked].map(id => byId[id]).filter(Boolean).sort((a, b) => a.start.localeCompare(b.start));
-  const info = Object.fromEntries(list.map(s => [s.id, { clash: [], tight: [], repeat: [], gap: null }]));
+  const info = Object.fromEntries(list.map(s => [s.id, { clash: [], tight: [], repeat: [], rest: [], gap: null }]));
   // ponytail: O(n²) over marked sessions only, fine for a few hundred
   for (const a of list) for (const b of list) {
     if (a === b || b.start < a.start || (b.start === a.start && b.id < a.id)) continue;
@@ -404,6 +542,15 @@ function analyse() {
     const next = list[i + 1];
     if (next && festDay(next.start) === festDay(s.start)) info[s.id].gap = [(toDate(next.start) - toDate(s.end)) / 60000, next];
   });
+  // Rest: from the last session of each festival day (by end time) to the first one of the next day.
+  days.forEach((d, n) => {
+    const tonight = list.filter(s => festDay(s.start) === d), tomorrow = list.filter(s => festDay(s.start) === days[n + 1]);
+    if (!tonight.length || !tomorrow.length) return;
+    const last = tonight.reduce((a, b) => b.end > a.end ? b : a), first = tomorrow[0];
+    const rest = (toDate(first.start) - toDate(last.end)) / 60000;
+    if (!info[last.id].gap) info[last.id].gap = [rest, first, true];
+    if (rest < minRest * 60) { info[last.id].rest.push([first, rest, 'before']); info[first.id].rest.push([last, rest, 'after']); }
+  });
   return info;
 }
 
@@ -413,26 +560,35 @@ const listFilms = s => s.films.length > 1 || (s.films.length === 1 && norm(s.fil
 
 function notesHtml(s, i) {
   if (!i) return '';
-  let notes = i.clash.map(o => `<span class="note warn">Overlaps ${esc(o.title)} · ${esc(o.location)}</span>`).join('');
-  notes += i.tight.map(([o, g]) => `<span class="note tight">Only ${g}′ to reach ${esc(o.location)} (walk ${need(s.location, o.location)}′)</span>`).join('');
+  let notes = i.clash.map(o => `<span class="note warn">${t('noteOverlap', { t: esc(o.title), v: esc(o.location) })}</span>`).join('');
+  notes += i.tight.map(([o, g]) => `<span class="note tight">${t('noteTight', { g, v: esc(o.location), w: need(s.location, o.location) })}</span>`).join('');
   notes += i.repeat.map(([f, o]) => {
-    const inside = o.films.length > 1 ? ` in ${esc(o.title)}` : '';
-    return `<span class="note repeat">Repeat: ${esc(f.title)} also ${dayLabel(o.start)} ${hhmm(toDate(o.start))} · ${esc(venue(o.location))}${inside}</span>`;
+    const inside = o.films.length > 1 ? t('noteRepeatIn', { t: esc(o.title) }) : '';
+    return `<span class="note repeat">${t('noteRepeat', { f: esc(f.title), when: `${dayLabel(o.start)} ${hhmm(toDate(o.start))}`, v: esc(venue(o.location)) })}${inside}</span>`;
   }).join('');
-  const warned = i.gap && i.tight.some(([o]) => o === i.gap[1]);
-  if (i.gap && i.gap[0] >= 0 && !warned) notes += `<span class="note gap">→ ${dur(i.gap[0])} free until ${esc(i.gap[1].title)}</span>`;
+  notes += i.rest.map(([o, m, dir]) => dir === 'before'
+    ? `<span class="note rest">${t('noteRestBefore', { d: dur(m), t: esc(o.title), when: `${dayLabel(o.start)} ${hhmm(toDate(o.start))}` })}</span>`
+    : `<span class="note rest">${t('noteRestAfter', { d: dur(m), t: esc(o.title), e: hhmm(toDate(o.end)) })}</span>`).join('');
+  const warned = i.gap && (i.tight.some(([o]) => o === i.gap[1]) || i.rest.some(([o]) => o === i.gap[1]));
+  if (i.gap && i.gap[0] >= 0 && !warned) notes += `<span class="note gap">${t(i.gap[2] ? 'gapTomorrow' : 'gapFree', { d: dur(i.gap[0]), t: esc(i.gap[1].title) })}</span>`;
   return notes;
 }
 
 function renderDays(info) {
   document.getElementById('days').innerHTML = days.map(d => {
     const mine = byDay[d].filter(s => marked.has(s.id));
-    const bad = mine.some(s => info[s.id].clash.length || info[s.id].tight.length || info[s.id].repeat.length);
+    const bad = mine.some(s => info[s.id].clash.length || info[s.id].tight.length || info[s.id].repeat.length || info[s.id].rest.length);
     const date = new Date(d + 'T12:00');
-    const wd = date.toLocaleDateString('ca', { weekday: 'short' }).replace('.', '');
-    return `<button data-day="${d}" aria-pressed="${d === current}" aria-label="${date.toLocaleDateString('ca', { weekday: 'long', day: 'numeric', month: 'long' })}">
+    const wd = date.toLocaleDateString(LOCALE[LANG], { weekday: 'short' }).replace('.', '');
+    return `<button data-day="${d}" aria-pressed="${d === current}" aria-label="${date.toLocaleDateString(LOCALE[LANG], { weekday: 'long', day: 'numeric', month: 'long' })}">
       <small>${wd}</small><strong>${date.getDate()}</strong>${mine.length ? `<i class="${bad ? 'bad' : ''}">${mine.length}</i>` : ''}</button>`;
   }).join('');
+}
+
+// A summary counter with the number in bold; on phones an optional shorter wording.
+function count(key, n, shortKey) {
+  const text = k => tn(k, n, { n: `<b>${n}</b>` });
+  return shortKey ? `<span class="long">${text(key)}</span><span class="short">${text(shortKey)}</span>` : text(key);
 }
 
 function renderStatus(info) {
@@ -440,18 +596,20 @@ function renderStatus(info) {
   const clashes = mine.filter(s => info[s.id].clash.length).length;
   const tights = mine.filter(s => info[s.id].tight.length).length;
   const repeats = mine.filter(s => info[s.id].repeat.length).length;
+  const nights = mine.reduce((n, s) => n + info[s.id].rest.length, 0);
   const total = byDay[current].length;
   document.getElementById('status').innerHTML = `
-    <span><b>${mine.length}</b><span class="long"> of ${total} sessions marked</span><span class="short">/${total} ★</span></span>
-    <span class="k key"><span class="sw mine"></span>Mine</span>
-    <span class="k"><span class="sw clash"></span>${clashes ? `<b>${clashes}</b>` : 'No'} overlaps</span>
-    <span class="k"><span class="sw tight"></span>${tights ? `<b>${tights}</b>` : 'No'} <span>tight<span class="long"> changes</span></span></span>
-    <span class="k"><span class="sw repeat"></span>${repeats ? `<b>${repeats}</b>` : 'No'} <span>repeat<span class="long">ed films</span></span></span>
-    ${hiddenVenues.size ? `<span class="k hidden-venues"><span class="long">Hidden:</span>${[...hiddenVenues].sort().map(l => {
+    <span><b>${mine.length}</b><span class="long">${t('ofMarked', { total })}</span><span class="short">/${total} ★</span></span>
+    <span class="k key"><span class="sw mine"></span>${t('mine')}</span>
+    <span class="k"><span class="sw clash"></span>${count('overlaps', clashes)}</span>
+    <span class="k"><span class="sw tight"></span>${count('tight', tights, 'tightShort')}</span>
+    <span class="k"><span class="sw repeat"></span>${count('repeats', repeats, 'repeatsShort')}</span>
+    <span class="k"><span class="sw rest"></span>${count('nights', nights)}</span>
+    ${hiddenVenues.size ? `<span class="k hidden-venues"><span class="long">${t('hidden')}</span>${[...hiddenVenues].sort().map(l => {
       const n = mine.filter(s => s.location === l).length;
-      return `<button data-show="${esc(l)}" title="Show ${esc(l)} again">${esc(SHORT[l] || l)}${n ? ` <i>★${n}</i>` : ''} <span aria-hidden="true">+</span></button>`;
+      return `<button data-show="${esc(l)}" title="${esc(t('showAgain', { v: l }))}">${esc(SHORT[l] || l)}${n ? ` <i>★${n}</i>` : ''} <span aria-hidden="true">+</span></button>`;
     }).join('')}</span>` : ''}
-    <span class="hint">Click a session to mark it · ⓘ shows details · ✕ hides a venue</span>`;
+    <span class="hint">${t('hint')}</span>`;
 }
 
 function render(day) {
@@ -472,7 +630,7 @@ function render(day) {
   const shown = locations.filter(l => !hiddenVenues.has(l));
   grid.style.gridTemplateColumns = `${matchMedia('(max-width: 640px)').matches ? 40 : 52}px repeat(${shown.length}, minmax(180px, 1fr))`;
   grid.innerHTML = '<div class="head corner"></div>' + shown.map(l =>
-    `<div class="head"><span><span class="long">${esc(l)}</span><span class="short">${esc(SHORT[l] || l)}</span></span><button class="hide" data-hide="${esc(l)}" title="Hide ${esc(l)}" aria-label="Hide ${esc(l)}">✕</button></div>`).join('');
+    `<div class="head"><span><span class="long">${esc(l)}</span><span class="short">${esc(SHORT[l] || l)}</span></span><button class="hide" data-hide="${esc(l)}" title="${esc(t('hide', { v: l }))}" aria-label="${esc(t('hide', { v: l }))}">✕</button></div>`).join('');
 
   const marks = [];
   for (let m = from; m <= to; m += 30) marks.push(m);
@@ -490,11 +648,11 @@ function render(day) {
       const filmLine = f => `${f.title}${f.directors.length ? ' — ' + f.directors.join(', ') : ''}`;
       const credits = multi ? s.films.map(filmLine).join('\n') : (s.films[0]?.directors || []).join(', ');
       const creditsHtml = multi ? `<ul>${s.films.map(f => `<li>${esc(filmLine(f))}</li>`).join('')}</ul>` : credits ? `<div class="who">${esc(credits)}</div>` : '';
-      const wl = s.films.some(f => watch[f.url]) ? `<span class="wl" title="On your watchlist" aria-label="On your watchlist">◆</span>` : '';
-      const open = `${wl}<button type="button" class="info" data-info="${s.id}" title="Details" aria-label="Details for ${esc(s.title)}">ⓘ</button>`;
+      const wl = s.films.some(f => watch[f.url]) ? `<span class="wl" title="${t('onWatchlist')}" aria-label="${t('onWatchlist')}">◆</span>` : '';
+      const open = `${wl}<button type="button" class="info" data-info="${s.id}" title="${t('details')}" aria-label="${esc(t('detailsFor', { t: s.title }))}">ⓘ</button>`;
       const i = info[s.id];
       const notes = notesHtml(s, i);
-      const cls = ['s', i && 'on', i?.repeat.length && 'repeat', i?.tight.length && 'tight', i?.clash.length && 'clash'].filter(Boolean).join(' ');
+      const cls = ['s', i && 'on', i?.repeat.length && 'repeat', i?.rest.length && 'rest', i?.tight.length && 'tight', i?.clash.length && 'clash'].filter(Boolean).join(' ');
       const h = `calc(${min(s.end) - min(s.start)} * var(--px))`;
       return `<div class="${cls}" role="button" tabindex="0" aria-pressed="${!!i}" data-id="${s.id}" data-a="${min(s.start)}" data-b="${min(s.end)}"
         style="top:${px(min(s.start))};height:${h};--hgt:${h};--h:${hue(s.sections[0] || '')}"
@@ -522,23 +680,23 @@ function render(day) {
 
 // Red line at the current time on today's grid, and the next marked session with when to leave.
 function renderNow() {
-  const t = now();
+  const at = now();
   const line = document.getElementById('nowline');
   if (line && view) {
-    const m = view.min(t);
+    const m = view.min(at);
     line.hidden = !(view.day === nowDay() && m >= view.from && m <= view.to);
     line.style.top = `calc(${view.top}px + ${view.px(m)})`;
-    line.dataset.t = hhmm(t);
+    line.dataset.t = hhmm(at);
   }
   const bar = document.getElementById('next');
   const mine = [...marked].map(id => byId[id]).filter(Boolean).sort((a, b) => a.start.localeCompare(b.start));
-  const iso = t.getTime();
+  const iso = at.getTime();
   const inside = mine.find(s => toDate(s.start) <= iso && iso < toDate(s.end));
   const next = mine.find(s => toDate(s.start) > iso);
   const soon = next && (toDate(next.start) - iso) / 3600000 < 18; // only while it is useful today
   if (!inside && !soon) { bar.hidden = true; return; }
   let html = '';
-  if (inside) html += `<span class="lbl">Now</span><b>${esc(inside.title)}</b><span class="when">${esc(venue(inside.location))} · ends ${hhmm(toDate(inside.end))}</span>`;
+  if (inside) html += `<span class="lbl">${t('now')}</span><b>${esc(inside.title)}</b><span class="when">${esc(venue(inside.location))} · ${t('ends', { e: hhmm(toDate(inside.end)) })}</span>`;
   if (soon) {
     const mins = Math.round((toDate(next.start) - iso) / 60000);
     const prev = inside || [...mine].reverse().find(s => toDate(s.end) <= toDate(next.start) && toDate(s.end) <= iso && festDay(s.start) === festDay(next.start));
@@ -546,9 +704,9 @@ function renderNow() {
     if (prev && prev.location !== next.location) {
       const by = new Date(toDate(next.start) - need(prev.location, next.location) * 60000);
       const late = by <= iso;
-      leave = `<span class="leave${late ? ' late' : ''}">${late ? 'Leave now' : `Leave ${esc(venue(prev.location))} by ${hhmm(by)}`}</span>`;
+      leave = `<span class="leave${late ? ' late' : ''}">${late ? t('leaveNow') : t('leaveBy', { v: esc(venue(prev.location)), h: hhmm(by) })}</span>`;
     }
-    html += `<span class="lbl">Next</span><b>${esc(next.title)}</b><span class="when">${hhmm(toDate(next.start))} · ${esc(venue(next.location))} · in ${dur(mins)}</span>${leave}`;
+    html += `<span class="lbl">${t('next')}</span><b>${esc(next.title)}</b><span class="when">${hhmm(toDate(next.start))} · ${esc(venue(next.location))} · ${t('inTime', { d: dur(mins) })}</span>${leave}`;
   }
   bar.innerHTML = html;
   bar.dataset.id = (soon ? next : inside).id;
@@ -604,7 +762,44 @@ function saveWalk() {
   store.set('walkTimes', overrides);
   render(current);
 }
-document.getElementById('walkOpen').onclick = () => { renderWalk(); dialog.showModal(); };
+document.getElementById('walkOpen').onclick = () => { renderWalk(); renderClear(); document.getElementById('minRest').value = minRest; dialog.showModal(); };
+
+// Replan: each clear needs a second tap within 4 s, then offers Undo for 10 s.
+const clears = {
+  clearMarks: { count: () => marked.size, take: () => { const old = [...marked]; marked.clear(); store.set('marked', []); return old; },
+                give: old => { old.forEach(id => marked.add(id)); store.set('marked', [...marked]); } },
+  clearWatch: { count: () => Object.keys(watch).length, take: () => { const old = watch; watch = {}; saveWatch(); updateWatchCount(); return old; },
+                give: old => { watch = old; saveWatch(); updateWatchCount(); } },
+};
+const clearState = {}; // id -> { mode: 'confirm' | 'undo', timer, old }
+function renderClear() {
+  for (const [id, c] of Object.entries(clears)) {
+    const btn = document.getElementById(id), st = clearState[id];
+    btn.className = st?.mode || '';
+    btn.textContent = st?.mode === 'confirm' ? t('confirmAgain') : st?.mode === 'undo' ? t('undoClear') : tn(id, c.count());
+    btn.disabled = !st && !c.count();
+  }
+}
+function setClear(id, st, ms) {
+  clearTimeout(clearState[id]?.timer);
+  if (st) { st.timer = setTimeout(() => { delete clearState[id]; renderClear(); }, ms); clearState[id] = st; } else delete clearState[id];
+  renderClear();
+}
+document.querySelector('.clear-row').onclick = e => {
+  const btn = e.target.closest('button');
+  if (!btn || btn.disabled) return;
+  const id = btn.id, c = clears[id], st = clearState[id];
+  if (!st) return setClear(id, { mode: 'confirm' }, 4000);
+  if (st.mode === 'confirm') setClear(id, { mode: 'undo', old: c.take() }, 10000);
+  else { c.give(st.old); setClear(id, null); }
+  render(current);
+};
+document.getElementById('minRest').oninput = e => {
+  if (e.target.value === '') return;
+  minRest = Math.min(16, Math.max(0, +e.target.value || 0));
+  store.set('minRest', minRest);
+  render(current);
+};
 document.getElementById('walkRows').oninput = e => {
   const el = e.target.closest('[data-pair]');
   if (!el || el.value === '') return;
@@ -612,7 +807,7 @@ document.getElementById('walkRows').oninput = e => {
   el.closest('label').classList.toggle('changed', walkTimes[el.dataset.pair] !== DEFAULT_WALK[el.dataset.pair]);
   saveWalk();
 };
-document.getElementById('walkReset').onclick = () => { walkTimes = { ...DEFAULT_WALK }; saveWalk(); renderWalk(); };
+document.getElementById('walkReset').onclick = () => { walkTimes = { ...DEFAULT_WALK }; minRest = DEFAULT_REST; store.set('minRest', minRest); document.getElementById('minRest').value = minRest; saveWalk(); renderWalk(); };
 // Detail sheet
 const sheet = document.getElementById('sheet');
 function openSheet(id) {
@@ -620,7 +815,7 @@ function openSheet(id) {
   const on = marked.has(id);
   const notes = notesHtml(s, analyse()[id]);
   const posters = s.films.filter(f => f.image).map(f => `<img src="${esc(f.image)}" alt="" loading="lazy">`).join('');
-  const films = s.films.map(f => `<li><a href="https://sitgesfilmfestival.com${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)} ↗</a><button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? '✓ Watchlist' : '+ Watchlist'}</button>${f.directors.length ? `<small>${esc(f.directors.join(', '))}</small>` : ''}${f.synopsis ? f.synopsis.split('\n').map(p => `<p class="syn">${esc(p)}</p>`).join('') : ''}</li>`).join('');
+  const films = s.films.map(f => `<li><a href="https://sitgesfilmfestival.com${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)} ↗</a><button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? t('watchOn') : t('watchAdd')}</button>${f.directors.length ? `<small>${esc(f.directors.join(', '))}</small>` : ''}${f.synopsis ? f.synopsis.split('\n').map(p => `<p class="syn">${esc(p)}</p>`).join('') : ''}</li>`).join('');
   sheet.innerHTML = `<form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
     ${posters ? `<div class="posters">${posters}</div>` : ''}
     <h2 id="sheetTitle" tabindex="-1" autofocus>${esc(s.title)}</h2>
@@ -628,7 +823,7 @@ function openSheet(id) {
     ${s.sections.length ? `<div class="secs">${s.sections.map(x => `<span style="--h:${hue(x)}">${esc(x)}</span>`).join('')}</div>` : ''}
     ${films ? `<ol>${films}</ol>` : ''}
     ${notes ? `<div class="notes">${notes}</div>` : ''}
-    <div class="walk-actions"><button type="submit">Close</button><button type="button" class="primary" data-mark="${id}">${on ? '★ Unmark' : '☆ Mark'}</button></div>
+    <div class="walk-actions"><button type="submit">${t('close')}</button><button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
   </form>`;
   if (!sheet.open) sheet.showModal();
 }
@@ -645,10 +840,9 @@ const syncDialog = document.getElementById('syncDialog');
 const b64 = { enc: str => btoa(String.fromCharCode(...new TextEncoder().encode(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
               dec: code => new TextDecoder().decode(Uint8Array.from(atob(code.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))) };
 const walkOverrides = () => Object.fromEntries(Object.entries(walkTimes).filter(([k, v]) => v !== DEFAULT_WALK[k]));
-const planCode = () => b64.enc(JSON.stringify({ v: 1, m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch }));
+const planCode = () => b64.enc(JSON.stringify({ v: 1, m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch, r: minRest }));
 const planLink = () => `${location.origin}${location.pathname}?import=${planCode()}`;
-const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-const describe = p => `${plural(p.m.length, 'marked session')}, ${plural(Object.keys(p.l || {}).length, 'watchlist film')}, ${plural(p.h.length, 'hidden venue')}, ${plural(Object.keys(p.w).length, 'edited walk time')}`;
+const describe = p => [tn('markedSessions', p.m.length), tn('watchFilms', Object.keys(p.l || {}).length), tn('hiddenVenues', p.h.length), tn('walkEdits', Object.keys(p.w).length)].join(', ');
 function parsePlan(text) {
   const raw = text.trim();
   if (!raw) return null;
@@ -658,17 +852,18 @@ function parsePlan(text) {
     const p = JSON.parse(b64.dec(code));
     if (p.v !== 1 || !Array.isArray(p.m) || !Array.isArray(p.h) || typeof p.w !== 'object') return null;
     const l = p.l && typeof p.l === 'object' ? Object.fromEntries(Object.entries(p.l).filter(([u, v]) => filmIndex[u] && (v === 1 || v === 2))) : {};
-    return { m: p.m.filter(id => byId[id]), h: p.h.filter(l => locations.includes(l)), w: Object.fromEntries(Object.entries(p.w).filter(([k, v]) => k in DEFAULT_WALK && Number.isFinite(v) && v >= 0)), l };
+    const r = Number.isFinite(p.r) && p.r >= 0 && p.r <= 16 ? p.r : DEFAULT_REST;
+    return { r, m: p.m.filter(id => byId[id]), h: p.h.filter(l => locations.includes(l)), w: Object.fromEntries(Object.entries(p.w).filter(([k, v]) => k in DEFAULT_WALK && Number.isFinite(v) && v >= 0)), l };
   } catch { return null; }
 }
 const syncInput = document.getElementById('syncInput'), syncPreview = document.getElementById('syncPreview'), syncImport = document.getElementById('syncImport');
 function previewImport() {
   const p = parsePlan(syncInput.value);
   syncImport.disabled = !p;
-  syncPreview.textContent = !syncInput.value.trim() ? '' : p ? `This replaces your plan with ${describe(p)}.` : 'This is not a valid plan code or link. Copy it again from the other device.';
+  syncPreview.textContent = !syncInput.value.trim() ? '' : p ? t('replacesWith', { d: describe(p) }) : t('invalidPlan');
 }
 function openSync(prefill = '') {
-  document.getElementById('syncSummary').textContent = `This device: ${describe({ m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch })}.`;
+  document.getElementById('syncSummary').textContent = t('thisDevice', { d: describe({ m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch }) });
   document.getElementById('syncCode').value = planCode();
   syncInput.value = prefill;
   previewImport();
@@ -676,14 +871,14 @@ function openSync(prefill = '') {
 }
 function flash(btn, text) { const old = btn.textContent; btn.textContent = text; setTimeout(() => btn.textContent = old, 1800); }
 async function copy(text, btn) {
-  try { await navigator.clipboard.writeText(text); flash(btn, 'Copied'); }
-  catch { const code = document.getElementById('syncCode'); code.focus(); code.select(); flash(btn, 'Select and copy'); }
+  try { await navigator.clipboard.writeText(text); flash(btn, t('copied')); }
+  catch { const code = document.getElementById('syncCode'); code.focus(); code.select(); flash(btn, t('selectCopy')); }
 }
 document.getElementById('syncOpen').onclick = () => openSync();
 document.getElementById('syncCopy').onclick = e => copy(planCode(), e.currentTarget);
 document.getElementById('syncShare').onclick = async e => {
   const btn = e.currentTarget;
-  if (navigator.share) { try { await navigator.share({ title: 'My Sitges 2026 plan', url: planLink() }); return; } catch (err) { if (err.name === 'AbortError') return; } }
+  if (navigator.share) { try { await navigator.share({ title: t('shareTitle'), url: planLink() }); return; } catch (err) { if (err.name === 'AbortError') return; } }
   copy(planLink(), btn);
 };
 syncInput.oninput = previewImport;
@@ -694,11 +889,12 @@ syncImport.onclick = () => {
   hiddenVenues.clear(); p.h.forEach(l => hiddenVenues.add(l));
   walkTimes = { ...DEFAULT_WALK, ...p.w };
   watch = p.l; saveWatch(); updateWatchCount();
+  minRest = p.r; store.set('minRest', minRest);
   store.set('marked', [...marked]); store.set('hiddenVenues', [...hiddenVenues]); store.set('walkTimes', walkOverrides());
   render(current);
-  syncPreview.textContent = `Imported: ${describe(p)}.`;
+  syncPreview.textContent = t('imported', { d: describe(p) });
   syncImport.disabled = true;
-  document.getElementById('syncSummary').textContent = `This device: ${describe(p)}.`;
+  document.getElementById('syncSummary').textContent = t('thisDevice', { d: describe(p) });
   document.getElementById('syncCode').value = planCode();
 };
 
@@ -712,39 +908,40 @@ function toggleWatch(url, level) {
   if (level) watch[url] = level; else delete watch[url];
   saveWatch(); updateWatchCount(); render(current);
 }
-{
-  const count = {};
-  for (const f of allFilms) for (const x of f.sections) count[x] = (count[x] || 0) + 1;
-  filmSection.innerHTML = '<option value="">All sections</option>' + Object.keys(count).sort((a, b) => a.localeCompare(b, 'ca'))
-    .map(x => `<option value="${esc(x)}">${esc(x)} (${count[x]})</option>`).join('');
+function renderSections() {
+  const perSection = {}, chosen = filmSection.value;
+  for (const f of allFilms) for (const x of f.sections) perSection[x] = (perSection[x] || 0) + 1;
+  filmSection.innerHTML = `<option value="">${t('allSections')}</option>` + Object.keys(perSection).sort((a, b) => a.localeCompare(b, 'ca'))
+    .map(x => `<option value="${esc(x)}">${esc(x)} (${perSection[x]})</option>`).join('');
+  filmSection.value = chosen;
 }
 const when = s => `${dayLabel(s.start)} ${hhmm(toDate(s.start))}`;
 
 // Why a screening can't be added: hidden venue, or it overlaps / leaves too little walk time with a marked session.
 function blockedBy(s, mine) {
-  if (hiddenVenues.has(s.location)) return `${venue(s.location)} is hidden`;
+  if (hiddenVenues.has(s.location)) return t('isHidden', { v: venue(s.location) });
   for (const o of mine) {
     if (o === s) continue;
     const [a, b] = o.start < s.start ? [o, s] : [s, o];
     const gap = (toDate(b.start) - toDate(a.end)) / 60000;
-    if (gap < 0) return `overlaps ${o.title}`;
-    if (gap < need(a.location, b.location)) return `too close to ${o.title}`;
+    if (gap < 0) return t('overlapsWith', { t: o.title });
+    if (gap < need(a.location, b.location)) return t('tooClose', { t: o.title });
   }
   return null;
 }
 function filmStatus(f, mine) {
   const seen = f.sessions.find(s => marked.has(s.id));
-  if (seen) return { key: 'covered', rank: 2, text: `✓ Covered · ${when(seen)} · ${venue(seen.location)}` };
+  if (seen) return { key: 'covered', rank: 2, text: t('covered', { when: when(seen), v: venue(seen.location) }) };
   const reasons = f.sessions.map(s => [s, blockedBy(s, mine)]);
   const free = reasons.filter(([, r]) => !r).length;
-  if (free) return { key: 'open', rank: 1, text: `Not planned yet · ${free} of ${plural(f.sessions.length, 'screening')} free` };
-  return { key: 'blocked', rank: 0, text: `⚠ Cannot fit: ${reasons.map(([s, r]) => `${when(s)} ${r}`).join('; ')}` };
+  if (free) return { key: 'open', rank: 1, text: tn('notPlanned', f.sessions.length, { free }) };
+  return { key: 'blocked', rank: 0, text: t('cannotFit', { r: reasons.map(([s, r]) => `${when(s)} ${r}`).join('; ') }) };
 }
 
 function renderFilms() {
   const q = norm(filmSearch.value), sec = filmSection.value;
   const mine = [...marked].map(id => byId[id]).filter(Boolean);
-  document.getElementById('tabWatch').textContent = `My watchlist (${Object.keys(watch).length})`;
+  document.getElementById('tabWatch').textContent = t('tabWatch', { n: Object.keys(watch).length });
   document.querySelectorAll('.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === filmsTab));
   let list = allFilms.filter(f => (filmsTab === 'all' || watch[f.url]) && (!sec || f.sections.includes(sec))
     && (!q || norm(f.title).includes(q) || f.directors.some(d => norm(d).includes(q))));
@@ -754,8 +951,8 @@ function renderFilms() {
   const wl = allFilms.filter(f => watch[f.url]).map(f => filmStatus(f, mine).key);
   const n = k => wl.filter(x => x === k).length;
   document.getElementById('filmsSummary').innerHTML = filmsTab === 'watch'
-    ? (wl.length ? `<b>${n('covered')} of ${wl.length}</b> covered · ${n('open')} not planned · ${n('blocked') ? `<b>${n('blocked')}</b>` : 'none'} cannot fit` : '')
-    : `${plural(list.length, 'film')}${wl.length ? ` · ${wl.length} on your watchlist` : ''}`;
+    ? (wl.length ? t('watchSummary', { c: n('covered'), n: wl.length, o: n('open'), b: tn('noFit', n('blocked'), { n: `<b>${n('blocked')}</b>` }) }) : '')
+    : tn('filmCount', list.length) + (wl.length ? t('onYourList', { n: wl.length }) : '');
 
   document.getElementById('filmList').innerHTML = list.length ? list.map(f => {
     const w = watch[f.url], st = status.get(f);
@@ -767,14 +964,14 @@ function renderFilms() {
       ${f.image ? `<img src="${esc(f.image)}" alt="" loading="lazy">` : '<span></span>'}
       <div class="ft">${esc(f.title)}</div>
       <div class="acts">
-        ${w ? `<button type="button" class="must${w === 2 ? ' on' : ''}" data-must="${esc(f.url)}" title="Must-see" aria-label="Must-see" aria-pressed="${w === 2}">!</button>` : ''}
-        <button type="button" class="${w ? 'on' : ''}" data-wl="${esc(f.url)}" aria-pressed="${!!w}" aria-label="${w ? 'Remove from watchlist' : 'Add to watchlist'}">${w ? '✓' : '+'}</button>
+        ${w ? `<button type="button" class="must${w === 2 ? ' on' : ''}" data-must="${esc(f.url)}" title="${t('mustSee')}" aria-label="${t('mustSee')}" aria-pressed="${w === 2}">!</button>` : ''}
+        <button type="button" class="${w ? 'on' : ''}" data-wl="${esc(f.url)}" aria-pressed="${!!w}" aria-label="${w ? t('removeFromList') : t('addToList')}">${w ? '✓' : '+'}</button>
       </div>
       <div class="fd">${esc(f.directors.join(', '))}${f.sections.length ? ` <span class="fsec">· ${esc(f.sections.join(' · '))}</span>` : ''}</div>
       ${st ? `<div class="st ${st.key}">${esc(st.text)}</div>` : ''}
       <div class="fs">${shows}</div>
     </li>`;
-  }).join('') : `<li class="empty">${filmsTab === 'watch' && !Object.keys(watch).length ? 'Your watchlist is empty. Add films with + in All films.' : 'No films match.'}</li>`;
+  }).join('') : `<li class="empty">${filmsTab === 'watch' && !Object.keys(watch).length ? t('emptyList') : t('noMatch')}</li>`;
 }
 document.getElementById('filmsOpen').onclick = () => { renderFilms(); filmsDialog.showModal(); };
 filmSearch.oninput = filmSection.onchange = renderFilms;
@@ -802,6 +999,28 @@ document.getElementById('next').onclick = e => {
   render(festDay(byId[id].start));
   document.querySelector(`.s[data-id="${id}"]`)?.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
 };
+
+// Texts in the static HTML: data-i18n (text), data-i18n-html (trusted markup), data-i18n-attr ("attr:key,attr:key").
+function applyLanguage() {
+  document.documentElement.lang = LANG;
+  document.title = t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el => el.innerHTML = t(el.dataset.i18nHtml));
+  document.querySelectorAll('[data-i18n-attr]').forEach(el => el.dataset.i18nAttr.split(',').forEach(pairs => {
+    const [attr, key] = pairs.split(':');
+    el.setAttribute(attr, t(key));
+  }));
+  document.getElementById('lang').value = LANG;
+  renderSections();
+  renderClear();
+}
+document.getElementById('lang').onchange = e => {
+  LANG = e.target.value;
+  store.set('lang', LANG);
+  applyLanguage();
+  render(current);
+};
+applyLanguage();
 
 // Start on the day in the link, else today during the festival, else the first day.
 const hashDay = location.hash.slice(1);

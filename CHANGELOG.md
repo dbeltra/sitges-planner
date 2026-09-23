@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-09-23
+
+### Added
+- Short-night warning: when the time from your last session of a night to your first session the next day is below your minimum rest (8 hours by default), both sessions show a warning, the day tab turns red and the summary counts short nights.
+- The last session of each night shows the time until your first session the next day.
+- Minimum rest setting. Sync also moves it.
+- Replan: buttons in Settings clear all marked sessions or the whole watchlist, with a second tap to confirm and Undo for 10 seconds.
+- Catalan and English for all app texts, including dates. Choose the language in Settings; the first time, the app uses Catalan on Catalan or Spanish phones and English on other phones.
+
+### Changed
+- The "Walk times" button is now "Settings", with the minimum rest and the walk times.
+- The midnight line is now a dark dashed line, so red on the grid only marks the current time.
+- On phones, the Settings, Films and Sync buttons sit together at the right of the bar.
+
 ## [1.5.0] - 2026-09-23
 
 ### Added
@@ -67,7 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sitges Film Festival colours and fonts.
 - Installable on Android as an app (PWA), with offline support.
 
-[Unreleased]: https://github.com/dbeltra/sitges-planner/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/dbeltra/sitges-planner/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/dbeltra/sitges-planner/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/dbeltra/sitges-planner/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/dbeltra/sitges-planner/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/dbeltra/sitges-planner/compare/v1.2.0...v1.3.0
