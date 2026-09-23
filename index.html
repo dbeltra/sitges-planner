@@ -21,7 +21,7 @@
     --ground: #ECE6DC; --surface: #FFFFFF; --ink: #000000; --muted: #5E5850; --line: #D2CABD; --line-soft: #DDD6CA;
     --red: #FF0042; --gold: #B78B4B; --yellow: #FFED00;
     --mine-bg: #000000; --mine-ink: #FFFFFF; --mine-muted: #B7B3AB;
-    --clash: #FF0042; --tight: #F34B15; --band: rgb(255 0 66 / .08); --band-edge: rgb(255 0 66 / .55);
+    --clash: #FF0042; --tight: #F34B15; --repeat: #9B85D6; --band: rgb(255 0 66 / .08); --band-edge: rgb(255 0 66 / .55);
     --stripe-l: .55; --stripe-c: .16;
     --display: "Clash Display", "Arial Black", Arial, sans-serif;
     --body: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -81,6 +81,7 @@
   .sw.mine { background: var(--mine-bg); box-shadow: inset 0 0 0 2px var(--yellow); }
   .sw.clash { background: var(--clash); }
   .sw.tight { background: var(--tight); }
+  .sw.repeat { background: none; outline: 2px dashed var(--repeat); outline-offset: -2px; }
   .status .hint { margin-left: auto; }
 
   /* Grid */
@@ -122,6 +123,7 @@
   .s .note { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; }
   .s .note.warn { color: var(--clash); }
   .s .note.tight { color: var(--tight); }
+  .s .note.repeat { color: var(--repeat); }
   .s .note.gap { font-weight: 500; color: var(--muted); }
 
   .s.on { background: var(--mine-bg); color: var(--mine-ink); box-shadow: inset 0 0 0 2px var(--yellow); }
@@ -133,6 +135,7 @@
   .s.on .sec { color: oklch(.78 .12 var(--h)); }
   .s.on.tight { box-shadow: inset 0 0 0 3px var(--tight); }
   .s.on.clash { box-shadow: inset 0 0 0 3px var(--clash); }
+  .s.on.repeat { outline: 2px dashed var(--repeat); outline-offset: 2px; }
 
   .only .s:not(.on) { display: none; }
   #band { position: absolute; left: 0; right: 0; z-index: 1; background: var(--band); border-block: 1px dashed var(--band-edge); pointer-events: none; }
@@ -228,10 +231,10 @@ const SHORT = { 'Cinema Casino Prado': 'Prado', 'Cinema Escorxador': 'Escorxador
 const locations = [...new Set(SCHEDULE.map(s => s.location))].sort((a, b) => (ORDER.indexOf(a) + 1 || 99) - (ORDER.indexOf(b) + 1 || 99));
 let current;
 
-// For each marked session: sessions it overlaps, a too-short location change, and the free time to the next one.
+// For each marked session: sessions it overlaps, a too-short location change, films also marked in another session, and the free time to the next one.
 function analyse() {
   const list = [...marked].map(id => byId[id]).filter(Boolean).sort((a, b) => a.start.localeCompare(b.start));
-  const info = Object.fromEntries(list.map(s => [s.id, { clash: [], tight: [], gap: null }]));
+  const info = Object.fromEntries(list.map(s => [s.id, { clash: [], tight: [], repeat: [], gap: null }]));
   // ponytail: O(n²) over marked sessions only, fine for a few hundred
   for (const a of list) for (const b of list) {
     if (a === b || b.start < a.start || (b.start === a.start && b.id < a.id)) continue;
@@ -239,6 +242,11 @@ function analyse() {
     if (gap < 0) { info[a.id].clash.push(b); info[b.id].clash.push(a); }
     else if (gap < need(a.location, b.location)) { info[a.id].tight.push([b, gap]); info[b.id].tight.push([a, gap]); }
   }
+  // Same film in two marked sessions, matched by film page URL so films inside multi-film sessions count too.
+  const byFilm = {};
+  for (const s of list) for (const f of s.films) (byFilm[f.url] ??= []).push([s, f]);
+  for (const hits of Object.values(byFilm)) if (hits.length > 1)
+    for (const [s, f] of hits) for (const [o] of hits) if (o !== s) info[s.id].repeat.push([f, o]);
   list.forEach((s, i) => {
     const next = list[i + 1];
     if (next && festDay(next.start) === festDay(s.start)) info[s.id].gap = [(toDate(next.start) - toDate(s.end)) / 60000, next];
@@ -249,7 +257,7 @@ function analyse() {
 function renderDays(info) {
   document.getElementById('days').innerHTML = days.map(d => {
     const mine = byDay[d].filter(s => marked.has(s.id));
-    const bad = mine.some(s => info[s.id].clash.length || info[s.id].tight.length);
+    const bad = mine.some(s => info[s.id].clash.length || info[s.id].tight.length || info[s.id].repeat.length);
     const date = new Date(d + 'T12:00');
     const wd = date.toLocaleDateString('ca', { weekday: 'short' }).replace('.', '');
     return `<button data-day="${d}" aria-pressed="${d === current}" aria-label="${date.toLocaleDateString('ca', { weekday: 'long', day: 'numeric', month: 'long' })}">
@@ -261,12 +269,14 @@ function renderStatus(info) {
   const mine = byDay[current].filter(s => marked.has(s.id));
   const clashes = mine.filter(s => info[s.id].clash.length).length;
   const tights = mine.filter(s => info[s.id].tight.length).length;
+  const repeats = mine.filter(s => info[s.id].repeat.length).length;
   const total = byDay[current].length;
   document.getElementById('status').innerHTML = `
     <span><b>${mine.length}</b><span class="long"> of ${total} sessions marked</span><span class="short">/${total} ★</span></span>
     <span class="k key"><span class="sw mine"></span>Mine</span>
     <span class="k"><span class="sw clash"></span>${clashes ? `<b>${clashes}</b>` : 'No'} overlaps</span>
-    <span class="k"><span class="sw tight"></span>${tights ? `<b>${tights}</b>` : 'No'} tight<span class="long"> changes</span></span>
+    <span class="k"><span class="sw tight"></span>${tights ? `<b>${tights}</b>` : 'No'} <span>tight<span class="long"> changes</span></span></span>
+    <span class="k"><span class="sw repeat"></span>${repeats ? `<b>${repeats}</b>` : 'No'} <span>repeat<span class="long">ed films</span></span></span>
     ${hiddenVenues.size ? `<span class="k hidden-venues"><span class="long">Hidden:</span>${[...hiddenVenues].sort().map(l => {
       const n = mine.filter(s => s.location === l).length;
       return `<button data-show="${esc(l)}" title="Show ${esc(l)} again">${esc(SHORT[l] || l)}${n ? ` <i>★${n}</i>` : ''} <span aria-hidden="true">+</span></button>`;
@@ -316,10 +326,15 @@ function render(day) {
       if (i) {
         notes += i.clash.map(o => `<span class="note warn">Overlaps ${esc(o.title)} · ${esc(o.location)}</span>`).join('');
         notes += i.tight.map(([o, g]) => `<span class="note tight">Only ${g}′ to reach ${esc(o.location)} (walk ${need(s.location, o.location)}′)</span>`).join('');
+        notes += i.repeat.map(([f, o]) => {
+          const when = `${toDate(o.start).toLocaleDateString('ca', { weekday: 'short', day: 'numeric' }).replace('.', '')} ${hhmm(toDate(o.start))}`;
+          const inside = o.films.length > 1 ? ` in ${esc(o.title)}` : '';
+          return `<span class="note repeat">Repeat: ${esc(f.title)} also ${when} · ${esc(SHORT[o.location] || o.location)}${inside}</span>`;
+        }).join('');
         const warned = i.gap && i.tight.some(([o]) => o === i.gap[1]);
         if (i.gap && i.gap[0] >= 0 && !warned) notes += `<span class="note gap">→ ${dur(i.gap[0])} free until ${esc(i.gap[1].title)}</span>`;
       }
-      const cls = ['s', i && 'on', i?.tight.length && 'tight', i?.clash.length && 'clash'].filter(Boolean).join(' ');
+      const cls = ['s', i && 'on', i?.repeat.length && 'repeat', i?.tight.length && 'tight', i?.clash.length && 'clash'].filter(Boolean).join(' ');
       const h = `calc(${min(s.end) - min(s.start)} * var(--px))`;
       return `<div class="${cls}" role="button" tabindex="0" aria-pressed="${!!i}" data-id="${s.id}" data-a="${min(s.start)}" data-b="${min(s.end)}"
         style="top:${px(min(s.start))};height:${h};--hgt:${h};--h:${hue(s.sections[0] || '')}"
