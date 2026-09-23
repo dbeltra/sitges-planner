@@ -20,7 +20,8 @@
     --px: 1.4px;
     --ground: #ECE6DC; --surface: #FFFFFF; --ink: #000000; --muted: #5E5850; --line: #D2CABD; --line-soft: #DDD6CA;
     --red: #FF0042; --gold: #B78B4B; --yellow: #FFED00;
-    --mine-bg: #000000; --mine-ink: #FFFFFF; --mine-muted: #B7B3AB;
+    --mine-bg: #000000; --mine-ink: #FFFFFF; --mine-muted: #B7B3AB; --mine-frame: transparent; --mine-sec-l: .78;
+    --note-warn: #FF0042; --note-tight: #F34B15; --note-repeat: #9B85D6; --note-rest: #5AB0F0;
     --clash: #FF0042; --tight: #F34B15; --repeat: #9B85D6; --rest: #0071B3; --band: rgb(255 0 66 / .08); --band-edge: rgb(255 0 66 / .55);
     --stripe-l: .55; --stripe-c: .16;
     --display: "Clash Display", "Arial Black", Arial, sans-serif;
@@ -44,7 +45,18 @@
   .walk-open:hover { background: #fff; color: #000; }
   dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
   dialog::backdrop { background: rgb(0 0 0 / .55); }
+  /* Every panel: fixed ✕ at the top right, content scrolls under it. */
+  dialog[open] { display: flex; flex-direction: column; overflow: hidden; }
+  dialog > form, dialog > .film-list { flex: 1; min-height: 0; overflow: auto; }
+  dialog > .films-head, dialog > .dlg-head { flex: none; }
+  .dlg-head { padding: 16px 20px 12px; border-bottom: 1px solid var(--line); }
+  .dlg-head + form { padding-top: 16px; }
+  dialog h2 { padding-right: 40px; }
+  .dlg-close { position: absolute; top: 10px; right: 10px; z-index: 2; width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--surface); color: var(--ink); font-size: 18px; line-height: 32px; cursor: pointer; }
+  .dlg-close:hover { background: var(--ink); color: var(--surface); }
+  .walk-actions .primary { margin-left: auto; }
   dialog form { display: grid; gap: 14px; padding: 20px 22px; }
+  dialog h2:focus { outline: none; }
   dialog h2 { margin: 0; font: 700 26px/1 var(--display); text-transform: uppercase; }
   dialog p { margin: 0; color: var(--muted); max-width: 60ch; }
   .walk-rows { display: grid; gap: 2px; }
@@ -87,12 +99,25 @@
   .status b { color: var(--ink); font-weight: 700; }
   .status .k { display: inline-flex; gap: 6px; align-items: center; }
   .status .sw { width: 11px; height: 11px; }
-  .sw.mine { background: var(--mine-bg); box-shadow: inset 0 0 0 2px var(--yellow); }
+  .sw.mine { background: var(--mine-bg); box-shadow: inset 0 0 0 2px var(--mine-frame); }
   .sw.clash { background: var(--clash); }
   .sw.tight { background: var(--tight); }
   .sw.rest { background: var(--rest); }
   .sw.repeat { background: none; outline: 2px dashed var(--repeat); outline-offset: -2px; }
-  .status .hint { margin-left: auto; }
+  .status .ok { color: #2E7D32; font-weight: 600; }
+  .tip { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 7px 16px; background: var(--ink); color: var(--surface); font-size: 12px; }
+  .tip button { flex: none; padding: 3px 10px; border: 1px solid currentColor; background: none; font-weight: 700; font-size: 11px; cursor: pointer; }
+  dialog p.how { max-width: none; padding: 8px 10px; background: var(--ground); font-size: 12px; }
+  .head.corner { display: flex; align-items: center; justify-content: center; padding: 0; }
+  .hidden-btn { padding: 3px 6px; border: 1px solid var(--ink); background: var(--surface); font: 700 11px/1.2 var(--body); cursor: pointer; }
+  .hidden-btn:hover { background: var(--ink); color: var(--surface); }
+  .hidden-menu { margin: 0; padding: 12px; border: 0; border-top: 4px solid var(--red); background: var(--surface); color: var(--ink); box-shadow: 0 8px 24px rgb(0 0 0 / .25); min-width: 220px; }
+  .hidden-menu h3 { margin: 0 0 8px; font: 700 11px/1 var(--body); letter-spacing: 1.63px; text-transform: uppercase; }
+  .hidden-menu ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+  .hidden-menu li button { display: flex; width: 100%; justify-content: space-between; gap: 12px; padding: 6px 8px; border: 1px solid var(--line); background: var(--ground); font: 600 12px/1.3 var(--body); cursor: pointer; text-align: left; }
+  .hidden-menu li button:hover { border-color: var(--ink); }
+  .hidden-menu i { font-style: normal; color: var(--red); }
+  .hidden-menu .all { margin-top: 8px; width: 100%; padding: 6px 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); font-weight: 700; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
 
   /* Grid */
   #scroller { flex: 1; overflow: auto; overscroll-behavior: contain; }
@@ -104,10 +129,6 @@
   .head .hide { flex: none; width: 20px; height: 20px; padding: 0; border: 0; background: none; color: var(--muted); font: 600 12px/1 var(--body); cursor: pointer; opacity: .45; }
   .head:hover .hide, .head .hide:focus-visible { opacity: 1; }
   .head .hide:hover { color: var(--red); }
-  .hidden-venues { flex-wrap: wrap; }
-  .hidden-venues button { padding: 2px 8px; border: 1px solid var(--ink); border-radius: 0; background: var(--surface); font: 600 11px/1.4 var(--body); cursor: pointer; }
-  .hidden-venues button:hover { background: var(--ink); color: var(--surface); }
-  .hidden-venues button i { font-style: normal; color: var(--red); }
   .col { position: relative; min-width: 180px; border-left: 1px solid var(--line-soft); }
   .col.axis { position: sticky; left: 0; z-index: 6; min-width: 0; border: 0; background: var(--ground); }
   .hour { position: absolute; left: 0; right: 0; border-top: 1px solid var(--line-soft); }
@@ -131,26 +152,33 @@
   .s ul li::marker { content: "★ "; color: var(--red); font-size: 9px; }
   .s .sec { margin-top: 3px; font: 700 9.5px/1.3 var(--body); text-transform: uppercase; letter-spacing: 1px; color: oklch(var(--stripe-l) var(--stripe-c) var(--h)); }
   .s .note { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; }
-  .s .note.warn { color: var(--clash); }
-  .s .note.tight { color: var(--tight); }
-  .s .note.repeat { color: var(--repeat); }
-  .s .note.rest { color: #5AB0F0; }
+  .s .note.warn { color: var(--note-warn); }
+  .s .note.tight { color: var(--note-tight); }
+  .s .note.repeat { color: var(--note-repeat); }
+  .s .note.rest { color: var(--note-rest); }
   .s:not(.on) .note.rest, .sheet .notes .rest { color: var(--rest); }
   .s .note.gap { font-weight: 500; color: var(--muted); }
 
-  .s.on { background: var(--mine-bg); color: var(--mine-ink); box-shadow: inset 0 0 0 2px var(--yellow); }
-  .s.on:hover, .s.on:focus-visible { box-shadow: inset 0 0 0 2px var(--yellow), 0 6px 18px rgb(0 0 0 / .25); }
+  .s.on { background: var(--mine-bg); color: var(--mine-ink); --frame: var(--mine-frame); --fw: 2px; box-shadow: inset 0 0 0 var(--fw) var(--frame); }
+  .s.on:hover, .s.on:focus-visible { box-shadow: inset 0 0 0 var(--fw) var(--frame), 0 6px 18px rgb(0 0 0 / .25); }
   .s.on .t, .s.on .who, .s.on ul, .s.on .note.gap { color: var(--mine-muted); }
-  .s.on .t::before { content: "★ "; color: var(--yellow); }
   .s.on .t { justify-content: flex-start; }
   .s.on .t a { margin-left: auto; }
-  .s.on .sec { color: oklch(.78 .12 var(--h)); }
-  .s.on.rest { box-shadow: inset 0 0 0 3px var(--rest); }
-  .s.on.tight { box-shadow: inset 0 0 0 3px var(--tight); }
-  .s.on.clash { box-shadow: inset 0 0 0 3px var(--clash); }
+  .s.on .sec { color: oklch(var(--mine-sec-l) .12 var(--h)); }
+  .s.on.rest { --frame: var(--rest); --fw: 3px; }
+  .s.on.tight { --frame: var(--tight); --fw: 3px; }
+  .s.on.clash { --frame: var(--clash); --fw: 3px; }
   .s.on.repeat { outline: 2px dashed var(--repeat); outline-offset: 2px; }
 
   .only .s:not(.on) { display: none; }
+  /* More text than fits: fade the bottom edge into the block colour and show "⋯" */
+  .s { --blk: var(--surface); --frame: transparent; --fw: 0px; }
+  .s.on { --blk: var(--mine-bg); }
+  .s.more::after { content: "⋯"; position: absolute; left: 4px; right: 0; bottom: 0; height: 24px; padding-right: 8px; text-align: right;
+    font: 700 14px/28px var(--body); color: var(--muted); background: linear-gradient(to bottom, transparent, var(--blk) 60%);
+    box-shadow: inset 0 calc(-1 * var(--fw)) 0 var(--frame), inset calc(-1 * var(--fw)) 0 0 var(--frame); pointer-events: none; }
+  .s.on.more::after { color: var(--mine-muted); }
+  .s.more:hover::after, .s.more:focus-visible::after { display: none; }
 
   /* Now line and next-session bar */
   #nowline { position: absolute; left: 0; right: 0; z-index: 7; height: 0; border-top: 2px solid var(--red); pointer-events: none; }
@@ -169,7 +197,7 @@
   .s.on .t .info { margin-left: auto; }
 
   /* Detail sheet */
-  .sheet { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); overflow: auto; }
+  .sheet { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
   .sheet::backdrop, #syncDialog::backdrop { background: rgb(0 0 0 / .55); }
   .sheet-body { display: grid; gap: 12px; padding: 18px 20px 20px; }
   .posters { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
@@ -193,13 +221,10 @@
   /* Films view */
   #watchCount:not(:empty) { margin-left: 5px; padding: 0 5px; background: var(--red); color: #fff; font-size: 10px; }
   .films { width: min(760px, calc(100% - 32px)); height: min(88%, 900px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
-  .films[open] { display: flex; flex-direction: column; }
   .films::backdrop { background: rgb(0 0 0 / .55); }
   .films-head { display: grid; gap: 10px; padding: 16px 20px 10px; border-bottom: 1px solid var(--line); }
-  .films-top { display: flex; justify-content: space-between; align-items: center; }
   .films h2:focus { outline: none; }
   .films h2 { margin: 0; font: 700 26px/1 var(--display); text-transform: uppercase; }
-  .films-close { width: 32px; height: 32px; border: 0; background: none; font-size: 18px; cursor: pointer; }
   .tabs { display: flex; gap: 0; }
   .tabs button { padding: 7px 12px; border: 1px solid var(--ink); background: none; font-weight: 700; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
   .tabs button + button { border-left: 0; }
@@ -244,7 +269,8 @@
   @media (max-width: 640px) {
     :root { --px: 1.2px; }
     .short { display: inline; }
-    .long, .dates, .brand, .status .hint, .status .k.key { display: none; }
+    .long, .dates, .brand { display: none; }
+    .tip { padding: 6px 12px; }
     /* Phone: days first, then one line of controls, then one line of summary */
     header { order: 1; padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 4px; }
     .topbar { order: 2; padding: 4px 12px; }
@@ -259,17 +285,35 @@
     .controls label { margin-right: auto; }
     .walk-open { padding: 2px 8px; font-size: 12px; }
     .status { flex-wrap: nowrap; gap: 12px; padding: 4px 12px; overflow-x: auto; scrollbar-width: none; white-space: nowrap; font-size: 11.5px; }
-    .hidden-venues { flex-wrap: nowrap; }
     .head { padding: 6px 4px 5px; font-size: 12.5px; }
     .axis .hour span { right: 5px; font-size: 10px; }
     .col { min-width: 150px; }
     .next { padding: 5px 12px; font-size: 12px; }
     .sheet { width: 100%; max-width: 100%; max-height: 88%; margin: auto 0 0; }
-    .films { width: 100%; max-width: 100%; height: 100%; max-height: 100%; }
-    .films-head { padding: 12px 12px 8px; }
+    .films, #walkDialog, #syncDialog { width: 100%; max-width: 100%; height: 100%; max-height: 100%; }
+    .films-head, .dlg-head { padding: 12px 12px 8px; }
     .film-list { padding: 0 12px 16px; }
   }
-  @media (prefers-reduced-motion: reduce) { .s { transition: none; } }
+  /* Motion: panels fade and rise in, marked blocks pop, a new day fades in. Off with reduced motion. */
+  button, .walk-open, .tabs button, .hidden-btn { transition: background-color .15s, color .15s, border-color .15s, opacity .15s; }
+  /* Panels: an entry animation on top of a fully visible resting state, so a panel never stays hidden if the animation does not run. */
+  @keyframes panelIn { from { opacity: 0; translate: 0 12px; } }
+  @keyframes backdropIn { from { background-color: transparent; } }
+  dialog[open], .hidden-menu:popover-open { animation: panelIn .25s cubic-bezier(.2, .8, .2, 1); }
+  dialog[open]::backdrop { animation: backdropIn .25s ease-out; }
+  /* Marking: the new state spreads as a circle from the tap point over a copy of the old block. */
+  @keyframes reveal { from { clip-path: circle(0 at var(--rx) var(--ry)); } to { clip-path: circle(var(--rr) at var(--rx) var(--ry)); } }
+  .s.reveal { animation: reveal .45s cubic-bezier(.4, 0, .2, 1); }
+  .s.ghost { pointer-events: none; }
+  @keyframes gridIn { from { opacity: .35; translate: 0 6px; } }
+  #grid.enter .col:not(.axis) { animation: gridIn .22s ease-out; } /* headers and time axis stay put; columns slide in under them */
+  @media (max-width: 640px) {
+    @keyframes sheetUp { from { translate: 0 100%; } }
+    .sheet[open] { animation: sheetUp .3s cubic-bezier(.2, .8, .2, 1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after, ::backdrop { animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -287,10 +331,14 @@
   <nav id="days" data-i18n-attr="aria-label:festivalDays"></nav>
 </header>
 <div class="status" id="status"></div>
+<div id="tip" class="tip" hidden><span data-i18n="hint"></span><button type="button" id="tipClose" data-i18n="gotIt">Got it</button></div>
 <button type="button" id="next" class="next" hidden></button>
+<div id="hiddenMenu" class="hidden-menu" popover></div>
 <dialog id="walkDialog" aria-labelledby="walkTitle">
+  <button type="button" class="dlg-close" data-close data-i18n-attr="aria-label:close,title:close">✕</button>
+  <div class="dlg-head"><h2 id="walkTitle" tabindex="-1" autofocus data-i18n="settings">Settings</h2></div>
   <form method="dialog">
-    <h2 id="walkTitle" data-i18n="settings">Settings</h2>
+    <p class="how" data-i18n="hint"></p>
     <label class="rest-row" for="lang"><span><b data-i18n="language">Language</b></span>
       <select id="lang"><option value="ca">Català</option><option value="en">English</option></select></label>
     <label class="rest-row" for="minRest"><span data-i18n-html="restHelp"></span>
@@ -306,17 +354,14 @@
     </div>
     <div class="walk-actions">
       <button type="button" id="walkReset" data-i18n="reset">Reset to defaults</button>
-      <button type="submit" class="primary" data-i18n="done">Done</button>
     </div>
   </form>
 </dialog>
 <dialog id="sheet" class="sheet" aria-labelledby="sheetTitle"></dialog>
 <dialog id="filmsDialog" class="films" aria-labelledby="filmsTitle">
+  <button type="button" class="dlg-close" data-close data-i18n-attr="aria-label:close,title:close">✕</button>
   <div class="films-head">
-    <div class="films-top">
-      <h2 id="filmsTitle" tabindex="-1" autofocus data-i18n="films">Films</h2>
-      <form method="dialog"><button type="submit" class="films-close" data-i18n-attr="aria-label:close">✕</button></form>
-    </div>
+    <h2 id="filmsTitle" tabindex="-1" autofocus data-i18n="films">Films</h2>
     <div class="tabs" role="tablist">
       <button type="button" role="tab" id="tabAll" data-tab="all" aria-selected="true" data-i18n="tabAll">All films</button>
       <button type="button" role="tab" id="tabWatch" data-tab="watch" aria-selected="false">My watchlist</button>
@@ -330,8 +375,9 @@
   <ul id="filmList" class="film-list"></ul>
 </dialog>
 <dialog id="syncDialog" aria-labelledby="syncTitle">
+  <button type="button" class="dlg-close" data-close data-i18n-attr="aria-label:close,title:close">✕</button>
+  <div class="dlg-head"><h2 id="syncTitle" tabindex="-1" autofocus data-i18n="syncTitle">Sync</h2></div>
   <form method="dialog">
-    <h2 id="syncTitle" data-i18n="syncTitle">Sync</h2>
     <p data-i18n="syncHelp"></p>
     <section class="sync-part">
       <h3 data-i18n="sendPlan">Send this plan</h3>
@@ -347,7 +393,6 @@
       <textarea id="syncInput" rows="3" data-i18n-attr="placeholder:pastePlan,aria-label:pastePlan"></textarea>
       <p id="syncPreview" class="sync-summary" aria-live="polite"></p>
       <div class="walk-actions">
-        <button type="submit" data-i18n="close">Close</button>
         <button type="button" id="syncImport" class="primary" disabled data-i18n="replacePlan">Replace my plan</button>
       </div>
     </section>
@@ -380,14 +425,14 @@ const STR = {
     syncTitle: 'Sincronització', syncHelp: "El teu pla només es desa en aquest dispositiu. Per passar-lo a un altre, envia'l des d'aquí i obre'l a l'altre.",
     sendPlan: 'Envia aquest pla', planCode: 'Codi del pla', copyCode: 'Copia el codi', shareLink: "Comparteix l'enllaç",
     receivePlan: 'Rep un pla', pastePlan: 'Enganxa un codi o un enllaç', replacePlan: 'Substitueix el meu pla',
-    ofMarked: ' de {total} sessions marcades', mine: 'Meves',
+    ofMarked: ' de {total} sessions marcades',
     overlaps: { zero: 'Cap solapament', one: '{n} solapament', other: '{n} solapaments' },
     tight: { zero: 'Cap canvi just', one: '{n} canvi just', other: '{n} canvis justos' },
     tightShort: { zero: 'Cap just', one: '{n} just', other: '{n} justos' },
     repeats: { zero: 'Cap pel·lícula repetida', one: '{n} pel·lícula repetida', other: '{n} pel·lícules repetides' },
     repeatsShort: { zero: 'Cap repetida', one: '{n} repetida', other: '{n} repetides' },
     nights: { zero: 'Cap nit curta', one: '{n} nit curta', other: '{n} nits curtes' },
-    hidden: 'Amagades:', showAgain: 'Torna a mostrar {v}', hide: 'Amaga {v}',
+    noConflicts: '✓ Sense conflictes', gotIt: 'Entesos', showVenue: 'Mostra', showAll: 'Mostra-les totes', hide: 'Amaga {v}',
     hint: 'Toca una sessió per marcar-la · ⓘ mostra els detalls · ✕ amaga una sala',
     onWatchlist: 'A la teva llista', details: 'Detalls', detailsFor: 'Detalls de {t}',
     noteOverlap: 'Se solapa amb {t} · {v}', noteTight: 'Només {g}′ per arribar a {v} (a peu {w}′)',
@@ -427,14 +472,14 @@ const STR = {
     syncTitle: 'Sync', syncHelp: 'Your plan is saved only on this device. To move it, send it from this device and open it on the other one.',
     sendPlan: 'Send this plan', planCode: 'Plan code', copyCode: 'Copy code', shareLink: 'Share link',
     receivePlan: 'Receive a plan', pastePlan: 'Paste a code or a link', replacePlan: 'Replace my plan',
-    ofMarked: ' of {total} sessions marked', mine: 'Mine',
+    ofMarked: ' of {total} sessions marked',
     overlaps: { zero: 'No overlaps', one: '{n} overlap', other: '{n} overlaps' },
     tight: { zero: 'No tight changes', one: '{n} tight change', other: '{n} tight changes' },
     tightShort: { zero: 'No tight', one: '{n} tight', other: '{n} tight' },
     repeats: { zero: 'No repeated films', one: '{n} repeated film', other: '{n} repeated films' },
     repeatsShort: { zero: 'No repeat', one: '{n} repeat', other: '{n} repeats' },
     nights: { zero: 'No short nights', one: '{n} short night', other: '{n} short nights' },
-    hidden: 'Hidden:', showAgain: 'Show {v} again', hide: 'Hide {v}',
+    noConflicts: '✓ No conflicts', gotIt: 'Got it', showVenue: 'Show', showAll: 'Show all', hide: 'Hide {v}',
     hint: 'Click a session to mark it · ⓘ shows details · ✕ hides a venue',
     onWatchlist: 'On your watchlist', details: 'Details', detailsFor: 'Details for {t}',
     noteOverlap: 'Overlaps {t} · {v}', noteTight: 'Only {g}′ to reach {v} (walk {w}′)',
@@ -598,21 +643,15 @@ function renderStatus(info) {
   const repeats = mine.filter(s => info[s.id].repeat.length).length;
   const nights = mine.reduce((n, s) => n + info[s.id].rest.length, 0);
   const total = byDay[current].length;
+  const warnings = [['clash', 'overlaps', clashes], ['tight', 'tight', tights, 'tightShort'], ['repeat', 'repeats', repeats, 'repeatsShort'], ['rest', 'nights', nights]]
+    .filter(([, , n]) => n).map(([sw, key, n, short]) => `<span class="k"><span class="sw ${sw}"></span>${count(key, n, short)}</span>`).join('');
   document.getElementById('status').innerHTML = `
     <span><b>${mine.length}</b><span class="long">${t('ofMarked', { total })}</span><span class="short">/${total} ★</span></span>
-    <span class="k key"><span class="sw mine"></span>${t('mine')}</span>
-    <span class="k"><span class="sw clash"></span>${count('overlaps', clashes)}</span>
-    <span class="k"><span class="sw tight"></span>${count('tight', tights, 'tightShort')}</span>
-    <span class="k"><span class="sw repeat"></span>${count('repeats', repeats, 'repeatsShort')}</span>
-    <span class="k"><span class="sw rest"></span>${count('nights', nights)}</span>
-    ${hiddenVenues.size ? `<span class="k hidden-venues"><span class="long">${t('hidden')}</span>${[...hiddenVenues].sort().map(l => {
-      const n = mine.filter(s => s.location === l).length;
-      return `<button data-show="${esc(l)}" title="${esc(t('showAgain', { v: l }))}">${esc(SHORT[l] || l)}${n ? ` <i>★${n}</i>` : ''} <span aria-hidden="true">+</span></button>`;
-    }).join('')}</span>` : ''}
-    <span class="hint">${t('hint')}</span>`;
+    ${warnings || (mine.length ? `<span class="ok">${t('noConflicts')}</span>` : '')}`;
 }
 
 function render(day) {
+  const newDay = day !== current;
   current = day;
   history.replaceState(null, '', location.search.replace(/[?&]import=[^&]*/, '') + '#' + day);
   const info = analyse();
@@ -629,7 +668,8 @@ function render(day) {
   grid.classList.toggle('only', only);
   const shown = locations.filter(l => !hiddenVenues.has(l));
   grid.style.gridTemplateColumns = `${matchMedia('(max-width: 640px)').matches ? 40 : 52}px repeat(${shown.length}, minmax(180px, 1fr))`;
-  grid.innerHTML = '<div class="head corner"></div>' + shown.map(l =>
+  const hiddenBtn = hiddenVenues.size ? `<button type="button" class="hidden-btn" popovertarget="hiddenMenu" title="${esc(tn('hiddenVenues', hiddenVenues.size))}" aria-label="${esc(tn('hiddenVenues', hiddenVenues.size))}">+${hiddenVenues.size}</button>` : '';
+  grid.innerHTML = `<div class="head corner">${hiddenBtn}</div>` + shown.map(l =>
     `<div class="head"><span><span class="long">${esc(l)}</span><span class="short">${esc(SHORT[l] || l)}</span></span><button class="hide" data-hide="${esc(l)}" title="${esc(t('hide', { v: l }))}" aria-label="${esc(t('hide', { v: l }))}">✕</button></div>`).join('');
 
   const marks = [];
@@ -675,8 +715,17 @@ function render(day) {
 
   grid.insertAdjacentHTML('beforeend', '<div id="nowline" hidden></div>');
   view = { day, min, px, top, from, to };
+  grid.classList.remove('enter'); // a redraw on the same day (marking, hiding) must not replay the slide
+  if (newDay) { void grid.offsetWidth; grid.classList.add('enter'); }
   renderNow();
+  markOverflow();
 }
+
+// Blocks whose text is taller than the block get the "more" cue.
+function markOverflow() {
+  grid.querySelectorAll('.s').forEach(el => el.classList.toggle('more', el.scrollHeight > el.clientHeight + 2));
+}
+document.fonts?.ready.then(markOverflow);
 
 // Red line at the current time on today's grid, and the next marked session with when to leave.
 function renderNow() {
@@ -718,12 +767,36 @@ function scrollToNow() {
   if (line && !line.hidden) document.getElementById('scroller').scrollTop = Math.max(0, line.offsetTop - innerHeight * 0.25);
 }
 
-function toggle(el) {
-  const id = +el.dataset.id;
+// Mark or unmark a session, revealing the new look from (x, y) inside the block; the block centre by default.
+function toggleMark(id, x, y) {
+  const old = document.querySelector(`.s[data-id="${id}"]`);
+  const ghost = old?.cloneNode(true);
+  const box = old?.getBoundingClientRect();
   marked.has(id) ? marked.delete(id) : marked.add(id);
   store.set('marked', [...marked]);
   render(current);
-  document.querySelector(`.s[data-id="${id}"]`)?.focus({ preventScroll: true });
+  const el = document.querySelector(`.s[data-id="${id}"]`);
+  if (!el || !ghost || !box || !el.offsetParent) return el;
+  const w = box.width, h = box.height;
+  x = x ?? w / 2; y = y ?? h / 2;
+  el.style.setProperty('--rx', `${x}px`);
+  el.style.setProperty('--ry', `${y}px`);
+  el.style.setProperty('--rr', `${Math.ceil(Math.hypot(Math.max(x, w - x), Math.max(y, h - y)))}px`);
+  ghost.classList.add('ghost');
+  ghost.classList.remove('reveal');
+  ghost.removeAttribute('tabindex');
+  ghost.setAttribute('aria-hidden', 'true');
+  el.before(ghost);
+  el.classList.add('reveal');
+  const done = () => { ghost.remove(); el.classList.remove('reveal'); };
+  el.addEventListener('animationend', done, { once: true });
+  setTimeout(done, 700); // reduced motion or no animation: never leave the copy behind
+  return el;
+}
+function toggle(el, e) {
+  const r = el.getBoundingClientRect();
+  const at = e && e.clientX !== undefined && (e.clientX || e.clientY) ? [e.clientX - r.left, e.clientY - r.top] : [];
+  toggleMark(+el.dataset.id, ...at)?.focus({ preventScroll: true });
 }
 const grid = document.getElementById('grid');
 function setVenue(name, hide) {
@@ -737,9 +810,36 @@ grid.onclick = e => {
   const info = e.target.closest('[data-info]');
   if (info) return openSheet(+info.dataset.info);
   const el = e.target.closest('.s');
-  if (el && !e.target.closest('a')) toggle(el);
+  if (el && !e.target.closest('a')) toggle(el, e);
 };
-document.getElementById('status').onclick = e => { const b = e.target.closest('[data-show]'); if (b) setVenue(b.dataset.show, false); };
+// Hidden venues menu, opened from the "+N" button in the header corner.
+const hiddenMenu = document.getElementById('hiddenMenu');
+function renderHiddenMenu() {
+  const mine = byDay[current].filter(s => marked.has(s.id));
+  const list = locations.filter(l => hiddenVenues.has(l));
+  hiddenMenu.innerHTML = `<h3>${esc(tn('hiddenVenues', list.length))}</h3><ul>${list.map(l => {
+    const n = mine.filter(s => s.location === l).length;
+    return `<li><button type="button" data-show="${esc(l)}"><span>${esc(l)}${n ? ` <i>★${n}</i>` : ''}</span><span>${t('showVenue')}</span></button></li>`;
+  }).join('')}</ul>${list.length > 1 ? `<button type="button" class="all" data-show-all>${t('showAll')}</button>` : ''}`;
+}
+hiddenMenu.addEventListener('beforetoggle', e => {
+  if (e.newState !== 'open') return;
+  renderHiddenMenu();
+  const r = grid.querySelector('.hidden-btn')?.getBoundingClientRect();
+  if (r) { hiddenMenu.style.inset = 'auto'; hiddenMenu.style.left = `${Math.max(8, r.left)}px`; hiddenMenu.style.top = `${r.bottom + 4}px`; }
+});
+hiddenMenu.onclick = e => {
+  const one = e.target.closest('[data-show]');
+  if (one) setVenue(one.dataset.show, false);
+  else if (e.target.closest('[data-show-all]')) { hiddenVenues.clear(); store.set('hiddenVenues', []); render(current); }
+  else return;
+  if (hiddenVenues.size) renderHiddenMenu(); else hiddenMenu.hidePopover();
+};
+
+// First-run tip; the same text stays in Settings.
+const tip = document.getElementById('tip');
+tip.hidden = !!store.get('tipSeen', false);
+document.getElementById('tipClose').onclick = () => { tip.hidden = true; store.set('tipSeen', true); };
 grid.onkeydown = e => { const el = e.target.closest('.s'); if (el && !e.target.closest('[data-info]') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(el); } };
 document.getElementById('days').onclick = e => { const b = e.target.closest('button'); if (b) render(b.dataset.day); };
 const onlyBox = document.getElementById('only');
@@ -808,6 +908,11 @@ document.getElementById('walkRows').oninput = e => {
   saveWalk();
 };
 document.getElementById('walkReset').onclick = () => { walkTimes = { ...DEFAULT_WALK }; minRest = DEFAULT_REST; store.set('minRest', minRest); document.getElementById('minRest').value = minRest; saveWalk(); renderWalk(); };
+// Every panel closes with its ✕, with Esc (native) and with a tap on the backdrop outside it.
+document.querySelectorAll('dialog').forEach(dlg => dlg.addEventListener('click', e => {
+  if (e.target === dlg || e.target.closest('[data-close]')) dlg.close();
+}));
+
 // Detail sheet
 const sheet = document.getElementById('sheet');
 function openSheet(id) {
@@ -816,14 +921,14 @@ function openSheet(id) {
   const notes = notesHtml(s, analyse()[id]);
   const posters = s.films.filter(f => f.image).map(f => `<img src="${esc(f.image)}" alt="" loading="lazy">`).join('');
   const films = s.films.map(f => `<li><a href="https://sitgesfilmfestival.com${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)} ↗</a><button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? t('watchOn') : t('watchAdd')}</button>${f.directors.length ? `<small>${esc(f.directors.join(', '))}</small>` : ''}${f.synopsis ? f.synopsis.split('\n').map(p => `<p class="syn">${esc(p)}</p>`).join('') : ''}</li>`).join('');
-  sheet.innerHTML = `<form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
+  sheet.innerHTML = `<button type="button" class="dlg-close" data-close aria-label="${t('close')}" title="${t('close')}">✕</button><form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
     ${posters ? `<div class="posters">${posters}</div>` : ''}
     <h2 id="sheetTitle" tabindex="-1" autofocus>${esc(s.title)}</h2>
     <div class="meta"><span>${dayLabel(s.start)} · ${hhmm(toDate(s.start))}–${hhmm(toDate(s.end))}</span><span>${esc(s.location)}</span><span>${dur(s.duration)}</span></div>
     ${s.sections.length ? `<div class="secs">${s.sections.map(x => `<span style="--h:${hue(x)}">${esc(x)}</span>`).join('')}</div>` : ''}
     ${films ? `<ol>${films}</ol>` : ''}
     ${notes ? `<div class="notes">${notes}</div>` : ''}
-    <div class="walk-actions"><button type="submit">${t('close')}</button><button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
+    <div class="walk-actions"><button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
   </form>`;
   if (!sheet.open) sheet.showModal();
 }
@@ -831,8 +936,7 @@ sheet.onclick = e => {
   const b = e.target.closest('[data-mark]');
   const w = e.target.closest('[data-watch]');
   if (w) { toggleWatch(w.dataset.watch); openSheet(+sheet.querySelector('[data-mark]').dataset.mark); return; }
-  if (b) { const id = +b.dataset.mark; marked.has(id) ? marked.delete(id) : marked.add(id); store.set('marked', [...marked]); render(current); openSheet(id); }
-  else if (e.target === sheet) sheet.close(); // tap on the backdrop
+  if (b) { const id = +b.dataset.mark; toggleMark(id); openSheet(id); }
 };
 
 // Sync: the plan travels as a base64url code, alone or inside a ?import= link.

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-09-23
+
+### Changed
+- Marked sessions are plain black blocks, without the yellow border and star; only warnings add a coloured frame.
+- All panels work the same: a ✕ at the top right, a tap outside closes them, and the bottom only keeps real actions. On phones, Settings and Sync open full screen like Films. Settings and Sync keep their title in a fixed header while the content scrolls.
+- The summary line shows only the warnings that exist, or "No conflicts", so it fits on one line.
+- Hidden venues are in one "+N" button in the corner of the venue headers, which opens a list to show them again.
+- The help hint shows once as a tip you can dismiss, and stays in Settings.
+- Short transitions: panels fade and rise in when they open (the details panel slides up on phones), marking or unmarking a session spreads the new colour as a circle from where you tapped, and a new day fades in. They are off when the device asks for reduced motion.
+- Sessions with more text than fits show a fade and "⋯" at the bottom, so the cut text does not look like an error.
+
+### Fixed
+- The help text in Settings now uses the full width of the panel.
+
 ## [1.6.0] - 2026-09-23
 
 ### Added
@@ -81,7 +95,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sitges Film Festival colours and fonts.
 - Installable on Android as an app (PWA), with offline support.
 
-[Unreleased]: https://github.com/dbeltra/sitges-planner/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/dbeltra/sitges-planner/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/dbeltra/sitges-planner/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/dbeltra/sitges-planner/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/dbeltra/sitges-planner/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/dbeltra/sitges-planner/compare/v1.3.0...v1.4.0
