@@ -1,5 +1,7 @@
 # Joins the raw downloads into schedule.json. Offline: reads local files only.
-import json, glob
+import json, glob, os
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def load(pattern, key):
     return [x for p in sorted(glob.glob(pattern)) for x in json.load(open(p))[key]]

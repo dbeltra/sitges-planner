@@ -1,6 +1,8 @@
 # Builds directors.json: names from film credits, else from the film page JSON-LD (cached in film-pages/).
 import json, glob, re, html, time, urllib.request, os
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 films = [f for p in glob.glob('films/*.json') for f in json.load(open(p))['films']]
 
 def from_credits(f):
