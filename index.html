@@ -87,9 +87,9 @@
   /* Grid */
   #scroller { flex: 1; overflow: auto; overscroll-behavior: contain; }
   #grid { display: grid; position: relative; min-width: min-content; padding-bottom: 24px; }
-  .head { position: sticky; top: 0; z-index: 3; padding: 10px 8px 8px; background: var(--ground); border-bottom: 2px solid #000;
+  .head { position: sticky; top: 0; z-index: 8; padding: 10px 8px 8px; background: var(--ground); border-bottom: 2px solid #000;
           font: 600 15px/1.1 var(--display); letter-spacing: .02em; text-transform: uppercase; text-align: center; text-wrap: balance; }
-  .head.corner { left: 0; z-index: 4; }
+  .head.corner { left: 0; z-index: 9; }
   .head { display: flex; align-items: center; justify-content: center; gap: 6px; }
   .head .hide { flex: none; width: 20px; height: 20px; padding: 0; border: 0; background: none; color: var(--muted); font: 600 12px/1 var(--body); cursor: pointer; opacity: .45; }
   .head:hover .hide, .head .hide:focus-visible { opacity: 1; }
@@ -99,7 +99,7 @@
   .hidden-venues button:hover { background: var(--ink); color: var(--surface); }
   .hidden-venues button i { font-style: normal; color: var(--red); }
   .col { position: relative; min-width: 180px; border-left: 1px solid var(--line-soft); }
-  .col.axis { position: sticky; left: 0; z-index: 2; min-width: 0; border: 0; background: var(--ground); }
+  .col.axis { position: sticky; left: 0; z-index: 6; min-width: 0; border: 0; background: var(--ground); }
   .hour { position: absolute; left: 0; right: 0; border-top: 1px solid var(--line-soft); }
   .hour.half { border-top-style: dashed; opacity: .7; }
   .axis .hour { border: 0; }
@@ -138,6 +138,50 @@
   .s.on.repeat { outline: 2px dashed var(--repeat); outline-offset: 2px; }
 
   .only .s:not(.on) { display: none; }
+
+  /* Now line and next-session bar */
+  #nowline { position: absolute; left: 0; right: 0; z-index: 7; height: 0; border-top: 2px solid var(--red); pointer-events: none; }
+  #nowline::before { content: attr(data-t); position: absolute; left: 2px; top: -9px; padding: 1px 4px; background: var(--red); color: #fff; font: 700 10px/14px var(--body); font-variant-numeric: tabular-nums; }
+  .next { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; width: 100%; padding: 7px 16px; border: 0; border-bottom: 1px solid var(--line); background: var(--surface); text-align: left; font-size: 13px; cursor: pointer; }
+  [hidden] { display: none !important; }
+  .next b { font-family: var(--display); font-weight: 600; font-size: 14px; }
+  .next .lbl { font-weight: 700; font-size: 10px; letter-spacing: 1.63px; text-transform: uppercase; color: var(--red); }
+  .next .when { color: var(--muted); }
+  .next .leave { font-weight: 700; }
+  .next .leave.late { color: var(--clash); }
+
+  /* Info button on blocks */
+  .s .t .info { flex: none; width: 18px; height: 18px; margin: -2px -3px 0 0; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; font: 700 12px/18px var(--body); cursor: pointer; }
+  .s .t .info:hover { color: var(--red); }
+  .s.on .t .info { margin-left: auto; }
+
+  /* Detail sheet */
+  .sheet { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); overflow: auto; }
+  .sheet::backdrop, #syncDialog::backdrop { background: rgb(0 0 0 / .55); }
+  .sheet-body { display: grid; gap: 12px; padding: 18px 20px 20px; }
+  .posters { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .posters img { flex: none; width: 96px; aspect-ratio: 291 / 434; object-fit: cover; background: var(--ground); }
+  .sheet h2:focus { outline: none; }
+  .sheet h2 { margin: 0; font: 700 24px/1.05 var(--display); text-wrap: balance; }
+  .sheet .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .sheet .meta span:last-child { color: var(--muted); font-weight: 500; }
+  .sheet .secs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sheet .secs span { padding: 2px 7px; font: 700 10px/1.4 var(--body); letter-spacing: 1px; text-transform: uppercase; color: #fff; background: oklch(var(--stripe-l) var(--stripe-c) var(--h)); }
+  .sheet ol { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .sheet li a { font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .sheet li a:hover { color: var(--red); border-color: var(--red); }
+  .sheet li small { display: block; color: var(--muted); font-size: 12px; }
+  .sheet .notes .note { display: block; font-weight: 700; font-size: 13px; }
+  .sheet .notes .warn { color: var(--clash); } .sheet .notes .tight { color: var(--tight); }
+  .sheet .notes .repeat { color: #6B55B0; } .sheet .notes .gap { color: var(--muted); font-weight: 500; }
+
+  /* Sync */
+  #syncDialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
+  .sync-part { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .sync-part h3 { margin: 0; font: 700 11px/1 var(--body); letter-spacing: 1.63px; text-transform: uppercase; }
+  .sync-summary { min-height: 1.35em; font-size: 12px; }
+  #syncDialog textarea { width: 100%; padding: 6px 8px; border: 1px solid var(--line); background: var(--ground); font: 11px/1.4 ui-monospace, Menlo, monospace; resize: vertical; word-break: break-all; }
+  .walk-actions button:disabled { opacity: .4; cursor: default; }
   #band { position: absolute; left: 0; right: 0; z-index: 1; background: var(--band); border-block: 1px dashed var(--band-edge); pointer-events: none; }
 
   .short { display: none; }
@@ -148,7 +192,7 @@
     /* Phone: days first, then one line of controls, then one line of summary */
     header { order: 1; padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 4px; }
     .topbar { order: 2; padding: 4px 12px; }
-    .status { order: 3; }
+    .status, .next { order: 3; }
     #scroller { order: 4; }
     nav { justify-content: flex-start; padding-top: 7px; margin-top: -7px; }
     nav button { min-width: 38px; padding: 3px 5px; gap: 1px; }
@@ -162,6 +206,8 @@
     .head { padding: 6px 4px 5px; font-size: 12.5px; }
     .axis .hour span { right: 5px; font-size: 10px; }
     .col { min-width: 150px; }
+    .next { padding: 5px 12px; font-size: 12px; }
+    .sheet { width: 100%; max-width: 100%; max-height: 88%; margin: auto 0 0; }
   }
   @media (prefers-reduced-motion: reduce) { .s { transition: none; } }
 </style>
@@ -171,7 +217,8 @@
   <div class="dates">8-18 octubre 2026<span>59a edició</span></div>
   <div class="controls">
     <label><input type="checkbox" id="only"> <span class="long">Only my sessions</span><span class="short">Only mine</span></label>
-    <button type="button" id="walkOpen" class="walk-open">Walk times</button>
+    <button type="button" id="walkOpen" class="walk-open"><span class="long">Walk times</span><span class="short">Walk</span></button>
+    <button type="button" id="syncOpen" class="walk-open">Sync</button>
   </div>
 </div>
 <header>
@@ -179,6 +226,7 @@
   <nav id="days" aria-label="Festival days"></nav>
 </header>
 <div class="status" id="status"></div>
+<button type="button" id="next" class="next" hidden></button>
 <dialog id="walkDialog" aria-labelledby="walkTitle">
   <form method="dialog">
     <h2 id="walkTitle">Walk times</h2>
@@ -188,6 +236,31 @@
       <button type="button" id="walkReset">Reset to defaults</button>
       <button type="submit" class="primary">Done</button>
     </div>
+  </form>
+</dialog>
+<dialog id="sheet" class="sheet" aria-labelledby="sheetTitle"></dialog>
+<dialog id="syncDialog" aria-labelledby="syncTitle">
+  <form method="dialog">
+    <h2 id="syncTitle">Sync</h2>
+    <p>Your plan is saved only on this device. To move it, send it from this device and open it on the other one.</p>
+    <section class="sync-part">
+      <h3>Send this plan</h3>
+      <p id="syncSummary" class="sync-summary"></p>
+      <textarea id="syncCode" readonly rows="3" aria-label="Plan code"></textarea>
+      <div class="walk-actions">
+        <button type="button" id="syncCopy">Copy code</button>
+        <button type="button" id="syncShare" class="primary">Share link</button>
+      </div>
+    </section>
+    <section class="sync-part">
+      <h3>Receive a plan</h3>
+      <textarea id="syncInput" rows="3" placeholder="Paste a code or a link" aria-label="Code or link to import"></textarea>
+      <p id="syncPreview" class="sync-summary" aria-live="polite"></p>
+      <div class="walk-actions">
+        <button type="submit">Close</button>
+        <button type="button" id="syncImport" class="primary" disabled>Replace my plan</button>
+      </div>
+    </section>
   </form>
 </dialog>
 <div id="scroller"><div id="grid"></div></div>
@@ -229,7 +302,15 @@ const days = Object.keys(byDay).sort();
 const ORDER = ['Cinema Casino Prado', 'Cinema Escorxador', 'Mercat Vell', 'Sala Auditori Meliá', 'Brigadoon', 'Sala Tramuntana Meliá'];
 const SHORT = { 'Cinema Casino Prado': 'Prado', 'Cinema Escorxador': 'Escorxador', 'Sala Auditori Meliá': 'Auditori', 'Sala Tramuntana Meliá': 'Tramuntana' };
 const locations = [...new Set(SCHEDULE.map(s => s.location))].sort((a, b) => (ORDER.indexOf(a) + 1 || 99) - (ORDER.indexOf(b) + 1 || 99));
-let current;
+let current, view = null; // view: what the grid was drawn with, so the now line can move without a redraw
+
+// ?now=2026-10-08T21:30 pretends it is that time, to try the festival-day features early.
+const NOW_OVERRIDE = new URLSearchParams(location.search).get('now');
+const nowOffset = NOW_OVERRIDE && !isNaN(new Date(NOW_OVERRIDE)) ? new Date(NOW_OVERRIDE) - Date.now() : 0;
+const now = () => new Date(Date.now() + nowOffset);
+const nowDay = () => festDay(now());
+const dayLabel = d => toDate(d).toLocaleDateString('ca', { weekday: 'short', day: 'numeric' }).replace('.', '');
+const venue = l => SHORT[l] || l;
 
 // For each marked session: sessions it overlaps, a too-short location change, films also marked in another session, and the free time to the next one.
 function analyse() {
@@ -252,6 +333,19 @@ function analyse() {
     if (next && festDay(next.start) === festDay(s.start)) info[s.id].gap = [(toDate(next.start) - toDate(s.end)) / 60000, next];
   });
   return info;
+}
+
+function notesHtml(s, i) {
+  if (!i) return '';
+  let notes = i.clash.map(o => `<span class="note warn">Overlaps ${esc(o.title)} · ${esc(o.location)}</span>`).join('');
+  notes += i.tight.map(([o, g]) => `<span class="note tight">Only ${g}′ to reach ${esc(o.location)} (walk ${need(s.location, o.location)}′)</span>`).join('');
+  notes += i.repeat.map(([f, o]) => {
+    const inside = o.films.length > 1 ? ` in ${esc(o.title)}` : '';
+    return `<span class="note repeat">Repeat: ${esc(f.title)} also ${dayLabel(o.start)} ${hhmm(toDate(o.start))} · ${esc(venue(o.location))}${inside}</span>`;
+  }).join('');
+  const warned = i.gap && i.tight.some(([o]) => o === i.gap[1]);
+  if (i.gap && i.gap[0] >= 0 && !warned) notes += `<span class="note gap">→ ${dur(i.gap[0])} free until ${esc(i.gap[1].title)}</span>`;
+  return notes;
 }
 
 function renderDays(info) {
@@ -281,12 +375,12 @@ function renderStatus(info) {
       const n = mine.filter(s => s.location === l).length;
       return `<button data-show="${esc(l)}" title="Show ${esc(l)} again">${esc(SHORT[l] || l)}${n ? ` <i>★${n}</i>` : ''} <span aria-hidden="true">+</span></button>`;
     }).join('')}</span>` : ''}
-    <span class="hint">Click a session to mark it · ↗ opens the film page · ✕ hides a venue</span>`;
+    <span class="hint">Click a session to mark it · ⓘ shows details · ✕ hides a venue</span>`;
 }
 
 function render(day) {
   current = day;
-  history.replaceState(null, '', '#' + day);
+  history.replaceState(null, '', location.search.replace(/[?&]import=[^&]*/, '') + '#' + day);
   const info = analyse();
   renderDays(info);
   renderStatus(info);
@@ -320,20 +414,9 @@ function render(day) {
       const filmLine = f => `${f.title}${f.directors.length ? ' — ' + f.directors.join(', ') : ''}`;
       const credits = multi ? s.films.map(filmLine).join('\n') : (s.films[0]?.directors || []).join(', ');
       const creditsHtml = multi ? `<ul>${s.films.map(f => `<li>${esc(filmLine(f))}</li>`).join('')}</ul>` : credits ? `<div class="who">${esc(credits)}</div>` : '';
-      const open = s.films[0] ? `<a href="https://sitgesfilmfestival.com${s.films[0].url}" target="_blank" rel="noopener" title="Open film page" aria-label="Open film page">↗</a>` : '';
+      const open = `<button type="button" class="info" data-info="${s.id}" title="Details" aria-label="Details for ${esc(s.title)}">ⓘ</button>`;
       const i = info[s.id];
-      let notes = '';
-      if (i) {
-        notes += i.clash.map(o => `<span class="note warn">Overlaps ${esc(o.title)} · ${esc(o.location)}</span>`).join('');
-        notes += i.tight.map(([o, g]) => `<span class="note tight">Only ${g}′ to reach ${esc(o.location)} (walk ${need(s.location, o.location)}′)</span>`).join('');
-        notes += i.repeat.map(([f, o]) => {
-          const when = `${toDate(o.start).toLocaleDateString('ca', { weekday: 'short', day: 'numeric' }).replace('.', '')} ${hhmm(toDate(o.start))}`;
-          const inside = o.films.length > 1 ? ` in ${esc(o.title)}` : '';
-          return `<span class="note repeat">Repeat: ${esc(f.title)} also ${when} · ${esc(SHORT[o.location] || o.location)}${inside}</span>`;
-        }).join('');
-        const warned = i.gap && i.tight.some(([o]) => o === i.gap[1]);
-        if (i.gap && i.gap[0] >= 0 && !warned) notes += `<span class="note gap">→ ${dur(i.gap[0])} free until ${esc(i.gap[1].title)}</span>`;
-      }
+      const notes = notesHtml(s, i);
       const cls = ['s', i && 'on', i?.repeat.length && 'repeat', i?.tight.length && 'tight', i?.clash.length && 'clash'].filter(Boolean).join(' ');
       const h = `calc(${min(s.end) - min(s.start)} * var(--px))`;
       return `<div class="${cls}" role="button" tabindex="0" aria-pressed="${!!i}" data-id="${s.id}" data-a="${min(s.start)}" data-b="${min(s.end)}"
@@ -354,6 +437,50 @@ function render(day) {
       band.hidden = false; band.style.top = `calc(${top}px + ${px(a)})`; band.style.height = `calc(${b - a} * var(--px))`; };
     el.onmouseleave = el.onblur = () => band.hidden = true;
   });
+
+  grid.insertAdjacentHTML('beforeend', '<div id="nowline" hidden></div>');
+  view = { day, min, px, top, from, to };
+  renderNow();
+}
+
+// Red line at the current time on today's grid, and the next marked session with when to leave.
+function renderNow() {
+  const t = now();
+  const line = document.getElementById('nowline');
+  if (line && view) {
+    const m = view.min(t);
+    line.hidden = !(view.day === nowDay() && m >= view.from && m <= view.to);
+    line.style.top = `calc(${view.top}px + ${view.px(m)})`;
+    line.dataset.t = hhmm(t);
+  }
+  const bar = document.getElementById('next');
+  const mine = [...marked].map(id => byId[id]).filter(Boolean).sort((a, b) => a.start.localeCompare(b.start));
+  const iso = t.getTime();
+  const inside = mine.find(s => toDate(s.start) <= iso && iso < toDate(s.end));
+  const next = mine.find(s => toDate(s.start) > iso);
+  const soon = next && (toDate(next.start) - iso) / 3600000 < 18; // only while it is useful today
+  if (!inside && !soon) { bar.hidden = true; return; }
+  let html = '';
+  if (inside) html += `<span class="lbl">Now</span><b>${esc(inside.title)}</b><span class="when">${esc(venue(inside.location))} · ends ${hhmm(toDate(inside.end))}</span>`;
+  if (soon) {
+    const mins = Math.round((toDate(next.start) - iso) / 60000);
+    const prev = inside || [...mine].reverse().find(s => toDate(s.end) <= toDate(next.start) && toDate(s.end) <= iso && festDay(s.start) === festDay(next.start));
+    let leave = '';
+    if (prev && prev.location !== next.location) {
+      const by = new Date(toDate(next.start) - need(prev.location, next.location) * 60000);
+      const late = by <= iso;
+      leave = `<span class="leave${late ? ' late' : ''}">${late ? 'Leave now' : `Leave ${esc(venue(prev.location))} by ${hhmm(by)}`}</span>`;
+    }
+    html += `<span class="lbl">Next</span><b>${esc(next.title)}</b><span class="when">${hhmm(toDate(next.start))} · ${esc(venue(next.location))} · in ${dur(mins)}</span>${leave}`;
+  }
+  bar.innerHTML = html;
+  bar.dataset.id = (soon ? next : inside).id;
+  bar.hidden = false;
+}
+
+function scrollToNow() {
+  const line = document.getElementById('nowline');
+  if (line && !line.hidden) document.getElementById('scroller').scrollTop = Math.max(0, line.offsetTop - innerHeight * 0.25);
 }
 
 function toggle(el) {
@@ -372,11 +499,13 @@ function setVenue(name, hide) {
 grid.onclick = e => {
   const hide = e.target.closest('[data-hide]');
   if (hide) return setVenue(hide.dataset.hide, true);
+  const info = e.target.closest('[data-info]');
+  if (info) return openSheet(+info.dataset.info);
   const el = e.target.closest('.s');
   if (el && !e.target.closest('a')) toggle(el);
 };
 document.getElementById('status').onclick = e => { const b = e.target.closest('[data-show]'); if (b) setVenue(b.dataset.show, false); };
-grid.onkeydown = e => { const el = e.target.closest('.s'); if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(el); } };
+grid.onkeydown = e => { const el = e.target.closest('.s'); if (el && !e.target.closest('[data-info]') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(el); } };
 document.getElementById('days').onclick = e => { const b = e.target.closest('button'); if (b) render(b.dataset.day); };
 const onlyBox = document.getElementById('only');
 onlyBox.checked = only;
@@ -407,9 +536,108 @@ document.getElementById('walkRows').oninput = e => {
   saveWalk();
 };
 document.getElementById('walkReset').onclick = () => { walkTimes = { ...DEFAULT_WALK }; saveWalk(); renderWalk(); };
-render(days.includes(location.hash.slice(1)) ? location.hash.slice(1) : days[0]);
+// Detail sheet
+const sheet = document.getElementById('sheet');
+function openSheet(id) {
+  const s = byId[id];
+  const on = marked.has(id);
+  const notes = notesHtml(s, analyse()[id]);
+  const posters = s.films.filter(f => f.image).map(f => `<img src="${esc(f.image)}" alt="" loading="lazy">`).join('');
+  const films = s.films.map(f => `<li><a href="https://sitgesfilmfestival.com${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)} ↗</a>${f.directors.length ? `<small>${esc(f.directors.join(', '))}</small>` : ''}</li>`).join('');
+  sheet.innerHTML = `<form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
+    ${posters ? `<div class="posters">${posters}</div>` : ''}
+    <h2 id="sheetTitle" tabindex="-1" autofocus>${esc(s.title)}</h2>
+    <div class="meta"><span>${dayLabel(s.start)} · ${hhmm(toDate(s.start))}–${hhmm(toDate(s.end))}</span><span>${esc(s.location)}</span><span>${dur(s.duration)}</span></div>
+    ${s.sections.length ? `<div class="secs">${s.sections.map(x => `<span style="--h:${hue(x)}">${esc(x)}</span>`).join('')}</div>` : ''}
+    ${films ? `<ol>${films}</ol>` : ''}
+    ${notes ? `<div class="notes">${notes}</div>` : ''}
+    <div class="walk-actions"><button type="submit">Close</button><button type="button" class="primary" data-mark="${id}">${on ? '★ Unmark' : '☆ Mark'}</button></div>
+  </form>`;
+  if (!sheet.open) sheet.showModal();
+}
+sheet.onclick = e => {
+  const b = e.target.closest('[data-mark]');
+  if (b) { const id = +b.dataset.mark; marked.has(id) ? marked.delete(id) : marked.add(id); store.set('marked', [...marked]); render(current); openSheet(id); }
+  else if (e.target === sheet) sheet.close(); // tap on the backdrop
+};
+
+// Sync: the plan travels as a base64url code, alone or inside a ?import= link.
+const syncDialog = document.getElementById('syncDialog');
+const b64 = { enc: str => btoa(String.fromCharCode(...new TextEncoder().encode(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+              dec: code => new TextDecoder().decode(Uint8Array.from(atob(code.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))) };
+const walkOverrides = () => Object.fromEntries(Object.entries(walkTimes).filter(([k, v]) => v !== DEFAULT_WALK[k]));
+const planCode = () => b64.enc(JSON.stringify({ v: 1, m: [...marked], h: [...hiddenVenues], w: walkOverrides() }));
+const planLink = () => `${location.origin}${location.pathname}?import=${planCode()}`;
+const describe = p => `${p.m.length} marked session${p.m.length === 1 ? '' : 's'}, ${p.h.length} hidden venue${p.h.length === 1 ? '' : 's'}, ${Object.keys(p.w).length} edited walk time${Object.keys(p.w).length === 1 ? '' : 's'}`;
+function parsePlan(text) {
+  const raw = text.trim();
+  if (!raw) return null;
+  let code = raw;
+  try { code = new URL(raw).searchParams.get('import') || raw; } catch {}
+  try {
+    const p = JSON.parse(b64.dec(code));
+    if (p.v !== 1 || !Array.isArray(p.m) || !Array.isArray(p.h) || typeof p.w !== 'object') return null;
+    return { m: p.m.filter(id => byId[id]), h: p.h.filter(l => locations.includes(l)), w: Object.fromEntries(Object.entries(p.w).filter(([k, v]) => k in DEFAULT_WALK && Number.isFinite(v) && v >= 0)) };
+  } catch { return null; }
+}
+const syncInput = document.getElementById('syncInput'), syncPreview = document.getElementById('syncPreview'), syncImport = document.getElementById('syncImport');
+function previewImport() {
+  const p = parsePlan(syncInput.value);
+  syncImport.disabled = !p;
+  syncPreview.textContent = !syncInput.value.trim() ? '' : p ? `This replaces your plan with ${describe(p)}.` : 'This is not a valid plan code or link. Copy it again from the other device.';
+}
+function openSync(prefill = '') {
+  document.getElementById('syncSummary').textContent = `This device: ${describe({ m: [...marked], h: [...hiddenVenues], w: walkOverrides() })}.`;
+  document.getElementById('syncCode').value = planCode();
+  syncInput.value = prefill;
+  previewImport();
+  syncDialog.showModal();
+}
+function flash(btn, text) { const old = btn.textContent; btn.textContent = text; setTimeout(() => btn.textContent = old, 1800); }
+async function copy(text, btn) {
+  try { await navigator.clipboard.writeText(text); flash(btn, 'Copied'); }
+  catch { const code = document.getElementById('syncCode'); code.focus(); code.select(); flash(btn, 'Select and copy'); }
+}
+document.getElementById('syncOpen').onclick = () => openSync();
+document.getElementById('syncCopy').onclick = e => copy(planCode(), e.currentTarget);
+document.getElementById('syncShare').onclick = async e => {
+  const btn = e.currentTarget;
+  if (navigator.share) { try { await navigator.share({ title: 'My Sitges 2026 plan', url: planLink() }); return; } catch (err) { if (err.name === 'AbortError') return; } }
+  copy(planLink(), btn);
+};
+syncInput.oninput = previewImport;
+syncImport.onclick = () => {
+  const p = parsePlan(syncInput.value);
+  if (!p) return;
+  marked.clear(); p.m.forEach(id => marked.add(id));
+  hiddenVenues.clear(); p.h.forEach(l => hiddenVenues.add(l));
+  walkTimes = { ...DEFAULT_WALK, ...p.w };
+  store.set('marked', [...marked]); store.set('hiddenVenues', [...hiddenVenues]); store.set('walkTimes', walkOverrides());
+  render(current);
+  syncPreview.textContent = `Imported: ${describe(p)}.`;
+  syncImport.disabled = true;
+  document.getElementById('syncSummary').textContent = `This device: ${describe(p)}.`;
+  document.getElementById('syncCode').value = planCode();
+};
+
+document.getElementById('next').onclick = e => {
+  const id = +e.currentTarget.dataset.id;
+  render(festDay(byId[id].start));
+  document.querySelector(`.s[data-id="${id}"]`)?.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
+};
+
+// Start on the day in the link, else today during the festival, else the first day.
+const hashDay = location.hash.slice(1);
+render(days.includes(hashDay) ? hashDay : days.includes(nowDay()) ? nowDay() : days[0]);
+if (current === nowDay()) scrollToNow();
+setInterval(renderNow, 30000);
+const importCode = new URLSearchParams(location.search).get('import');
+if (importCode) {
+  history.replaceState(null, '', location.pathname + (NOW_OVERRIDE ? `?now=${encodeURIComponent(NOW_OVERRIDE)}` : '') + location.hash);
+  openSync(importCode);
+}
 matchMedia('(max-width: 640px)').addEventListener('change', () => render(current));
-if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
 </html>
