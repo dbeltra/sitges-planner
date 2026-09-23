@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-09-23
+
+### Added
+- Build number at the bottom of Settings, to see which version a device runs.
+
+### Fixed
+- On phones, the circle that marks a session always started from the same corner. Chrome on Android drew the clip-path animation with a wrong origin inside the scrolling grid; the app now draws each frame itself. A tap also no longer gives the block the keyboard focus.
+
 ## [1.7.0] - 2026-09-23
 
 ### Changed
@@ -95,7 +103,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sitges Film Festival colours and fonts.
 - Installable on Android as an app (PWA), with offline support.
 
-[Unreleased]: https://github.com/dbeltra/sitges-planner/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/dbeltra/sitges-planner/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/dbeltra/sitges-planner/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/dbeltra/sitges-planner/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/dbeltra/sitges-planner/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/dbeltra/sitges-planner/compare/v1.4.0...v1.5.0

@@ -63,6 +63,7 @@
   .rest-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px; background: var(--ground); font-size: 12px; }
   .rest-row input { width: 64px; padding: 4px 6px; border: 1px solid var(--line); background: var(--surface); font-variant-numeric: tabular-nums; text-align: right; }
   .rest-row small { color: var(--muted); }
+  dialog p.build { font-size: 11px; font-variant-numeric: tabular-nums; }
   .clear-row { display: flex; flex-wrap: wrap; gap: 8px; }
   .clear-row button { padding: 8px 12px; border: 1px solid var(--clash); border-radius: 0; background: none; color: var(--clash); font-weight: 700; font-size: 12px; cursor: pointer; }
   .clear-row button:disabled { border-color: var(--line); color: var(--muted); cursor: default; }
@@ -301,9 +302,9 @@
   @keyframes backdropIn { from { background-color: transparent; } }
   dialog[open], .hidden-menu:popover-open { animation: panelIn .25s cubic-bezier(.2, .8, .2, 1); }
   dialog[open]::backdrop { animation: backdropIn .25s ease-out; }
-  /* Marking: the new state spreads as a circle from the tap point over a copy of the old block. */
-  @keyframes reveal { from { clip-path: circle(0 at var(--rx) var(--ry)); } to { clip-path: circle(var(--rr) at var(--rx) var(--ry)); } }
-  .s.reveal { animation: reveal .45s cubic-bezier(.4, 0, .2, 1); }
+  /* Marking: the new state spreads as a circle from the tap point over a copy of the old block (animated from JS). */
+  /* During the reveal, hover and focus must not expand the block (phones keep :hover after a tap). */
+  .s.reveal, .s.reveal:hover, .s.reveal:focus-visible, .s.ghost, .s.ghost:hover { height: var(--hgt) !important; overflow: hidden; z-index: auto; }
   .s.ghost { pointer-events: none; }
   @keyframes gridIn { from { opacity: .35; translate: 0 6px; } }
   #grid.enter .col:not(.axis) { animation: gridIn .22s ease-out; } /* headers and time axis stay put; columns slide in under them */
@@ -352,6 +353,7 @@
       <button type="button" id="clearMarks"></button>
       <button type="button" id="clearWatch"></button>
     </div>
+    <p class="build" id="build"></p>
     <div class="walk-actions">
       <button type="button" id="walkReset" data-i18n="reset">Reset to defaults</button>
     </div>
@@ -401,6 +403,7 @@
 <div id="scroller"><div id="grid"></div></div>
 <script src="data/schedule.js"></script>
 <script>
+const BUILD = '1.8.0'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -777,26 +780,35 @@ function toggleMark(id, x, y) {
   render(current);
   const el = document.querySelector(`.s[data-id="${id}"]`);
   if (!el || !ghost || !box || !el.offsetParent) return el;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return el;
   const w = box.width, h = box.height;
   x = x ?? w / 2; y = y ?? h / 2;
-  el.style.setProperty('--rx', `${x}px`);
-  el.style.setProperty('--ry', `${y}px`);
-  el.style.setProperty('--rr', `${Math.ceil(Math.hypot(Math.max(x, w - x), Math.max(y, h - y)))}px`);
+  const r = Math.ceil(Math.hypot(Math.max(x, w - x), Math.max(y, h - y)));
   ghost.classList.add('ghost');
-  ghost.classList.remove('reveal');
   ghost.removeAttribute('tabindex');
   ghost.setAttribute('aria-hidden', 'true');
   el.before(ghost);
   el.classList.add('reveal');
-  const done = () => { ghost.remove(); el.classList.remove('reveal'); };
-  el.addEventListener('animationend', done, { once: true });
-  setTimeout(done, 700); // reduced motion or no animation: never leave the copy behind
+  // Stepped by hand each frame: Chrome on Android composites clip-path animations with a wrong origin inside the scroller.
+  let finished = false;
+  const done = () => { if (finished) return; finished = true; ghost.remove(); el.classList.remove('reveal'); el.style.clipPath = ''; };
+  const t0 = performance.now(), DURATION = 450, ease = t => 1 - Math.pow(1 - t, 3);
+  el.style.clipPath = `circle(0px at ${x}px ${y}px)`;
+  const step = now => {
+    if (finished) return;
+    const k = Math.min(1, (now - t0) / DURATION);
+    el.style.clipPath = `circle(${(r * ease(k)).toFixed(1)}px at ${x}px ${y}px)`;
+    k < 1 ? requestAnimationFrame(step) : done();
+  };
+  requestAnimationFrame(step);
+  setTimeout(done, 1000); // never leave the copy behind
   return el;
 }
 function toggle(el, e) {
   const r = el.getBoundingClientRect();
-  const at = e && e.clientX !== undefined && (e.clientX || e.clientY) ? [e.clientX - r.left, e.clientY - r.top] : [];
-  toggleMark(+el.dataset.id, ...at)?.focus({ preventScroll: true });
+  const tap = e && e.clientX !== undefined && (e.clientX || e.clientY);
+  const nu = toggleMark(+el.dataset.id, ...(tap ? [e.clientX - r.left, e.clientY - r.top] : []));
+  if (!tap) nu?.focus({ preventScroll: true }); // keep keyboard users in place; a tap needs no focus ring
 }
 const grid = document.getElementById('grid');
 function setVenue(name, hide) {
@@ -1115,6 +1127,7 @@ function applyLanguage() {
     el.setAttribute(attr, t(key));
   }));
   document.getElementById('lang').value = LANG;
+  document.getElementById('build').textContent = `Build ${BUILD}`;
   renderSections();
   renderClear();
 }
