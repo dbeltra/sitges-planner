@@ -137,12 +137,28 @@
   .only .s:not(.on) { display: none; }
   #band { position: absolute; left: 0; right: 0; z-index: 1; background: var(--band); border-block: 1px dashed var(--band-edge); pointer-events: none; }
 
+  .short { display: none; }
   @media (max-width: 640px) {
     :root { --px: 1.2px; }
+    .short { display: inline; }
+    .long, .dates, .brand, .status .hint, .status .k.key { display: none; }
+    /* Phone: days first, then one line of controls, then one line of summary */
+    header { order: 1; padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 4px; }
+    .topbar { order: 2; padding: 4px 12px; }
+    .status { order: 3; }
+    #scroller { order: 4; }
+    nav { justify-content: flex-start; padding-top: 7px; margin-top: -7px; }
+    nav button { min-width: 38px; padding: 3px 5px; gap: 1px; }
+    nav button small { font-size: 8.5px; letter-spacing: 1px; }
+    nav button strong { font-size: 19px; }
+    nav button[aria-pressed="true"] small::before { content: none; }
+    .controls { width: 100%; justify-content: space-between; font-size: 12px; }
+    .walk-open { padding: 2px 8px; font-size: 12px; }
+    .status { flex-wrap: nowrap; gap: 12px; padding: 4px 12px; overflow-x: auto; scrollbar-width: none; white-space: nowrap; font-size: 11.5px; }
+    .hidden-venues { flex-wrap: nowrap; }
+    .head { padding: 6px 4px 5px; font-size: 12.5px; }
+    .axis .hour span { right: 5px; font-size: 10px; }
     .col { min-width: 150px; }
-    .status .hint { display: none; }
-    .brand { font-size: 22px; }
-    nav { justify-content: flex-start; }
   }
   @media (prefers-reduced-motion: reduce) { .s { transition: none; } }
 </style>
@@ -151,7 +167,7 @@
 <div class="topbar">
   <div class="dates">8-18 octubre 2026<span>59a edició</span></div>
   <div class="controls">
-    <label><input type="checkbox" id="only"> Only my sessions</label>
+    <label><input type="checkbox" id="only"> <span class="long">Only my sessions</span><span class="short">Only mine</span></label>
     <button type="button" id="walkOpen" class="walk-open">Walk times</button>
   </div>
 </div>
@@ -208,6 +224,7 @@ const byDay = {};
 for (const s of SCHEDULE) (byDay[festDay(s.start)] ??= []).push(s);
 const days = Object.keys(byDay).sort();
 const ORDER = ['Cinema Casino Prado', 'Cinema Escorxador', 'Mercat Vell', 'Sala Auditori Meliá', 'Brigadoon', 'Sala Tramuntana Meliá'];
+const SHORT = { 'Cinema Casino Prado': 'Prado', 'Cinema Escorxador': 'Escorxador', 'Sala Auditori Meliá': 'Auditori', 'Sala Tramuntana Meliá': 'Tramuntana' };
 const locations = [...new Set(SCHEDULE.map(s => s.location))].sort((a, b) => (ORDER.indexOf(a) + 1 || 99) - (ORDER.indexOf(b) + 1 || 99));
 let current;
 
@@ -246,13 +263,13 @@ function renderStatus(info) {
   const tights = mine.filter(s => info[s.id].tight.length).length;
   const total = byDay[current].length;
   document.getElementById('status').innerHTML = `
-    <span><b>${mine.length}</b> of ${total} sessions marked</span>
-    <span class="k"><span class="sw mine"></span>Mine</span>
+    <span><b>${mine.length}</b><span class="long"> of ${total} sessions marked</span><span class="short">/${total} ★</span></span>
+    <span class="k key"><span class="sw mine"></span>Mine</span>
     <span class="k"><span class="sw clash"></span>${clashes ? `<b>${clashes}</b>` : 'No'} overlaps</span>
-    <span class="k"><span class="sw tight"></span>${tights ? `<b>${tights}</b>` : 'No'} tight changes</span>
-    ${hiddenVenues.size ? `<span class="k hidden-venues">Hidden:${[...hiddenVenues].sort().map(l => {
+    <span class="k"><span class="sw tight"></span>${tights ? `<b>${tights}</b>` : 'No'} tight<span class="long"> changes</span></span>
+    ${hiddenVenues.size ? `<span class="k hidden-venues"><span class="long">Hidden:</span>${[...hiddenVenues].sort().map(l => {
       const n = mine.filter(s => s.location === l).length;
-      return `<button data-show="${esc(l)}" title="Show ${esc(l)} again">${esc(l)}${n ? ` <i>★${n}</i>` : ''} <span aria-hidden="true">+</span></button>`;
+      return `<button data-show="${esc(l)}" title="Show ${esc(l)} again">${esc(SHORT[l] || l)}${n ? ` <i>★${n}</i>` : ''} <span aria-hidden="true">+</span></button>`;
     }).join('')}</span>` : ''}
     <span class="hint">Click a session to mark it · ↗ opens the film page · ✕ hides a venue</span>`;
 }
@@ -273,9 +290,9 @@ function render(day) {
   const grid = document.getElementById('grid');
   grid.classList.toggle('only', only);
   const shown = locations.filter(l => !hiddenVenues.has(l));
-  grid.style.gridTemplateColumns = `52px repeat(${shown.length}, minmax(180px, 1fr))`;
+  grid.style.gridTemplateColumns = `${matchMedia('(max-width: 640px)').matches ? 40 : 52}px repeat(${shown.length}, minmax(180px, 1fr))`;
   grid.innerHTML = '<div class="head corner"></div>' + shown.map(l =>
-    `<div class="head"><span>${esc(l)}</span><button class="hide" data-hide="${esc(l)}" title="Hide ${esc(l)}" aria-label="Hide ${esc(l)}">✕</button></div>`).join('');
+    `<div class="head"><span><span class="long">${esc(l)}</span><span class="short">${esc(SHORT[l] || l)}</span></span><button class="hide" data-hide="${esc(l)}" title="Hide ${esc(l)}" aria-label="Hide ${esc(l)}">✕</button></div>`).join('');
 
   const marks = [];
   for (let m = from; m <= to; m += 30) marks.push(m);
@@ -376,6 +393,7 @@ document.getElementById('walkRows').oninput = e => {
 };
 document.getElementById('walkReset').onclick = () => { walkTimes = { ...DEFAULT_WALK }; saveWalk(); renderWalk(); };
 render(days.includes(location.hash.slice(1)) ? location.hash.slice(1) : days[0]);
+matchMedia('(max-width: 640px)').addEventListener('change', () => render(current));
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
