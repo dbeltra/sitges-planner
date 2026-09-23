@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.2] - 2026-09-23
+
+### Fixed
+- In Catalan, the Settings window title now says "Ajustos", the same as its button.
+
 ## [1.8.1] - 2026-09-23
 
 ### Fixed

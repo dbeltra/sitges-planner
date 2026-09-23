@@ -403,7 +403,7 @@
 <div id="scroller"><div id="grid"></div></div>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '1.8.1'; // bump on every change so a device can show which code it runs
+const BUILD = '1.8.2'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -418,7 +418,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const STR = {
   ca: {
     title: 'Planificador Sitges 2026', dates: '8-18 octubre 2026', edition: '59a edició',
-    onlyLong: 'Només les meves sessions', onlyShort: 'Les meves', settings: 'Configuració', settingsShort: 'Ajustos', films: 'Pel·lícules', sync: 'Sincronitza', syncShort: 'Sinc.',
+    onlyLong: 'Només les meves sessions', onlyShort: 'Les meves', settings: 'Ajustos', settingsShort: 'Ajustos', films: 'Pel·lícules', sync: 'Sincronitza', syncShort: 'Sinc.',
     festivalDays: 'Dies del festival', language: 'Idioma',
     restHelp: "<b>Descans mínim</b> entre l'última sessió d'una nit i la primera de l'endemà. Inclou-hi el trajecte d'anada i tornada a casa.",
     hours: 'hores', walkTimes: 'Temps a peu',
