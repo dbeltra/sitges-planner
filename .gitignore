@@ -1,0 +1,6 @@
+.DS_Store
+# Raw downloads from the festival site: rebuild locally, never publish
+data/film-pages/
+data/films/
+data/pages/
+data/*.json

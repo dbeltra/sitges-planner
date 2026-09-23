@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sitges 2026 Planner</title>
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap">
+<style>
+  /* Sitges Film Festival look: black bar, #FF0042 band, #ECE6DC ground, Clash Display + Montserrat. Light only, like the site. */
+  :root {
+    color-scheme: light;
+    --px: 1.4px;
+    --ground: #ECE6DC; --surface: #FFFFFF; --ink: #000000; --muted: #5E5850; --line: #D2CABD; --line-soft: #DDD6CA;
+    --red: #FF0042; --gold: #B78B4B; --yellow: #FFED00;
+    --mine-bg: #000000; --mine-ink: #FFFFFF; --mine-muted: #B7B3AB;
+    --clash: #FF0042; --tight: #F34B15; --band: rgb(255 0 66 / .08); --band-edge: rgb(255 0 66 / .55);
+    --stripe-l: .55; --stripe-c: .16;
+    --display: "Clash Display", "Arial Black", Arial, sans-serif;
+    --body: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; display: flex; flex-direction: column; background: var(--ground); color: var(--ink); font: 13px/1.35 var(--body); }
+  button, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+  /* Top bar: black, red letter-spaced dates, white controls */
+  .topbar { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; justify-content: space-between; padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px; background: #000; color: #fff; }
+  .dates { font: 700 13px/1 var(--body); letter-spacing: 3px; text-transform: uppercase; color: var(--red); white-space: nowrap; }
+  .dates span { color: var(--gold); letter-spacing: 1px; text-transform: none; margin-left: 14px; }
+  .controls { display: flex; gap: 18px; align-items: center; font-weight: 600; }
+  .controls label { display: flex; gap: 7px; align-items: center; white-space: nowrap; cursor: pointer; }
+  .controls input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--red); }
+  .walk-open { padding: 4px 10px; border: 1px solid #fff; border-radius: 0; background: none; color: #fff; font-weight: 600; cursor: pointer; }
+  .walk-open:hover { background: #fff; color: #000; }
+  dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
+  dialog::backdrop { background: rgb(0 0 0 / .55); }
+  dialog form { display: grid; gap: 14px; padding: 20px 22px; }
+  dialog h2 { margin: 0; font: 700 26px/1 var(--display); text-transform: uppercase; }
+  dialog p { margin: 0; color: var(--muted); max-width: 60ch; }
+  .walk-rows { display: grid; gap: 2px; }
+  .walk-rows label { display: grid; grid-template-columns: 1fr auto 1fr 56px auto; gap: 8px; align-items: center; padding: 5px 8px; background: var(--ground); font-size: 12px; font-weight: 500; }
+  .walk-rows label.changed { box-shadow: inset 3px 0 0 var(--red); }
+  .walk-rows label span:nth-child(2) { color: var(--muted); }
+  .walk-rows input { width: 56px; padding: 3px 6px; border: 1px solid var(--line); background: var(--surface); font-variant-numeric: tabular-nums; text-align: right; }
+  .walk-rows small { color: var(--muted); }
+  .walk-actions { display: flex; justify-content: space-between; gap: 8px; }
+  .walk-actions button { padding: 8px 14px; border: 1px solid var(--ink); border-radius: 0; background: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; cursor: pointer; }
+  .walk-actions .primary { background: var(--ink); color: var(--surface); }
+  @media (max-width: 480px) { .walk-rows label { grid-template-columns: 1fr 56px auto; } .walk-rows label span { grid-column: 1; } .walk-rows label span:nth-child(2) { display: none; } .walk-rows input, .walk-rows small { grid-row: 1 / span 2; } }
+  .controls input[type=number] { width: 52px; padding: 3px 6px; border: 1px solid #3B3B3B; border-radius: 0; background: #1E1E1E; color: #fff; font-variant-numeric: tabular-nums; }
+
+  /* Red band: brand + days */
+  header { display: flex; gap: 12px 24px; align-items: center; padding: 10px 16px; background: var(--red); color: #000; }
+  .brand { font: 700 30px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+  nav { display: flex; gap: 2px; padding-top: 8px; margin-top: -8px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; justify-content: flex-end; }
+  nav button { position: relative; display: grid; justify-items: center; gap: 2px; min-width: 52px; padding: 6px 8px 5px; border: 0; background: none; cursor: pointer; }
+  nav button small { font: 700 10px/1 var(--body); text-transform: uppercase; letter-spacing: 1.63px; }
+  nav button strong { font: 700 24px/1 var(--display); }
+  nav button:hover { color: #fff; }
+  nav button[aria-pressed="true"] { background: #000; color: #fff; }
+  nav button[aria-pressed="true"] small::before { content: "★ "; color: var(--red); }
+  nav button i { position: absolute; top: -7px; right: -4px; z-index: 1; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--yellow); color: #000; font: 700 10px/15px var(--body); font-style: normal; }
+  nav button i.bad { background: #000; color: var(--yellow); }
+  nav button[aria-pressed="true"] i.bad { background: var(--yellow); color: #000; }
+
+  /* Summary line */
+  .status { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .status b { color: var(--ink); font-weight: 700; }
+  .status .k { display: inline-flex; gap: 6px; align-items: center; }
+  .status .sw { width: 11px; height: 11px; }
+  .sw.mine { background: var(--mine-bg); box-shadow: inset 0 0 0 2px var(--yellow); }
+  .sw.clash { background: var(--clash); }
+  .sw.tight { background: var(--tight); }
+  .status .hint { margin-left: auto; }
+
+  /* Grid */
+  #scroller { flex: 1; overflow: auto; overscroll-behavior: contain; }
+  #grid { display: grid; position: relative; min-width: min-content; padding-bottom: 24px; }
+  .head { position: sticky; top: 0; z-index: 3; padding: 10px 8px 8px; background: var(--ground); border-bottom: 2px solid #000;
+          font: 600 15px/1.1 var(--display); letter-spacing: .02em; text-transform: uppercase; text-align: center; text-wrap: balance; }
+  .head.corner { left: 0; z-index: 4; }
+  .head { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .head .hide { flex: none; width: 20px; height: 20px; padding: 0; border: 0; background: none; color: var(--muted); font: 600 12px/1 var(--body); cursor: pointer; opacity: .45; }
+  .head:hover .hide, .head .hide:focus-visible { opacity: 1; }
+  .head .hide:hover { color: var(--red); }
+  .hidden-venues { flex-wrap: wrap; }
+  .hidden-venues button { padding: 2px 8px; border: 1px solid var(--ink); border-radius: 0; background: var(--surface); font: 600 11px/1.4 var(--body); cursor: pointer; }
+  .hidden-venues button:hover { background: var(--ink); color: var(--surface); }
+  .hidden-venues button i { font-style: normal; color: var(--red); }
+  .col { position: relative; min-width: 180px; border-left: 1px solid var(--line-soft); }
+  .col.axis { position: sticky; left: 0; z-index: 2; min-width: 0; border: 0; background: var(--ground); }
+  .hour { position: absolute; left: 0; right: 0; border-top: 1px solid var(--line-soft); }
+  .hour.half { border-top-style: dashed; opacity: .7; }
+  .axis .hour { border: 0; }
+  .axis .hour span { position: absolute; top: -7px; right: 8px; font: 600 11px/1 var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .axis .midnight span { color: var(--red); font-weight: 700; }
+  .col .midnight { border-top: 1px solid var(--red); }
+
+  /* Session blocks */
+  .s { position: absolute; left: 4px; right: 4px; overflow: hidden; padding: 5px 7px 5px 10px; cursor: pointer;
+       background: var(--surface); border: 0;
+       box-shadow: inset 4px 0 0 oklch(var(--stripe-l) var(--stripe-c) var(--h)); transition: box-shadow .12s; }
+  .s:hover, .s:focus-visible { z-index: 5; overflow: visible; height: auto !important; min-height: var(--hgt); box-shadow: inset 4px 0 0 oklch(var(--stripe-l) var(--stripe-c) var(--h)), 0 6px 18px rgb(0 0 0 / .15); }
+  .s .t { display: flex; justify-content: space-between; gap: 6px; font: 600 11px/1.3 var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .s .t a { color: inherit; text-decoration: none; padding: 0 2px; }
+  .s .t a:hover { color: var(--red); }
+  .s h3 { margin: 2px 0 1px; font: 600 15px/1.1 var(--display); letter-spacing: .01em; text-wrap: balance; }
+  .s .who { color: var(--muted); font-size: 12px; }
+  .s ul { margin: 2px 0; padding-left: 13px; font-size: 12px; color: var(--muted); }
+  .s ul li::marker { content: "★ "; color: var(--red); font-size: 9px; }
+  .s .sec { margin-top: 3px; font: 700 9.5px/1.3 var(--body); text-transform: uppercase; letter-spacing: 1px; color: oklch(var(--stripe-l) var(--stripe-c) var(--h)); }
+  .s .note { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; }
+  .s .note.warn { color: var(--clash); }
+  .s .note.tight { color: var(--tight); }
+  .s .note.gap { font-weight: 500; color: var(--muted); }
+
+  .s.on { background: var(--mine-bg); color: var(--mine-ink); box-shadow: inset 0 0 0 2px var(--yellow); }
+  .s.on:hover, .s.on:focus-visible { box-shadow: inset 0 0 0 2px var(--yellow), 0 6px 18px rgb(0 0 0 / .25); }
+  .s.on .t, .s.on .who, .s.on ul, .s.on .note.gap { color: var(--mine-muted); }
+  .s.on .t::before { content: "★ "; color: var(--yellow); }
+  .s.on .t { justify-content: flex-start; }
+  .s.on .t a { margin-left: auto; }
+  .s.on .sec { color: oklch(.78 .12 var(--h)); }
+  .s.on.tight { box-shadow: inset 0 0 0 3px var(--tight); }
+  .s.on.clash { box-shadow: inset 0 0 0 3px var(--clash); }
+
+  .only .s:not(.on) { display: none; }
+  #band { position: absolute; left: 0; right: 0; z-index: 1; background: var(--band); border-block: 1px dashed var(--band-edge); pointer-events: none; }
+
+  @media (max-width: 640px) {
+    :root { --px: 1.2px; }
+    .col { min-width: 150px; }
+    .status .hint { display: none; }
+    .brand { font-size: 22px; }
+    nav { justify-content: flex-start; }
+  }
+  @media (prefers-reduced-motion: reduce) { .s { transition: none; } }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="dates">8-18 octubre 2026<span>59a edició</span></div>
+  <div class="controls">
+    <label><input type="checkbox" id="only"> Only my sessions</label>
+    <button type="button" id="walkOpen" class="walk-open">Walk times</button>
+  </div>
+</div>
+<header>
+  <div class="brand">Sitges</div>
+  <nav id="days" aria-label="Festival days"></nav>
+</header>
+<div class="status" id="status"></div>
+<dialog id="walkDialog" aria-labelledby="walkTitle">
+  <form method="dialog">
+    <h2 id="walkTitle">Walk times</h2>
+    <p>Minutes you need to go from one venue to the other, in both directions. A change of location with less free time than this shows as tight.</p>
+    <div id="walkRows" class="walk-rows"></div>
+    <div class="walk-actions">
+      <button type="button" id="walkReset">Reset to defaults</button>
+      <button type="submit" class="primary">Done</button>
+    </div>
+  </form>
+</dialog>
+<div id="scroller"><div id="grid"></div></div>
+<script src="data/schedule.js"></script>
+<script>
+const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
+const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
+const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const hhmm = d => d.toTimeString().slice(0, 5);
+const dur = m => m < 60 ? `${m}′` : `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}′` : ''}`;
+const hue = str => [...str].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem('sitges26:' + k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('sitges26:' + k, JSON.stringify(v)); } catch {} },
+};
+const marked = new Set(store.get('marked', []));
+const pair = (a, b) => [a, b].sort().join('|');
+const PRADO = 'Cinema Casino Prado', ESCORXADOR = 'Cinema Escorxador', MERCAT = 'Mercat Vell';
+const MELIA = ['Sala Auditori Meliá', 'Brigadoon', 'Sala Tramuntana Meliá'];
+const DEFAULT_WALK = {
+  [pair(PRADO, ESCORXADOR)]: 10, [pair(PRADO, MERCAT)]: 10, [pair(ESCORXADOR, MERCAT)]: 10,
+  [pair(PRADO, MELIA[0])]: 25, [pair(PRADO, MELIA[1])]: 20, [pair(PRADO, MELIA[2])]: 20,
+  ...Object.fromEntries(MELIA.flatMap(m => [[pair(ESCORXADOR, m), 15], [pair(MERCAT, m), 20]])),
+  [pair(MELIA[0], MELIA[1])]: 5, [pair(MELIA[0], MELIA[2])]: 5, [pair(MELIA[1], MELIA[2])]: 5,
+};
+const FALLBACK_WALK = 15; // ponytail: only for a venue missing from the table
+let walkTimes = { ...DEFAULT_WALK, ...store.get('walkTimes', {}) };
+const need = (a, b) => a === b ? 0 : walkTimes[pair(a, b)] ?? FALLBACK_WALK;
+let only = store.get('only', false);
+const hiddenVenues = new Set(store.get('hiddenVenues', []));
+
+const byId = Object.fromEntries(SCHEDULE.map(s => [s.id, s]));
+const byDay = {};
+for (const s of SCHEDULE) (byDay[festDay(s.start)] ??= []).push(s);
+const days = Object.keys(byDay).sort();
+const ORDER = ['Cinema Casino Prado', 'Cinema Escorxador', 'Mercat Vell', 'Sala Auditori Meliá', 'Brigadoon', 'Sala Tramuntana Meliá'];
+const locations = [...new Set(SCHEDULE.map(s => s.location))].sort((a, b) => (ORDER.indexOf(a) + 1 || 99) - (ORDER.indexOf(b) + 1 || 99));
+let current;
+
+// For each marked session: sessions it overlaps, a too-short location change, and the free time to the next one.
+function analyse() {
+  const list = [...marked].map(id => byId[id]).filter(Boolean).sort((a, b) => a.start.localeCompare(b.start));
+  const info = Object.fromEntries(list.map(s => [s.id, { clash: [], tight: [], gap: null }]));
+  // ponytail: O(n²) over marked sessions only, fine for a few hundred
+  for (const a of list) for (const b of list) {
+    if (a === b || b.start < a.start || (b.start === a.start && b.id < a.id)) continue;
+    const gap = (toDate(b.start) - toDate(a.end)) / 60000;
+    if (gap < 0) { info[a.id].clash.push(b); info[b.id].clash.push(a); }
+    else if (gap < need(a.location, b.location)) { info[a.id].tight.push([b, gap]); info[b.id].tight.push([a, gap]); }
+  }
+  list.forEach((s, i) => {
+    const next = list[i + 1];
+    if (next && festDay(next.start) === festDay(s.start)) info[s.id].gap = [(toDate(next.start) - toDate(s.end)) / 60000, next];
+  });
+  return info;
+}
+
+function renderDays(info) {
+  document.getElementById('days').innerHTML = days.map(d => {
+    const mine = byDay[d].filter(s => marked.has(s.id));
+    const bad = mine.some(s => info[s.id].clash.length || info[s.id].tight.length);
+    const date = new Date(d + 'T12:00');
+    const wd = date.toLocaleDateString('ca', { weekday: 'short' }).replace('.', '');
+    return `<button data-day="${d}" aria-pressed="${d === current}" aria-label="${date.toLocaleDateString('ca', { weekday: 'long', day: 'numeric', month: 'long' })}">
+      <small>${wd}</small><strong>${date.getDate()}</strong>${mine.length ? `<i class="${bad ? 'bad' : ''}">${mine.length}</i>` : ''}</button>`;
+  }).join('');
+}
+
+function renderStatus(info) {
+  const mine = byDay[current].filter(s => marked.has(s.id));
+  const clashes = mine.filter(s => info[s.id].clash.length).length;
+  const tights = mine.filter(s => info[s.id].tight.length).length;
+  const total = byDay[current].length;
+  document.getElementById('status').innerHTML = `
+    <span><b>${mine.length}</b> of ${total} sessions marked</span>
+    <span class="k"><span class="sw mine"></span>Mine</span>
+    <span class="k"><span class="sw clash"></span>${clashes ? `<b>${clashes}</b>` : 'No'} overlaps</span>
+    <span class="k"><span class="sw tight"></span>${tights ? `<b>${tights}</b>` : 'No'} tight changes</span>
+    ${hiddenVenues.size ? `<span class="k hidden-venues">Hidden:${[...hiddenVenues].sort().map(l => {
+      const n = mine.filter(s => s.location === l).length;
+      return `<button data-show="${esc(l)}" title="Show ${esc(l)} again">${esc(l)}${n ? ` <i>★${n}</i>` : ''} <span aria-hidden="true">+</span></button>`;
+    }).join('')}</span>` : ''}
+    <span class="hint">Click a session to mark it · ↗ opens the film page · ✕ hides a venue</span>`;
+}
+
+function render(day) {
+  current = day;
+  history.replaceState(null, '', '#' + day);
+  const info = analyse();
+  renderDays(info);
+  renderStatus(info);
+  const list = byDay[day];
+  const midnight = new Date(day + 'T00:00:00');
+  const min = s => (toDate(s) - midnight) / 60000; // minutes since 00:00 of the festival day, >1440 after midnight
+  const from = Math.floor(Math.min(...list.map(s => min(s.start))) / 60) * 60;
+  const to = Math.ceil(Math.max(...list.map(s => min(s.end))) / 60) * 60;
+  const px = m => `calc(${m - from} * var(--px) + 14px)`; // 14px keeps the first hour label clear of the header
+
+  const grid = document.getElementById('grid');
+  grid.classList.toggle('only', only);
+  const shown = locations.filter(l => !hiddenVenues.has(l));
+  grid.style.gridTemplateColumns = `52px repeat(${shown.length}, minmax(180px, 1fr))`;
+  grid.innerHTML = '<div class="head corner"></div>' + shown.map(l =>
+    `<div class="head"><span>${esc(l)}</span><button class="hide" data-hide="${esc(l)}" title="Hide ${esc(l)}" aria-label="Hide ${esc(l)}">✕</button></div>`).join('');
+
+  const marks = [];
+  for (let m = from; m <= to; m += 30) marks.push(m);
+  const lines = axis => marks.map(m => {
+    const cls = ['hour', m % 60 && 'half', m % 1440 === 0 && 'midnight'].filter(Boolean).join(' ');
+    const label = axis && !(m % 60) ? `<span>${String((m / 60) % 24).padStart(2, '0')}:00</span>` : '';
+    return axis && m % 60 ? '' : `<div class="${cls}" style="top:${px(m)}">${label}</div>`;
+  }).join('');
+  const height = `height:${px(to)}`;
+
+  grid.insertAdjacentHTML('beforeend', `<div class="col axis" style="${height}">${lines(true)}</div>`);
+  for (const loc of shown) {
+    const blocks = list.filter(s => s.location === loc).map(s => {
+      const multi = s.films.length > 1;
+      const filmLine = f => `${f.title}${f.directors.length ? ' — ' + f.directors.join(', ') : ''}`;
+      const credits = multi ? s.films.map(filmLine).join('\n') : (s.films[0]?.directors || []).join(', ');
+      const creditsHtml = multi ? `<ul>${s.films.map(f => `<li>${esc(filmLine(f))}</li>`).join('')}</ul>` : credits ? `<div class="who">${esc(credits)}</div>` : '';
+      const open = s.films[0] ? `<a href="https://sitgesfilmfestival.com${s.films[0].url}" target="_blank" rel="noopener" title="Open film page" aria-label="Open film page">↗</a>` : '';
+      const i = info[s.id];
+      let notes = '';
+      if (i) {
+        notes += i.clash.map(o => `<span class="note warn">Overlaps ${esc(o.title)} · ${esc(o.location)}</span>`).join('');
+        notes += i.tight.map(([o, g]) => `<span class="note tight">Only ${g}′ to reach ${esc(o.location)} (walk ${need(s.location, o.location)}′)</span>`).join('');
+        const warned = i.gap && i.tight.some(([o]) => o === i.gap[1]);
+        if (i.gap && i.gap[0] >= 0 && !warned) notes += `<span class="note gap">→ ${dur(i.gap[0])} free until ${esc(i.gap[1].title)}</span>`;
+      }
+      const cls = ['s', i && 'on', i?.tight.length && 'tight', i?.clash.length && 'clash'].filter(Boolean).join(' ');
+      const h = `calc(${min(s.end) - min(s.start)} * var(--px))`;
+      return `<div class="${cls}" role="button" tabindex="0" aria-pressed="${!!i}" data-id="${s.id}" data-a="${min(s.start)}" data-b="${min(s.end)}"
+        style="top:${px(min(s.start))};height:${h};--hgt:${h};--h:${hue(s.sections[0] || '')}"
+        title="${esc(`${s.title}\n${credits}\n${s.sections.join(' · ')}\n${hhmm(toDate(s.start))}–${hhmm(toDate(s.end))} (${s.duration} min)`)}">
+        <div class="t"><span>${hhmm(toDate(s.start))}–${hhmm(toDate(s.end))} · ${s.duration}′</span>${open}</div>
+        <h3>${esc(s.title)}</h3>${creditsHtml}<div class="sec">${esc(s.sections.join(' · '))}</div>${notes}</div>`;
+    }).join('');
+    grid.insertAdjacentHTML('beforeend', `<div class="col" style="${height}">${lines(false)}${blocks}</div>`);
+  }
+
+  // Hover a session: a band shows its time span across all locations, to spot overlaps.
+  grid.insertAdjacentHTML('beforeend', '<div id="band" hidden></div>');
+  const band = document.getElementById('band');
+  const top = grid.querySelector('.axis').offsetTop;
+  grid.querySelectorAll('.s').forEach(el => {
+    el.onmouseenter = el.onfocus = () => { const a = +el.dataset.a, b = +el.dataset.b;
+      band.hidden = false; band.style.top = `calc(${top}px + ${px(a)})`; band.style.height = `calc(${b - a} * var(--px))`; };
+    el.onmouseleave = el.onblur = () => band.hidden = true;
+  });
+}
+
+function toggle(el) {
+  const id = +el.dataset.id;
+  marked.has(id) ? marked.delete(id) : marked.add(id);
+  store.set('marked', [...marked]);
+  render(current);
+  document.querySelector(`.s[data-id="${id}"]`)?.focus({ preventScroll: true });
+}
+const grid = document.getElementById('grid');
+function setVenue(name, hide) {
+  hide ? hiddenVenues.add(name) : hiddenVenues.delete(name);
+  store.set('hiddenVenues', [...hiddenVenues]);
+  render(current);
+}
+grid.onclick = e => {
+  const hide = e.target.closest('[data-hide]');
+  if (hide) return setVenue(hide.dataset.hide, true);
+  const el = e.target.closest('.s');
+  if (el && !e.target.closest('a')) toggle(el);
+};
+document.getElementById('status').onclick = e => { const b = e.target.closest('[data-show]'); if (b) setVenue(b.dataset.show, false); };
+grid.onkeydown = e => { const el = e.target.closest('.s'); if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(el); } };
+document.getElementById('days').onclick = e => { const b = e.target.closest('button'); if (b) render(b.dataset.day); };
+const onlyBox = document.getElementById('only');
+onlyBox.checked = only;
+onlyBox.onchange = () => { only = onlyBox.checked; store.set('only', only); render(current); };
+
+// Walk times panel: one row per pair of venues, saved as overrides of DEFAULT_WALK.
+const dialog = document.getElementById('walkDialog');
+function renderWalk() {
+  const rows = [];
+  locations.forEach((a, i) => locations.slice(i + 1).forEach(b => {
+    const k = pair(a, b), v = need(a, b), changed = v !== (DEFAULT_WALK[k] ?? FALLBACK_WALK);
+    rows.push(`<label class="${changed ? 'changed' : ''}"><span>${esc(a)}</span><span aria-hidden="true">↔</span><span>${esc(b)}</span>
+      <input type="number" min="0" max="120" step="1" value="${v}" id="walk-${i}-${locations.indexOf(b)}" data-pair="${esc(k)}"> <small>min</small></label>`);
+  }));
+  document.getElementById('walkRows').innerHTML = rows.join('');
+}
+function saveWalk() {
+  const overrides = Object.fromEntries(Object.entries(walkTimes).filter(([k, v]) => v !== DEFAULT_WALK[k]));
+  store.set('walkTimes', overrides);
+  render(current);
+}
+document.getElementById('walkOpen').onclick = () => { renderWalk(); dialog.showModal(); };
+document.getElementById('walkRows').oninput = e => {
+  const el = e.target.closest('[data-pair]');
+  if (!el || el.value === '') return;
+  walkTimes[el.dataset.pair] = Math.max(0, Math.round(+el.value) || 0);
+  el.closest('label').classList.toggle('changed', walkTimes[el.dataset.pair] !== DEFAULT_WALK[el.dataset.pair]);
+  saveWalk();
+};
+document.getElementById('walkReset').onclick = () => { walkTimes = { ...DEFAULT_WALK }; saveWalk(); renderWalk(); };
+render(days.includes(location.hash.slice(1)) ? location.hash.slice(1) : days[0]);
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
