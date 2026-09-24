@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-09-24
+
+### Changed
+- A session's details now show each film the same way as in Pel·lícules, with its other screenings, so when two sessions clash you can see right away when else a film plays.
+- On phones, a faded edge shows when there are more days or venues to scroll to, and the selected day always scrolls into view.
+- Ajustos is tidier: the language is at the bottom, "Restableix" sits next to the walk times it resets, and the tip is no longer repeated there.
+
+### Fixed
+- Turning on "Només les meves sessions" no longer shifts the schedule and misaligns the sessions.
+- On narrow phones, each walk time in Ajustos is on one line again: the two venues on the left, the minutes on the right.
+
 ## [2.0.0] - 2026-09-24
 
 ### Added

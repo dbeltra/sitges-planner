@@ -48,8 +48,8 @@
   .view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   .bar { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
   .bar .status { flex: 1; min-width: 0; border: 0; }
-  .only { display: flex; gap: 7px; align-items: center; padding: 0 16px; white-space: nowrap; font-size: 12px; font-weight: 600; cursor: pointer; }
-  .only input { width: 15px; height: 15px; margin: 0; accent-color: var(--red); }
+  .only-toggle { display: flex; gap: 7px; align-items: center; padding: 0 16px; white-space: nowrap; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .only-toggle input { width: 15px; height: 15px; margin: 0; accent-color: var(--red); }
   dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
   dialog::backdrop { background: rgb(0 0 0 / .55); }
   /* Every panel: fixed ✕ at the top right, content scrolls under it. */
@@ -85,7 +85,7 @@
   .walk-actions { display: flex; justify-content: space-between; gap: 8px; }
   .walk-actions button { padding: 8px 14px; border: 1px solid var(--ink); border-radius: 0; background: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; cursor: pointer; }
   .walk-actions .primary { background: var(--ink); color: var(--surface); }
-  @media (max-width: 480px) { .walk-rows label { grid-template-columns: 1fr 56px auto; } .walk-rows label span { grid-column: 1; } .walk-rows label span:nth-child(2) { display: none; } .walk-rows input, .walk-rows small { grid-row: 1 / span 2; } }
+  @media (max-width: 480px) { .walk-rows label { grid-template-columns: 1fr 56px auto; } .walk-rows label span { grid-column: 1; } .walk-rows label span:nth-child(2) { display: none; } .walk-rows input, .walk-rows small { grid-row: 1 / span 2; } .walk-rows input { grid-column: 2; } .walk-rows small { grid-column: 3; } }
 
   /* Red band: brand + days */
   header { display: flex; gap: 12px 24px; align-items: center; padding: 10px 16px; background: var(--red); color: #000; }
@@ -114,7 +114,6 @@
   .status .ok { color: #2E7D32; font-weight: 600; }
   .tip { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 7px 16px; background: var(--ink); color: var(--surface); font-size: 12px; }
   .tip button { flex: none; padding: 3px 10px; border: 1px solid currentColor; background: none; font-weight: 700; font-size: 11px; cursor: pointer; }
-  .settings p.how { max-width: none; padding: 8px 10px; background: var(--ground); font-size: 12px; }
   .head.corner { display: flex; align-items: center; justify-content: center; padding: 0; }
   .hidden-btn { padding: 3px 6px; border: 1px solid var(--ink); background: var(--surface); font: 700 11px/1.2 var(--body); cursor: pointer; }
   .hidden-btn:hover { background: var(--ink); color: var(--surface); }
@@ -207,20 +206,13 @@
   .sheet { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
   .sheet::backdrop, #syncDialog::backdrop { background: rgb(0 0 0 / .55); }
   .sheet-body { display: grid; gap: 12px; padding: 18px 20px 20px; }
-  .posters { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-  .posters img { flex: none; width: 96px; aspect-ratio: 291 / 434; object-fit: cover; background: var(--ground); }
   .sheet h2:focus { outline: none; }
   .sheet h2 { margin: 0; font: 700 24px/1.05 var(--display); text-wrap: balance; }
   .sheet .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .sheet .meta span:last-child { color: var(--muted); font-weight: 500; }
   .sheet .secs { display: flex; flex-wrap: wrap; gap: 4px; }
   .sheet .secs span { padding: 2px 7px; font: 700 10px/1.4 var(--body); letter-spacing: 1px; text-transform: uppercase; color: #fff; background: oklch(var(--stripe-l) var(--stripe-c) var(--h)); }
-  .sheet ol { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
-  .sheet li a { font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
-  .sheet li a:hover { color: var(--red); border-color: var(--red); }
-  .sheet li small { display: block; color: var(--muted); font-size: 12px; }
   .sheet .syn { margin: 4px 0 0; max-width: 62ch; font-size: 13px; line-height: 1.5; }
-  .sheet ol { gap: 12px; }
   .sheet .notes .note { display: block; font-weight: 700; font-size: 13px; }
   .sheet .notes .warn { color: var(--clash); } .sheet .notes .tight { color: var(--tight); }
   .sheet .notes .repeat { color: #6B55B0; } .sheet .notes .gap { color: var(--muted); font-weight: 500; }
@@ -270,6 +262,12 @@
   .sheet .extras .wbtn { margin-left: 0; }
   .sheet .extras a { font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
   .sheet .extras a:hover { color: var(--red); border-color: var(--red); }
+  .film-block { display: grid; gap: 12px; }
+  .film-block + .film-block { padding-top: 14px; border-top: 1px solid var(--line); }
+  .film-block.small .film-head { grid-template-columns: 76px 1fr; gap: 12px; }
+  .film-block.small .film-head > div { gap: 7px; }
+  .sheet .fh { margin: 0; font: 600 18px/1.1 var(--display); text-wrap: balance; }
+  .sheet h4.set-h { margin: 0 0 -4px; }
   .film-head { display: grid; grid-template-columns: 130px 1fr; gap: 16px; align-items: start; }
   .film-head:not(:has(img)) { grid-template-columns: 1fr; }
   .film-head img { width: 100%; aspect-ratio: 291 / 434; object-fit: cover; background: var(--ground); }
@@ -329,7 +327,7 @@
     .views button[aria-current="page"] svg { color: var(--red); }
     .views svg { display: block; transition: color .15s; }
     .views i { position: absolute; top: 4px; left: calc(50% + 5px); min-width: 16px; margin: 0; padding: 0 4px; border-radius: 8px; font-size: 9.5px; line-height: 15px; text-align: center; }
-    .only { padding: 0 12px; font-size: 11.5px; }
+    .only-toggle { padding: 0 12px; font-size: 11.5px; }
     .films-head, .plan-head { padding-top: calc(12px + env(safe-area-inset-top, 0px)) !important; }
     .plan-list { padding: 0 12px 16px; }
     .settings form { padding: calc(14px + env(safe-area-inset-top, 0px)) 12px 20px; }
@@ -362,6 +360,10 @@
   .s.ghost { pointer-events: none; }
   @keyframes gridIn { from { opacity: .35; translate: 0 6px; } }
   #grid.enter .col:not(.axis) { animation: gridIn .22s ease-out; }
+  /* More to scroll sideways (days, venues on phones): fade that edge. Classes set from JS. */
+  .fade-r { mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
+  .fade-l { mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent); }
+  .fade-l.fade-r { mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent); }
   /* Sections: the new one slides in from the side of its tab (--dx is set from JS) */
   @keyframes viewIn { from { opacity: 0; translate: var(--dx, 0) 0; } }
   .view.entering { animation: viewIn .24s cubic-bezier(.2, .8, .2, 1); } /* headers and time axis stay put; columns slide in under them */
@@ -390,7 +392,7 @@
   <nav id="days" data-i18n-attr="aria-label:festivalDays"></nav>
 </header>
 <div class="bar"><div class="status" id="status"></div>
-  <label class="only"><input type="checkbox" id="only"> <span class="long" data-i18n="onlyLong">Only my sessions</span><span class="short" data-i18n="onlyShort">Only mine</span></label></div>
+  <label class="only-toggle"><input type="checkbox" id="only"> <span class="long" data-i18n="onlyLong">Only my sessions</span><span class="short" data-i18n="onlyShort">Only mine</span></label></div>
 <div id="tip" class="tip" hidden><span data-i18n="hint"></span><button type="button" id="tipClose" data-i18n="gotIt">Got it</button></div>
 <button type="button" id="next" class="next" hidden></button>
 <div id="scroller"><div id="grid"></div></div>
@@ -416,14 +418,14 @@
 <div id="hiddenMenu" class="hidden-menu" popover></div>
 <section id="view-settings" class="view settings" hidden data-i18n-attr="aria-label:settings">
   <form>
-    <p class="how" data-i18n="hint"></p>
-    <label class="rest-row" for="lang"><span><b data-i18n="language">Language</b></span>
-      <select id="lang"><option value="ca">Català</option><option value="en">English</option></select></label>
     <label class="rest-row" for="minRest"><span data-i18n-html="restHelp"></span>
       <span><input type="number" id="minRest" min="0" max="16" step="0.5"> <small data-i18n="hours">hours</small></span></label>
     <h3 class="set-h" data-i18n="walkTimes">Walk times</h3>
     <p data-i18n="walkHelp"></p>
     <div id="walkRows" class="walk-rows"></div>
+    <div class="walk-actions">
+      <button type="button" id="walkReset" data-i18n="reset">Reset to defaults</button>
+    </div>
     <h3 class="set-h" data-i18n="replan">Replan</h3>
     <p data-i18n="replanHelp"></p>
     <div class="clear-row">
@@ -433,10 +435,9 @@
     <h3 class="set-h" data-i18n="syncTitle">Sync</h3>
     <p data-i18n="syncHelp"></p>
     <div class="walk-actions"><button type="button" id="syncOpen" data-i18n="syncOpen">Sync with another device</button></div>
+    <label class="rest-row" for="lang"><span><b data-i18n="language">Language</b></span>
+      <select id="lang"><option value="ca">Català</option><option value="en">English</option></select></label>
     <p class="build" id="build"></p>
-    <div class="walk-actions">
-      <button type="button" id="walkReset" data-i18n="reset">Reset to defaults</button>
-    </div>
   </form>
 </section>
 <dialog id="sheet" class="sheet" aria-labelledby="sheetTitle"></dialog>
@@ -466,7 +467,7 @@
 </dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.0.0'; // bump on every change so a device can show which code it runs
+const BUILD = '2.0.1'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -488,7 +489,7 @@ const STR = {
     hours: 'hores', walkTimes: 'Temps a peu',
     walkHelp: "Minuts que necessites per anar d'una sala a l'altra, en tots dos sentits. Un canvi de sala amb menys temps lliure es marca com a just.",
     reset: 'Restableix els valors per defecte', done: 'Fet', close: 'Tanca',
-    tabAll: 'Totes les pel·lícules', tabWatch: 'La meva llista ({n})', searchFilms: 'Cerca per títol o director', section: 'Secció', allSections: 'Totes les seccions', sectionsN: 'Seccions ({n})', screenings: 'Passis', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
+    tabAll: 'Totes les pel·lícules', tabWatch: 'La meva llista ({n})', searchFilms: 'Cerca per títol o director', section: 'Secció', allSections: 'Totes les seccions', sectionsN: 'Seccions ({n})', screenings: 'Passis', otherScreenings: 'Altres passis', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
     syncTitle: 'Sincronització', syncHelp: "El teu pla només es desa en aquest dispositiu. Per passar-lo a un altre, envia'l des d'aquí i obre'l a l'altre.",
     sendPlan: 'Envia aquest pla', planCode: 'Codi del pla', copyCode: 'Copia el codi', shareLink: "Comparteix l'enllaç",
     receivePlan: 'Rep un pla', pastePlan: 'Enganxa un codi o un enllaç', replacePlan: 'Substitueix el meu pla',
@@ -536,7 +537,7 @@ const STR = {
     hours: 'hours', walkTimes: 'Walk times',
     walkHelp: 'Minutes you need to go from one venue to the other, in both directions. A change of location with less free time than this shows as tight.',
     reset: 'Reset to defaults', done: 'Done', close: 'Close',
-    tabAll: 'All films', tabWatch: 'My watchlist ({n})', searchFilms: 'Search title or director', section: 'Section', allSections: 'All sections', sectionsN: 'Sections ({n})', screenings: 'Screenings', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
+    tabAll: 'All films', tabWatch: 'My watchlist ({n})', searchFilms: 'Search title or director', section: 'Section', allSections: 'All sections', sectionsN: 'Sections ({n})', screenings: 'Screenings', otherScreenings: 'Other screenings', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
     syncTitle: 'Sync', syncHelp: 'Your plan is saved only on this device. To move it, send it from this device and open it on the other one.',
     sendPlan: 'Send this plan', planCode: 'Plan code', copyCode: 'Copy code', shareLink: 'Share link',
     receivePlan: 'Receive a plan', pastePlan: 'Paste a code or a link', replacePlan: 'Replace my plan',
@@ -794,7 +795,22 @@ function render(day) {
   if (newDay) { void grid.offsetWidth; grid.classList.add('enter'); }
   renderNow();
   markOverflow();
+  if (newDay) daysNav.querySelector('[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  updateFades();
 }
+
+// Fade the edge of a sideways scroller while there is more beyond it. The grid keeps its left edge: the time axis is sticky there.
+const daysNav = document.getElementById('days');
+function updateFades() {
+  for (const [el, left] of [[daysNav, true], [scroller, false]]) {
+    const max = el.scrollWidth - el.clientWidth;
+    el.classList.toggle('fade-r', el.scrollLeft < max - 2);
+    el.classList.toggle('fade-l', left && el.scrollLeft > 2);
+  }
+}
+daysNav.addEventListener('scroll', updateFades, { passive: true });
+document.getElementById('scroller').addEventListener('scroll', updateFades, { passive: true });
+addEventListener('resize', updateFades);
 
 // Blocks whose text is taller than the block get the "more" cue.
 function markOverflow() {
@@ -1009,14 +1025,14 @@ function openSheet(id) {
   const on = marked.has(id);
   delete sheet.dataset.film;
   const notes = notesHtml(s, analyse()[id]);
-  const posters = s.films.filter(f => f.image).map(f => `<img src="${esc(f.image)}" alt="" loading="lazy">`).join('');
-  const films = s.films.map(f => `<li><a href="https://sitgesfilmfestival.com${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)} ↗</a><button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? t('watchOn') : t('watchAdd')}</button>${f.directors.length ? `<small>${esc(f.directors.join(', '))}</small>` : ''}${filmExtras(f)}${f.synopsis ? f.synopsis.split('\n').map(p => `<p class="syn">${esc(p)}</p>`).join('') : ''}</li>`).join('');
+  const when = `<div class="meta"><span>${dayLabel(s.start)} · ${hhmm(toDate(s.start))}–${hhmm(toDate(s.end))}</span><span>${esc(s.location)}</span><span>${dur(s.duration)}</span></div>`;
+  const title = `<h2 id="sheetTitle" tabindex="-1" autofocus>${esc(s.title)}</h2>`;
+  // One film under its own name: the film layout with the session's time. Several films (or a named session): each film in that layout.
+  const body = listFilms(s) || !s.films.length
+    ? `<div>${title}${when}</div>${s.sections.length ? secsHtml(s.sections) : ''}${s.films.map(f => filmHtml(f, id, `<h3 class="fh">${esc(f.title)}</h3>`, true)).join('')}`
+    : filmHtml(s.films[0], id, title + when);
   sheet.innerHTML = `<button type="button" class="dlg-close" data-close aria-label="${t('close')}" title="${t('close')}">✕</button><form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
-    ${posters ? `<div class="posters">${posters}</div>` : ''}
-    <h2 id="sheetTitle" tabindex="-1" autofocus>${esc(s.title)}</h2>
-    <div class="meta"><span>${dayLabel(s.start)} · ${hhmm(toDate(s.start))}–${hhmm(toDate(s.end))}</span><span>${esc(s.location)}</span><span>${dur(s.duration)}</span></div>
-    ${s.sections.length ? `<div class="secs">${s.sections.map(x => `<span style="--h:${hue(x)}">${esc(x)}</span>`).join('')}</div>` : ''}
-    ${films ? `<ol>${films}</ol>` : ''}
+    ${body}
     ${notes ? `<div class="notes">${notes}</div>` : ''}
     <div class="walk-actions"><button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
   </form>`;
@@ -1146,24 +1162,33 @@ const showButtons = (f, mine) => f.sessions.map(s => {
   return `<button type="button" data-goto="${s.id}" class="${marked.has(s.id) ? 'on' : r ? 'off' : ''}" title="${esc(`${s.title} · ${s.location}${r ? ` · ${r}` : ''}`)}">${marked.has(s.id) ? '★ ' : ''}${when(s)} · ${esc(venue(s.location))}</button>`;
 }).join('');
 
-// Film sheet: the same detail panel as a session, for one film and all its screenings.
-function openFilm(url) {
-  const f = filmIndex[url], mine = [...marked].map(id => byId[id]).filter(Boolean);
-  sheet.dataset.film = url;
-  sheet.innerHTML = `<button type="button" class="dlg-close" data-close aria-label="${t('close')}" title="${t('close')}">✕</button><form method="dialog" class="sheet-body" style="--h:${hue(f.sections[0] || '')}">
-    <div class="film-head">
+const secsHtml = secs => `<div class="secs">${secs.map(x => `<span style="--h:${hue(x)}">${esc(x)}</span>`).join('')}</div>`;
+// One film as the detail panels show it: poster beside title, director, sections, watchlist and links; then synopsis
+// and its screenings. From a session (`sessionId`), the list skips that session: "can I see it another time?".
+function filmHtml(f, sessionId, heading, small = false) {
+  const film = filmIndex[f.url] || { ...f, sessions: [] }, mine = [...marked].map(id => byId[id]).filter(Boolean);
+  const others = { ...film, sessions: film.sessions.filter(s => s.id !== sessionId) };
+  return `<div class="film-block${small ? ' small' : ''}"><div class="film-head">
       ${f.image ? `<img src="${esc(f.image)}" alt="" loading="lazy">` : ''}
       <div>
-        <h2 id="sheetTitle" tabindex="-1" autofocus>${esc(f.title)}</h2>
+        ${heading}
         ${f.directors.length ? `<div class="meta"><span>${esc(f.directors.join(', '))}</span></div>` : ''}
-        ${f.sections.length ? `<div class="secs">${f.sections.map(x => `<span style="--h:${hue(x)}">${esc(x)}</span>`).join('')}</div>` : ''}
-        <button type="button" class="wbtn${watch[url] ? ' on' : ''}" data-watch="${esc(url)}">${watch[url] ? t('watchOn') : t('watchAdd')}</button>
+        ${f.sections.length ? secsHtml(f.sections) : ''}
+        <button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? t('watchOn') : t('watchAdd')}</button>
         ${filmExtras(f, ext(`https://sitgesfilmfestival.com${esc(f.url)}`, t('festPage')))}
       </div>
     </div>
     ${f.synopsis ? `<div>${f.synopsis.split('\n').map(p => `<p class="syn">${esc(p)}</p>`).join('')}</div>` : ''}
-    <h3 class="set-h">${t('screenings')}</h3>
-    <div class="fs">${showButtons(f, mine)}</div>
+    ${others.sessions.length ? `<h4 class="set-h">${t(sessionId ? 'otherScreenings' : 'screenings')}</h4><div class="fs">${showButtons(others, mine)}</div>` : ''}
+  </div>`;
+}
+
+// Film sheet: the same detail panel as a session, for one film and all its screenings.
+function openFilm(url) {
+  const f = filmIndex[url];
+  sheet.dataset.film = url;
+  sheet.innerHTML = `<button type="button" class="dlg-close" data-close aria-label="${t('close')}" title="${t('close')}">✕</button><form method="dialog" class="sheet-body" style="--h:${hue(f.sections[0] || '')}">
+    ${filmHtml(f, null, `<h2 id="sheetTitle" tabindex="-1" autofocus>${esc(f.title)}</h2>`)}
   </form>`;
   openPanel(sheet);
 }
