@@ -38,11 +38,18 @@
   .topbar { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; justify-content: space-between; padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px; background: #000; color: #fff; }
   .dates { font: 700 13px/1 var(--body); letter-spacing: 3px; text-transform: uppercase; color: var(--red); white-space: nowrap; }
   .dates span + span { color: var(--gold); letter-spacing: 1px; text-transform: none; margin-left: 14px; }
-  .controls { display: flex; gap: 18px; align-items: center; font-weight: 600; }
-  .controls label { display: flex; gap: 7px; align-items: center; white-space: nowrap; cursor: pointer; }
-  .controls input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--red); }
-  .walk-open { padding: 4px 10px; border: 1px solid #fff; border-radius: 0; background: none; color: #fff; font-weight: 600; cursor: pointer; }
-  .walk-open:hover { background: #fff; color: #000; }
+  /* Sections: Programa, Pel·lícules, El meu pla (+ Ajustos). Tabs in the top bar; a bottom bar on phones. */
+  .views { display: flex; gap: 8px; align-items: center; }
+  .views button { padding: 4px 10px; border: 1px solid #fff; border-radius: 0; background: none; color: #fff; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .views button:hover, .views button[aria-current="page"] { background: #fff; color: #000; }
+  .views i { margin-left: 5px; padding: 0 5px; background: var(--red); color: #fff; font: 700 10px/1.5 var(--body); font-style: normal; }
+  .views i:empty { display: none; }
+  .views svg { display: none; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
+  .view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .bar { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
+  .bar .status { flex: 1; min-width: 0; border: 0; }
+  .only { display: flex; gap: 7px; align-items: center; padding: 0 16px; white-space: nowrap; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .only input { width: 15px; height: 15px; margin: 0; accent-color: var(--red); }
   dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
   dialog::backdrop { background: rgb(0 0 0 / .55); }
   /* Every panel: fixed ✕ at the top right, content scrolls under it. */
@@ -55,15 +62,15 @@
   .dlg-close { position: absolute; top: 10px; right: 10px; z-index: 2; width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--surface); color: var(--ink); font-size: 18px; line-height: 32px; cursor: pointer; }
   .dlg-close:hover { background: var(--ink); color: var(--surface); }
   .walk-actions .primary { margin-left: auto; }
-  dialog form { display: grid; gap: 14px; padding: 20px 22px; }
+  dialog form, .settings form { display: grid; gap: 14px; padding: 20px 22px; }
   dialog h2:focus { outline: none; }
   dialog h2 { margin: 0; font: 700 26px/1 var(--display); text-transform: uppercase; }
-  dialog p { margin: 0; color: var(--muted); max-width: 60ch; }
+  dialog p, .settings p { margin: 0; color: var(--muted); max-width: 60ch; }
   .walk-rows { display: grid; gap: 2px; }
   .rest-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px; background: var(--ground); font-size: 12px; }
   .rest-row input { width: 64px; padding: 4px 6px; border: 1px solid var(--line); background: var(--surface); font-variant-numeric: tabular-nums; text-align: right; }
   .rest-row small { color: var(--muted); }
-  dialog p.build { font-size: 11px; font-variant-numeric: tabular-nums; }
+  dialog p.build, .settings p.build { font-size: 11px; font-variant-numeric: tabular-nums; }
   .clear-row { display: flex; flex-wrap: wrap; gap: 8px; }
   .clear-row button { padding: 8px 12px; border: 1px solid var(--clash); border-radius: 0; background: none; color: var(--clash); font-weight: 700; font-size: 12px; cursor: pointer; }
   .clear-row button:disabled { border-color: var(--line); color: var(--muted); cursor: default; }
@@ -79,21 +86,20 @@
   .walk-actions button { padding: 8px 14px; border: 1px solid var(--ink); border-radius: 0; background: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; cursor: pointer; }
   .walk-actions .primary { background: var(--ink); color: var(--surface); }
   @media (max-width: 480px) { .walk-rows label { grid-template-columns: 1fr 56px auto; } .walk-rows label span { grid-column: 1; } .walk-rows label span:nth-child(2) { display: none; } .walk-rows input, .walk-rows small { grid-row: 1 / span 2; } }
-  .controls input[type=number] { width: 52px; padding: 3px 6px; border: 1px solid #3B3B3B; border-radius: 0; background: #1E1E1E; color: #fff; font-variant-numeric: tabular-nums; }
 
   /* Red band: brand + days */
   header { display: flex; gap: 12px 24px; align-items: center; padding: 10px 16px; background: var(--red); color: #000; }
   .brand { font: 700 30px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
-  nav { display: flex; gap: 2px; padding-top: 8px; margin-top: -8px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; justify-content: flex-end; }
-  nav button { position: relative; display: grid; justify-items: center; gap: 2px; min-width: 52px; padding: 6px 8px 5px; border: 0; background: none; cursor: pointer; }
-  nav button small { font: 700 10px/1 var(--body); text-transform: uppercase; letter-spacing: 1.63px; }
-  nav button strong { font: 700 24px/1 var(--display); }
-  nav button:hover { color: #fff; }
-  nav button[aria-pressed="true"] { background: #000; color: #fff; }
-  nav button[aria-pressed="true"] small::before { content: "★ "; color: var(--red); }
-  nav button i { position: absolute; top: -7px; right: -4px; z-index: 1; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--yellow); color: #000; font: 700 10px/15px var(--body); font-style: normal; }
-  nav button i.bad { background: #000; color: var(--yellow); }
-  nav button[aria-pressed="true"] i.bad { background: var(--yellow); color: #000; }
+  #days { display: flex; gap: 2px; padding-top: 8px; margin-top: -8px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; justify-content: flex-end; }
+  #days button { position: relative; display: grid; justify-items: center; gap: 2px; min-width: 52px; padding: 6px 8px 5px; border: 0; background: none; cursor: pointer; }
+  #days button small { font: 700 10px/1 var(--body); text-transform: uppercase; letter-spacing: 1.63px; }
+  #days button strong { font: 700 24px/1 var(--display); }
+  #days button:hover { color: #fff; }
+  #days button[aria-pressed="true"] { background: #000; color: #fff; }
+  #days button[aria-pressed="true"] small::before { content: "★ "; color: var(--red); }
+  #days button i { position: absolute; top: -7px; right: -4px; z-index: 1; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--yellow); color: #000; font: 700 10px/15px var(--body); font-style: normal; }
+  #days button i.bad { background: #000; color: var(--yellow); }
+  #days button[aria-pressed="true"] i.bad { background: var(--yellow); color: #000; }
 
   /* Summary line */
   .status { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
@@ -108,7 +114,7 @@
   .status .ok { color: #2E7D32; font-weight: 600; }
   .tip { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 7px 16px; background: var(--ink); color: var(--surface); font-size: 12px; }
   .tip button { flex: none; padding: 3px 10px; border: 1px solid currentColor; background: none; font-weight: 700; font-size: 11px; cursor: pointer; }
-  dialog p.how { max-width: none; padding: 8px 10px; background: var(--ground); font-size: 12px; }
+  .settings p.how { max-width: none; padding: 8px 10px; background: var(--ground); font-size: 12px; }
   .head.corner { display: flex; align-items: center; justify-content: center; padding: 0; }
   .hidden-btn { padding: 3px 6px; border: 1px solid var(--ink); background: var(--surface); font: 700 11px/1.2 var(--body); cursor: pointer; }
   .hidden-btn:hover { background: var(--ink); color: var(--surface); }
@@ -150,7 +156,7 @@
   .s h3 { margin: 2px 0 1px; font: 600 15px/1.1 var(--display); letter-spacing: .01em; text-wrap: balance; }
   .s .who { color: var(--muted); font-size: 12px; }
   .s ul { margin: 2px 0; padding-left: 13px; font-size: 12px; color: var(--muted); }
-  .s ul li::marker { content: "★ "; color: var(--red); font-size: 9px; }
+  .s ul li::marker { content: "• "; }
   .s .sec { margin-top: 3px; font: 700 9.5px/1.3 var(--body); text-transform: uppercase; letter-spacing: 1px; color: oklch(var(--stripe-l) var(--stripe-c) var(--h)); }
   .s .note { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; }
   .s .note.warn { color: var(--note-warn); }
@@ -192,10 +198,10 @@
   .next .leave { font-weight: 700; }
   .next .leave.late { color: var(--clash); }
 
-  /* Info button on blocks */
-  .s .t .info { flex: none; width: 18px; height: 18px; margin: -2px -3px 0 0; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; font: 700 12px/18px var(--body); cursor: pointer; }
-  .s .t .info:hover { color: var(--red); }
-  .s.on .t .info { margin-left: auto; }
+  /* Mark button on blocks: a small star with a thumb-sized hit area (the block itself opens the details) */
+  .s .t .mk { flex: none; width: 34px; height: 30px; margin: -8px -8px -7px auto; padding: 0; border: 0; background: none; color: inherit; font: 400 16px/30px var(--body); cursor: pointer; }
+  @media (hover: hover) { .s .t .mk:hover { color: var(--red); } }
+  .s .t .wl + .mk { margin-left: -4px; }
 
   /* Detail sheet */
   .sheet { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
@@ -220,24 +226,26 @@
   .sheet .notes .repeat { color: #6B55B0; } .sheet .notes .gap { color: var(--muted); font-weight: 500; }
 
   /* Films view */
-  #watchCount:not(:empty) { margin-left: 5px; padding: 0 5px; background: var(--red); color: #fff; font-size: 10px; }
-  .films { width: min(760px, calc(100% - 32px)); height: min(88%, 900px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
-  .films::backdrop { background: rgb(0 0 0 / .55); }
-  .films-head { display: grid; gap: 10px; padding: 16px 20px 10px; border-bottom: 1px solid var(--line); }
-  .films h2:focus { outline: none; }
-  .films h2 { margin: 0; font: 700 26px/1 var(--display); text-transform: uppercase; }
+  .films { background: var(--surface); }
+  .films-head { flex: none; display: grid; gap: 10px; padding: 16px max(20px, calc((100% - 860px) / 2)) 10px; border-bottom: 1px solid var(--line); }
   .tabs { display: flex; gap: 0; }
   .tabs button { padding: 7px 12px; border: 1px solid var(--ink); background: none; font-weight: 700; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
   .tabs button + button { border-left: 0; }
   .tabs button[aria-selected="true"] { background: var(--ink); color: var(--surface); }
   .films-filters { display: flex; gap: 8px; flex-wrap: wrap; }
   .films-filters input, .films-filters select { flex: 1 1 200px; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); border-radius: 0; background: var(--ground); font: inherit; }
+  .secpick summary { width: fit-content; padding: 7px 9px; border: 1px solid var(--line); background: var(--ground); cursor: pointer; }
+  .secpick .chips { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 8px; }
+  .secpick .chips button { padding: 3px 8px; border: 1px solid var(--line); background: var(--ground); font: 600 11px/1.4 var(--body); cursor: pointer; }
+  .secpick .chips button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
   .films-summary { margin: 0; min-height: 1.35em; font-size: 12px; color: var(--muted); }
   .films-summary b { color: var(--ink); }
-  .film-list { flex: 1; overflow: auto; margin: 0; padding: 0 20px 20px; list-style: none; }
+  .film-list { flex: 1; overflow: auto; margin: 0; padding: 0 max(20px, calc((100% - 860px) / 2)) 20px; list-style: none; }
   .film { display: grid; grid-template-columns: 54px 1fr auto; gap: 4px 12px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
   .film img { grid-row: span 3; width: 54px; aspect-ratio: 291 / 434; object-fit: cover; background: var(--ground); }
-  .film .ft { font: 600 15px/1.15 var(--display); }
+  .film { cursor: pointer; }
+  .film .ft { padding: 0; border: 0; background: none; color: inherit; text-align: left; font: 600 15px/1.15 var(--display); cursor: pointer; }
+  .film .ft:hover { color: var(--red); }
   .film .fd { font-size: 12px; color: var(--muted); }
   .film .fs { display: flex; flex-wrap: wrap; gap: 4px; grid-column: 2 / -1; }
   .film .fs button { padding: 2px 6px; border: 1px solid var(--line); background: var(--ground); font: 600 11px/1.4 var(--body); font-variant-numeric: tabular-nums; cursor: pointer; }
@@ -248,14 +256,51 @@
   .film .acts { display: flex; gap: 4px; grid-row: 1 / span 2; grid-column: 3; }
   .film .acts button { min-width: 34px; height: 30px; padding: 0 8px; border: 1px solid var(--ink); background: none; font-weight: 700; cursor: pointer; }
   .film .acts button.on { background: var(--ink); color: var(--surface); }
-  .film .acts .must.on { background: var(--red); border-color: var(--red); color: #fff; }
   .film .st { grid-column: 2 / -1; font-size: 12px; font-weight: 600; }
   .film .st.covered { color: #2E7D32; } .film .st.open { color: var(--muted); } .film .st.blocked { color: var(--clash); }
   .film-list .empty { padding: 30px 0; color: var(--muted); text-align: center; }
-  .s .t .wl { color: var(--red); font-size: 10px; margin-left: auto; }
-  .s .t .wl + .info { margin-left: 2px; }
+  .s .t .wl { color: var(--red); font-size: 14px; line-height: 1; margin-left: auto; }
   .sheet .wbtn { margin-left: 6px; padding: 1px 7px; border: 1px solid var(--ink); background: none; font: 700 10px/1.6 var(--body); letter-spacing: .5px; text-transform: uppercase; cursor: pointer; vertical-align: 2px; }
+  .sheet .fs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sheet .fs button { padding: 3px 7px; border: 1px solid var(--line); background: var(--ground); font: 600 12px/1.4 var(--body); font-variant-numeric: tabular-nums; cursor: pointer; }
+  .sheet .fs button:hover { border-color: var(--ink); }
+  .sheet .fs button.on { background: var(--mine-bg); color: var(--mine-ink); border-color: var(--mine-bg); }
+  .sheet .fs button.off { opacity: .5; text-decoration: line-through; }
+  .sheet .extras { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-top: 6px; font-size: 13px; }
+  .sheet .extras .wbtn { margin-left: 0; }
+  .sheet .extras a { font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .sheet .extras a:hover { color: var(--red); border-color: var(--red); }
+  .film-head { display: grid; grid-template-columns: 130px 1fr; gap: 16px; align-items: start; }
+  .film-head:not(:has(img)) { grid-template-columns: 1fr; }
+  .film-head img { width: 100%; aspect-ratio: 291 / 434; object-fit: cover; background: var(--ground); }
+  .film-head > div { display: grid; gap: 10px; justify-items: start; }
+  .film-head .wbtn { margin-left: 0; vertical-align: 0; }
+  .film-head .extras { margin-top: 0; }
+  .sheet .trailer { display: block; width: 100%; aspect-ratio: 16 / 9; margin-top: 6px; border: 0; background: #000; }
   .sheet .wbtn.on { background: var(--ink); color: var(--surface); }
+
+  /* My plan: marked sessions by day, with their warnings */
+  .plan { background: var(--surface); }
+  .settings { overflow: auto; background: var(--surface); }
+  .settings form { width: 100%; max-width: 640px; margin: 0 auto; }
+  .plan-head { flex: none; padding: 14px max(20px, calc((100% - 860px) / 2)) 10px; border-bottom: 1px solid var(--line); }
+  .plan-head .status { padding: 0; border: 0; }
+  .plan-list { flex: 1; overflow: auto; padding: 0 max(20px, calc((100% - 860px) / 2)) 24px; }
+  .pday h3 { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0; padding: 16px 0 6px; background: var(--surface); border-bottom: 2px solid var(--ink); font: 700 16px/1.1 var(--display); text-transform: uppercase; }
+  .pday h3 button { flex: none; padding: 4px 0; border: 0; background: none; font: 600 12px/1 var(--body); text-transform: none; color: var(--muted); cursor: pointer; }
+  .pday h3 button:hover { color: var(--red); }
+  .pday ol { margin: 0; padding: 0; list-style: none; }
+  .prow { --bar: oklch(var(--stripe-l) var(--stripe-c) var(--h)); display: grid; grid-template-columns: 50px 1fr; gap: 12px; padding: 10px 8px 10px 14px; border-bottom: 1px solid var(--line-soft); box-shadow: inset 4px 0 0 var(--bar); cursor: pointer; }
+  .prow:hover { background: var(--ground); }
+  .prow.clash { --bar: var(--clash); } .prow.tight { --bar: var(--tight); } .prow.rest { --bar: var(--rest); }
+  .prow.past { opacity: .5; }
+  .prow .pt { display: grid; align-content: start; font-variant-numeric: tabular-nums; }
+  .prow .pt b { font-size: 14px; } .prow .pt span { color: var(--muted); font-size: 12px; }
+  .prow .ptitle { font: 600 15px/1.15 var(--display); }
+  .prow .pmeta { font-size: 12px; color: var(--muted); }
+  .prow .note { display: block; margin-top: 3px; font-size: 12px; font-weight: 700; }
+  .prow .warn { color: var(--clash); } .prow .tight { color: var(--tight); } .prow .repeat { color: #6B55B0; } .prow .rest { color: var(--rest); } .prow .gap { color: var(--muted); font-weight: 500; }
+  .plan-list .empty { padding: 30px 0; color: var(--muted); text-align: center; }
 
   /* Sync */
   #syncDialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 0; border-top: 6px solid var(--red); background: var(--surface); color: var(--ink); }
@@ -272,31 +317,40 @@
     .short { display: inline; }
     .long, .dates, .brand { display: none; }
     .tip { padding: 6px 12px; }
-    /* Phone: days first, then one line of controls, then one line of summary */
-    header { order: 1; padding: calc(10px + env(safe-area-inset-top, 0px)) 8px 4px; }
-    .topbar { order: 2; padding: 4px 12px; }
-    .status, .next { order: 3; }
-    #scroller { order: 4; }
-    nav { justify-content: flex-start; padding-top: 8px; margin-top: -4px; } /* pull up only by the header's 4px padding, or the badges leave the screen */
-    nav button { min-width: 38px; padding: 3px 5px; gap: 1px; }
-    nav button small { font-size: 8.5px; letter-spacing: 1px; }
-    nav button strong { font-size: 19px; }
-    nav button[aria-pressed="true"] small::before { content: none; }
-    .controls { width: 100%; gap: 6px; font-size: 12px; }
-    .controls label { margin-right: auto; }
-    .walk-open { padding: 2px 8px; font-size: 12px; }
+    /* Phone: the section tabs become a bottom bar, within thumb reach */
+    header { padding: calc(10px + env(safe-area-inset-top, 0px)) 8px 4px; }
+    .topbar { order: 9; padding: 0 0 env(safe-area-inset-bottom, 0px); }
+    /* Phone tab bar: icon over a small label; the active tab lights up red with a line on top */
+    .views { width: 100%; gap: 0; border-top: 1px solid #222; }
+    .views button { position: relative; flex: 1; min-width: 0; display: grid; justify-items: center; gap: 4px; padding: 9px 2px 8px; border: 0; background: none; color: #8E8981; font: 600 10.5px/1 var(--body); letter-spacing: .2px; }
+    .views button:hover, .views button[aria-current="page"] { background: none; color: #fff; }
+    .views button::before { content: ""; position: absolute; top: -1px; left: 32%; right: 32%; height: 2px; background: var(--red); scale: 0 1; transition: scale .2s; }
+    .views button[aria-current="page"]::before { scale: 1 1; }
+    .views button[aria-current="page"] svg { color: var(--red); }
+    .views svg { display: block; transition: color .15s; }
+    .views i { position: absolute; top: 4px; left: calc(50% + 5px); min-width: 16px; margin: 0; padding: 0 4px; border-radius: 8px; font-size: 9.5px; line-height: 15px; text-align: center; }
+    .only { padding: 0 12px; font-size: 11.5px; }
+    .films-head, .plan-head { padding-top: calc(12px + env(safe-area-inset-top, 0px)) !important; }
+    .plan-list { padding: 0 12px 16px; }
+    .settings form { padding: calc(14px + env(safe-area-inset-top, 0px)) 12px 20px; }
+    #days { justify-content: flex-start; padding-top: 8px; margin-top: -4px; } /* pull up only by the header's 4px padding, or the badges leave the screen */
+    #days button { min-width: 38px; padding: 3px 5px; gap: 1px; }
+    #days button small { font-size: 8.5px; letter-spacing: 1px; }
+    #days button strong { font-size: 19px; }
+    #days button[aria-pressed="true"] small::before { content: none; }
     .status { flex-wrap: nowrap; gap: 12px; padding: 4px 12px; overflow-x: auto; scrollbar-width: none; white-space: nowrap; font-size: 11.5px; }
     .head { padding: 6px 4px 5px; font-size: 12.5px; }
     .axis .hour span { right: 5px; font-size: 10px; }
     .col { min-width: 150px; }
     .next { padding: 5px 12px; font-size: 12px; }
     .sheet { width: 100%; max-width: 100%; max-height: 88%; margin: auto 0 0; }
-    .films, #walkDialog, #syncDialog { width: 100%; max-width: 100%; height: 100%; max-height: 100%; }
-    .films-head, .dlg-head { padding: 12px 12px 8px; }
+    .film-head { grid-template-columns: 96px 1fr; gap: 12px; }
+    #syncDialog { width: 100%; max-width: 100%; height: 100%; max-height: 100%; }
+    .films-head, .plan-head, .dlg-head { padding: 12px 12px 8px; }
     .film-list { padding: 0 12px 16px; }
   }
   /* Motion: panels fade and rise in, marked blocks pop, a new day fades in. Off with reduced motion. */
-  button, .walk-open, .tabs button, .hidden-btn { transition: background-color .15s, color .15s, border-color .15s, opacity .15s; }
+  button, .tabs button, .hidden-btn { transition: background-color .15s, color .15s, border-color .15s, opacity .15s; }
   /* Panels: an entry animation on top of a fully visible resting state, so a panel never stays hidden if the animation does not run. */
   @keyframes panelIn { from { opacity: 0; translate: 0 12px; } }
   @keyframes backdropIn { from { background-color: transparent; } }
@@ -307,7 +361,10 @@
   .s.reveal, .s.reveal:hover, .s.reveal:focus-visible, .s.ghost, .s.ghost:hover { height: var(--hgt) !important; overflow: hidden; z-index: auto; }
   .s.ghost { pointer-events: none; }
   @keyframes gridIn { from { opacity: .35; translate: 0 6px; } }
-  #grid.enter .col:not(.axis) { animation: gridIn .22s ease-out; } /* headers and time axis stay put; columns slide in under them */
+  #grid.enter .col:not(.axis) { animation: gridIn .22s ease-out; }
+  /* Sections: the new one slides in from the side of its tab (--dx is set from JS) */
+  @keyframes viewIn { from { opacity: 0; translate: var(--dx, 0) 0; } }
+  .view.entering { animation: viewIn .24s cubic-bezier(.2, .8, .2, 1); } /* headers and time axis stay put; columns slide in under them */
   @media (max-width: 640px) {
     @keyframes sheetUp { from { translate: 0 100%; } }
     .sheet[open] { animation: sheetUp .3s cubic-bezier(.2, .8, .2, 1); }
@@ -320,25 +377,45 @@
 <body>
 <div class="topbar">
   <div class="dates"><span data-i18n="dates">8-18 octubre 2026</span><span data-i18n="edition">59a edició</span></div>
-  <div class="controls">
-    <label><input type="checkbox" id="only"> <span class="long" data-i18n="onlyLong">Only my sessions</span><span class="short" data-i18n="onlyShort">Only mine</span></label>
-    <button type="button" id="walkOpen" class="walk-open"><span class="long" data-i18n="settings">Settings</span><span class="short" data-i18n="settingsShort">Settings</span></button>
-    <button type="button" id="filmsOpen" class="walk-open"><span data-i18n="films">Films</span><span id="watchCount"></span></button>
-    <button type="button" id="syncOpen" class="walk-open"><span class="long" data-i18n="sync">Sync</span><span class="short" data-i18n="syncShort">Sync</span></button>
-  </div>
+  <nav class="views" id="views" data-i18n-attr="aria-label:sections">
+    <button type="button" data-view="schedule"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span data-i18n="schedule">Schedule</span></button>
+    <button type="button" data-view="films"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span data-i18n="films">Films</span><i id="watchCount"></i></button>
+    <button type="button" data-view="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><span data-i18n="plan">My plan</span><i id="planCount"></i></button>
+    <button type="button" data-view="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span data-i18n="settings">Settings</span></button>
+  </nav>
 </div>
+<section id="view-schedule" class="view" data-i18n-attr="aria-label:schedule">
 <header>
   <div class="brand">Sitges</div>
   <nav id="days" data-i18n-attr="aria-label:festivalDays"></nav>
 </header>
-<div class="status" id="status"></div>
+<div class="bar"><div class="status" id="status"></div>
+  <label class="only"><input type="checkbox" id="only"> <span class="long" data-i18n="onlyLong">Only my sessions</span><span class="short" data-i18n="onlyShort">Only mine</span></label></div>
 <div id="tip" class="tip" hidden><span data-i18n="hint"></span><button type="button" id="tipClose" data-i18n="gotIt">Got it</button></div>
 <button type="button" id="next" class="next" hidden></button>
+<div id="scroller"><div id="grid"></div></div>
+</section>
+<section id="view-films" class="view films" hidden data-i18n-attr="aria-label:films">
+  <div class="films-head">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabAll" data-tab="all" aria-selected="true" data-i18n="tabAll">All films</button>
+      <button type="button" role="tab" id="tabWatch" data-tab="watch" aria-selected="false">My watchlist</button>
+    </div>
+    <div class="films-filters">
+      <input type="search" id="filmSearch" data-i18n-attr="placeholder:searchFilms,aria-label:searchFilms">
+    </div>
+    <details class="secpick"><summary id="secSummary"></summary><div id="filmSections" class="chips"></div></details>
+    <p id="filmsSummary" class="films-summary" aria-live="polite"></p>
+  </div>
+  <ul id="filmList" class="film-list"></ul>
+</section>
+<section id="view-plan" class="view plan" hidden data-i18n-attr="aria-label:plan">
+  <div class="plan-head"><div class="status" id="planSummary"></div></div>
+  <div id="planList" class="plan-list"></div>
+</section>
 <div id="hiddenMenu" class="hidden-menu" popover></div>
-<dialog id="walkDialog" aria-labelledby="walkTitle">
-  <button type="button" class="dlg-close" data-close data-i18n-attr="aria-label:close,title:close">✕</button>
-  <div class="dlg-head"><h2 id="walkTitle" tabindex="-1" autofocus data-i18n="settings">Settings</h2></div>
-  <form method="dialog">
+<section id="view-settings" class="view settings" hidden data-i18n-attr="aria-label:settings">
+  <form>
     <p class="how" data-i18n="hint"></p>
     <label class="rest-row" for="lang"><span><b data-i18n="language">Language</b></span>
       <select id="lang"><option value="ca">Català</option><option value="en">English</option></select></label>
@@ -353,29 +430,16 @@
       <button type="button" id="clearMarks"></button>
       <button type="button" id="clearWatch"></button>
     </div>
+    <h3 class="set-h" data-i18n="syncTitle">Sync</h3>
+    <p data-i18n="syncHelp"></p>
+    <div class="walk-actions"><button type="button" id="syncOpen" data-i18n="syncOpen">Sync with another device</button></div>
     <p class="build" id="build"></p>
     <div class="walk-actions">
       <button type="button" id="walkReset" data-i18n="reset">Reset to defaults</button>
     </div>
   </form>
-</dialog>
+</section>
 <dialog id="sheet" class="sheet" aria-labelledby="sheetTitle"></dialog>
-<dialog id="filmsDialog" class="films" aria-labelledby="filmsTitle">
-  <button type="button" class="dlg-close" data-close data-i18n-attr="aria-label:close,title:close">✕</button>
-  <div class="films-head">
-    <h2 id="filmsTitle" tabindex="-1" autofocus data-i18n="films">Films</h2>
-    <div class="tabs" role="tablist">
-      <button type="button" role="tab" id="tabAll" data-tab="all" aria-selected="true" data-i18n="tabAll">All films</button>
-      <button type="button" role="tab" id="tabWatch" data-tab="watch" aria-selected="false">My watchlist</button>
-    </div>
-    <div class="films-filters">
-      <input type="search" id="filmSearch" data-i18n-attr="placeholder:searchFilms,aria-label:searchFilms">
-      <select id="filmSection" data-i18n-attr="aria-label:section"></select>
-    </div>
-    <p id="filmsSummary" class="films-summary" aria-live="polite"></p>
-  </div>
-  <ul id="filmList" class="film-list"></ul>
-</dialog>
 <dialog id="syncDialog" aria-labelledby="syncTitle">
   <button type="button" class="dlg-close" data-close data-i18n-attr="aria-label:close,title:close">✕</button>
   <div class="dlg-head"><h2 id="syncTitle" tabindex="-1" autofocus data-i18n="syncTitle">Sync</h2></div>
@@ -400,10 +464,9 @@
     </section>
   </form>
 </dialog>
-<div id="scroller"><div id="grid"></div></div>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '1.8.2'; // bump on every change so a device can show which code it runs
+const BUILD = '2.0.0'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -418,13 +481,14 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const STR = {
   ca: {
     title: 'Planificador Sitges 2026', dates: '8-18 octubre 2026', edition: '59a edició',
-    onlyLong: 'Només les meves sessions', onlyShort: 'Les meves', settings: 'Ajustos', settingsShort: 'Ajustos', films: 'Pel·lícules', sync: 'Sincronitza', syncShort: 'Sinc.',
+    onlyLong: 'Només les meves sessions', onlyShort: 'Les meves', settings: 'Ajustos', films: 'Pel·lícules', schedule: 'Programa', plan: 'El meu pla', sections: 'Seccions de l’aplicació', syncOpen: 'Sincronitza amb un altre dispositiu',
+    planEmpty: 'Encara no has marcat cap sessió. Toca ☆ en una sessió del programa.', seeDay: 'Veure al programa →', markSession: 'Marca {t}', unmarkSession: 'Desmarca {t}',
     festivalDays: 'Dies del festival', language: 'Idioma',
     restHelp: "<b>Descans mínim</b> entre l'última sessió d'una nit i la primera de l'endemà. Inclou-hi el trajecte d'anada i tornada a casa.",
     hours: 'hores', walkTimes: 'Temps a peu',
     walkHelp: "Minuts que necessites per anar d'una sala a l'altra, en tots dos sentits. Un canvi de sala amb menys temps lliure es marca com a just.",
     reset: 'Restableix els valors per defecte', done: 'Fet', close: 'Tanca',
-    tabAll: 'Totes les pel·lícules', tabWatch: 'La meva llista ({n})', searchFilms: 'Cerca per títol o director', section: 'Secció', allSections: 'Totes les seccions',
+    tabAll: 'Totes les pel·lícules', tabWatch: 'La meva llista ({n})', searchFilms: 'Cerca per títol o director', section: 'Secció', allSections: 'Totes les seccions', sectionsN: 'Seccions ({n})', screenings: 'Passis', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
     syncTitle: 'Sincronització', syncHelp: "El teu pla només es desa en aquest dispositiu. Per passar-lo a un altre, envia'l des d'aquí i obre'l a l'altre.",
     sendPlan: 'Envia aquest pla', planCode: 'Codi del pla', copyCode: 'Copia el codi', shareLink: "Comparteix l'enllaç",
     receivePlan: 'Rep un pla', pastePlan: 'Enganxa un codi o un enllaç', replacePlan: 'Substitueix el meu pla',
@@ -436,8 +500,8 @@ const STR = {
     repeatsShort: { zero: 'Cap repetida', one: '{n} repetida', other: '{n} repetides' },
     nights: { zero: 'Cap nit curta', one: '{n} nit curta', other: '{n} nits curtes' },
     noConflicts: '✓ Sense conflictes', gotIt: 'Entesos', showVenue: 'Mostra', showAll: 'Mostra-les totes', hide: 'Amaga {v}',
-    hint: 'Toca una sessió per marcar-la · ⓘ mostra els detalls · ✕ amaga una sala',
-    onWatchlist: 'A la teva llista', details: 'Detalls', detailsFor: 'Detalls de {t}',
+    hint: 'Toca una sessió per veure-la · ☆ la marca · ✕ amaga una sala',
+    onWatchlist: 'A la teva llista',
     noteOverlap: 'Se solapa amb {t} · {v}', noteTight: 'Només {g}′ per arribar a {v} (a peu {w}′)',
     noteRepeat: 'Repetida: {f} també {when} · {v}', noteRepeatIn: ' a {t}',
     noteRestBefore: 'Només {d} de descans abans de {t} ({when})', noteRestAfter: v => `Només ${v.d} de descans després de ${v.t} (acaba a ${caAt(v.e)})`,
@@ -456,7 +520,7 @@ const STR = {
     watchSummary: '<b>{c} de {n}</b> cobertes · {o} sense planificar · {b}',
     noFit: { zero: 'totes hi caben', one: '{n} no hi cap', other: '{n} no hi caben' },
     filmCount: { one: '{n} pel·lícula', other: '{n} pel·lícules' }, onYourList: ' · {n} a la teva llista',
-    mustSee: 'Imprescindible', addToList: 'Afegeix a la llista', removeFromList: 'Treu de la llista',
+    addToList: 'Afegeix a la llista', removeFromList: 'Treu de la llista',
     emptyList: 'La teva llista és buida. Afegeix-hi pel·lícules amb + a Totes les pel·lícules.', noMatch: 'Cap pel·lícula coincideix.',
     replan: 'Tornar a planificar', replanHelp: 'Les sales amagades, els temps a peu i la configuració es mantenen.',
     clearMarks: { zero: 'Cap sessió marcada', one: 'Esborra {n} sessió marcada', other: 'Esborra {n} sessions marcades' },
@@ -465,13 +529,14 @@ const STR = {
   },
   en: {
     title: 'Sitges 2026 Planner', dates: '8–18 October 2026', edition: '59th edition',
-    onlyLong: 'Only my sessions', onlyShort: 'Only mine', settings: 'Settings', settingsShort: 'Settings', films: 'Films', sync: 'Sync', syncShort: 'Sync',
+    onlyLong: 'Only my sessions', onlyShort: 'Only mine', settings: 'Settings', films: 'Films', schedule: 'Schedule', plan: 'My plan', sections: 'App sections', syncOpen: 'Sync with another device',
+    planEmpty: 'You have not marked any session yet. Tap ☆ on a session in the schedule.', seeDay: 'See in schedule →', markSession: 'Mark {t}', unmarkSession: 'Unmark {t}',
     festivalDays: 'Festival days', language: 'Language',
     restHelp: '<b>Minimum rest</b> between your last session of a night and your first one the next day. Include your trip home and back.',
     hours: 'hours', walkTimes: 'Walk times',
     walkHelp: 'Minutes you need to go from one venue to the other, in both directions. A change of location with less free time than this shows as tight.',
     reset: 'Reset to defaults', done: 'Done', close: 'Close',
-    tabAll: 'All films', tabWatch: 'My watchlist ({n})', searchFilms: 'Search title or director', section: 'Section', allSections: 'All sections',
+    tabAll: 'All films', tabWatch: 'My watchlist ({n})', searchFilms: 'Search title or director', section: 'Section', allSections: 'All sections', sectionsN: 'Sections ({n})', screenings: 'Screenings', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
     syncTitle: 'Sync', syncHelp: 'Your plan is saved only on this device. To move it, send it from this device and open it on the other one.',
     sendPlan: 'Send this plan', planCode: 'Plan code', copyCode: 'Copy code', shareLink: 'Share link',
     receivePlan: 'Receive a plan', pastePlan: 'Paste a code or a link', replacePlan: 'Replace my plan',
@@ -483,8 +548,8 @@ const STR = {
     repeatsShort: { zero: 'No repeat', one: '{n} repeat', other: '{n} repeats' },
     nights: { zero: 'No short nights', one: '{n} short night', other: '{n} short nights' },
     noConflicts: '✓ No conflicts', gotIt: 'Got it', showVenue: 'Show', showAll: 'Show all', hide: 'Hide {v}',
-    hint: 'Click a session to mark it · ⓘ shows details · ✕ hides a venue',
-    onWatchlist: 'On your watchlist', details: 'Details', detailsFor: 'Details for {t}',
+    hint: 'Tap a session for details · ☆ marks it · ✕ hides a venue',
+    onWatchlist: 'On your watchlist',
     noteOverlap: 'Overlaps {t} · {v}', noteTight: 'Only {g}′ to reach {v} (walk {w}′)',
     noteRepeat: 'Repeat: {f} also {when} · {v}', noteRepeatIn: ' in {t}',
     noteRestBefore: 'Only {d} rest before {t} ({when})', noteRestAfter: 'Only {d} rest after {t} (ends {e})',
@@ -503,7 +568,7 @@ const STR = {
     watchSummary: '<b>{c} of {n}</b> covered · {o} not planned · {b}',
     noFit: { zero: 'all fit', one: '{n} cannot fit', other: '{n} cannot fit' },
     filmCount: { one: '{n} film', other: '{n} films' }, onYourList: ' · {n} on your watchlist',
-    mustSee: 'Must-see', addToList: 'Add to watchlist', removeFromList: 'Remove from watchlist',
+    addToList: 'Add to watchlist', removeFromList: 'Remove from watchlist',
     emptyList: 'Your watchlist is empty. Add films with + in All films.', noMatch: 'No films match.',
     replan: 'Replan', replanHelp: 'Hidden venues, walk times and settings stay.',
     clearMarks: { zero: 'No marked sessions', one: 'Clear {n} marked session', other: 'Clear {n} marked sessions' },
@@ -553,7 +618,7 @@ const days = Object.keys(byDay).sort();
 const ORDER = ['Cinema Casino Prado', 'Cinema Escorxador', 'Mercat Vell', 'Sala Auditori Meliá', 'Brigadoon', 'Sala Tramuntana Meliá'];
 const SHORT = { 'Cinema Casino Prado': 'Prado', 'Cinema Escorxador': 'Escorxador', 'Sala Auditori Meliá': 'Auditori', 'Sala Tramuntana Meliá': 'Tramuntana' };
 const locations = [...new Set(SCHEDULE.map(s => s.location))].sort((a, b) => (ORDER.indexOf(a) + 1 || 99) - (ORDER.indexOf(b) + 1 || 99));
-// Watchlist: film page URL -> 1 (want) or 2 (must-see). Films are keyed by URL, as in the repeat warnings.
+// Watchlist: film page URL -> 1 (older plans may hold 2, the dropped must-see level; any value counts as on the list). Films are keyed by URL, as in the repeat warnings.
 let watch = store.get('watch', {});
 const saveWatch = () => store.set('watch', watch);
 const filmIndex = {};
@@ -639,15 +704,20 @@ function count(key, n, shortKey) {
   return shortKey ? `<span class="long">${text(key)}</span><span class="short">${text(shortKey)}</span>` : text(key);
 }
 
-function renderStatus(info) {
-  const mine = byDay[current].filter(s => marked.has(s.id));
+// Warning counters for a list of marked sessions (a day, or the whole plan).
+function warningsHtml(mine, info) {
   const clashes = mine.filter(s => info[s.id].clash.length).length;
   const tights = mine.filter(s => info[s.id].tight.length).length;
   const repeats = mine.filter(s => info[s.id].repeat.length).length;
   const nights = mine.reduce((n, s) => n + info[s.id].rest.length, 0);
-  const total = byDay[current].length;
-  const warnings = [['clash', 'overlaps', clashes], ['tight', 'tight', tights, 'tightShort'], ['repeat', 'repeats', repeats, 'repeatsShort'], ['rest', 'nights', nights]]
+  return [['clash', 'overlaps', clashes], ['tight', 'tight', tights, 'tightShort'], ['repeat', 'repeats', repeats, 'repeatsShort'], ['rest', 'nights', nights]]
     .filter(([, , n]) => n).map(([sw, key, n, short]) => `<span class="k"><span class="sw ${sw}"></span>${count(key, n, short)}</span>`).join('');
+}
+
+function renderStatus(info) {
+  const mine = byDay[current].filter(s => marked.has(s.id));
+  const total = byDay[current].length;
+  const warnings = warningsHtml(mine, info);
   document.getElementById('status').innerHTML = `
     <span><b>${mine.length}</b><span class="long">${t('ofMarked', { total })}</span><span class="short">/${total} ★</span></span>
     ${warnings || (mine.length ? `<span class="ok">${t('noConflicts')}</span>` : '')}`;
@@ -656,8 +726,10 @@ function renderStatus(info) {
 function render(day) {
   const newDay = day !== current;
   current = day;
-  history.replaceState(null, '', location.search.replace(/[?&]import=[^&]*/, '') + '#' + day);
+  if (activeView === 'schedule') history.replaceState(history.state, '', urlFor('schedule'));
   const info = analyse();
+  updateCounts();
+  if (activeView === 'plan') renderPlan(info);
   renderDays(info);
   renderStatus(info);
   const list = byDay[day];
@@ -692,12 +764,12 @@ function render(day) {
       const credits = multi ? s.films.map(filmLine).join('\n') : (s.films[0]?.directors || []).join(', ');
       const creditsHtml = multi ? `<ul>${s.films.map(f => `<li>${esc(filmLine(f))}</li>`).join('')}</ul>` : credits ? `<div class="who">${esc(credits)}</div>` : '';
       const wl = s.films.some(f => watch[f.url]) ? `<span class="wl" title="${t('onWatchlist')}" aria-label="${t('onWatchlist')}">◆</span>` : '';
-      const open = `${wl}<button type="button" class="info" data-info="${s.id}" title="${t('details')}" aria-label="${esc(t('detailsFor', { t: s.title }))}">ⓘ</button>`;
       const i = info[s.id];
+      const open = `${wl}<button type="button" class="mk" data-mk aria-pressed="${!!i}" aria-label="${esc(t(i ? 'unmarkSession' : 'markSession', { t: s.title }))}">${i ? '★' : '☆'}</button>`;
       const notes = notesHtml(s, i);
       const cls = ['s', i && 'on', i?.repeat.length && 'repeat', i?.rest.length && 'rest', i?.tight.length && 'tight', i?.clash.length && 'clash'].filter(Boolean).join(' ');
       const h = `calc(${min(s.end) - min(s.start)} * var(--px))`;
-      return `<div class="${cls}" role="button" tabindex="0" aria-pressed="${!!i}" data-id="${s.id}" data-a="${min(s.start)}" data-b="${min(s.end)}"
+      return `<div class="${cls}" role="button" tabindex="0" data-id="${s.id}" data-a="${min(s.start)}" data-b="${min(s.end)}"
         style="top:${px(min(s.start))};height:${h};--hgt:${h};--h:${hue(s.sections[0] || '')}"
         title="${esc(`${s.title}\n${credits}\n${s.sections.join(' · ')}\n${hhmm(toDate(s.start))}–${hhmm(toDate(s.end))} (${s.duration} min)`)}">
         <div class="t"><span>${hhmm(toDate(s.start))}–${hhmm(toDate(s.end))} · ${s.duration}′</span>${open}</div>
@@ -808,7 +880,7 @@ function toggle(el, e) {
   const r = el.getBoundingClientRect();
   const tap = e && e.clientX !== undefined && (e.clientX || e.clientY);
   const nu = toggleMark(+el.dataset.id, ...(tap ? [e.clientX - r.left, e.clientY - r.top] : []));
-  if (!tap) nu?.focus({ preventScroll: true }); // keep keyboard users in place; a tap needs no focus ring
+  if (!tap) nu?.querySelector('[data-mk]')?.focus({ preventScroll: true }); // keep keyboard users in place; a tap needs no focus ring
 }
 const grid = document.getElementById('grid');
 function setVenue(name, hide) {
@@ -819,10 +891,10 @@ function setVenue(name, hide) {
 grid.onclick = e => {
   const hide = e.target.closest('[data-hide]');
   if (hide) return setVenue(hide.dataset.hide, true);
-  const info = e.target.closest('[data-info]');
-  if (info) return openSheet(+info.dataset.info);
   const el = e.target.closest('.s');
-  if (el && !e.target.closest('a')) toggle(el, e);
+  if (!el) return;
+  if (e.target.closest('[data-mk]')) toggle(el, e);
+  else openSheet(+el.dataset.id);
 };
 // Hidden venues menu, opened from the "+N" button in the header corner.
 const hiddenMenu = document.getElementById('hiddenMenu');
@@ -850,16 +922,15 @@ hiddenMenu.onclick = e => {
 
 // First-run tip; the same text stays in Settings.
 const tip = document.getElementById('tip');
-tip.hidden = !!store.get('tipSeen', false);
-document.getElementById('tipClose').onclick = () => { tip.hidden = true; store.set('tipSeen', true); };
-grid.onkeydown = e => { const el = e.target.closest('.s'); if (el && !e.target.closest('[data-info]') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(el); } };
+tip.hidden = !!store.get('tipSeen2', false); // tipSeen2: tapping changed from marking to details, so show the new tip once
+document.getElementById('tipClose').onclick = () => { tip.hidden = true; store.set('tipSeen2', true); };
+grid.onkeydown = e => { if (e.target.matches('.s') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openSheet(+e.target.dataset.id); } };
 document.getElementById('days').onclick = e => { const b = e.target.closest('button'); if (b) render(b.dataset.day); };
 const onlyBox = document.getElementById('only');
 onlyBox.checked = only;
 onlyBox.onchange = () => { only = onlyBox.checked; store.set('only', only); render(current); };
 
 // Walk times panel: one row per pair of venues, saved as overrides of DEFAULT_WALK.
-const dialog = document.getElementById('walkDialog');
 function renderWalk() {
   const rows = [];
   locations.forEach((a, i) => locations.slice(i + 1).forEach(b => {
@@ -874,14 +945,13 @@ function saveWalk() {
   store.set('walkTimes', overrides);
   render(current);
 }
-document.getElementById('walkOpen').onclick = () => { renderWalk(); renderClear(); document.getElementById('minRest').value = minRest; dialog.showModal(); };
 
 // Replan: each clear needs a second tap within 4 s, then offers Undo for 10 s.
 const clears = {
   clearMarks: { count: () => marked.size, take: () => { const old = [...marked]; marked.clear(); store.set('marked', []); return old; },
                 give: old => { old.forEach(id => marked.add(id)); store.set('marked', [...marked]); } },
-  clearWatch: { count: () => Object.keys(watch).length, take: () => { const old = watch; watch = {}; saveWatch(); updateWatchCount(); return old; },
-                give: old => { watch = old; saveWatch(); updateWatchCount(); } },
+  clearWatch: { count: () => Object.keys(watch).length, take: () => { const old = watch; watch = {}; saveWatch(); updateCounts(); return old; },
+                give: old => { watch = old; saveWatch(); updateCounts(); } },
 };
 const clearState = {}; // id -> { mode: 'confirm' | 'undo', timer, old }
 function renderClear() {
@@ -927,12 +997,20 @@ document.querySelectorAll('dialog').forEach(dlg => dlg.addEventListener('click',
 
 // Detail sheet
 const sheet = document.getElementById('sheet');
+// Trailer the festival embeds (played in place on tap), else a YouTube search; plus an IMDb search. No API keys.
+const ext = (href, label) => `<a href="${href}" target="_blank" rel="noopener">${label} ↗</a>`;
+const filmExtras = (f, first = '') => {
+  const q = encodeURIComponent(f.query || f.title);
+  return `<div class="extras">${first}${f.trailer ? `<button type="button" class="wbtn" data-trailer="${esc(f.trailer)}">▶ ${t('trailer')}</button>`
+    : ext(`https://www.youtube.com/results?search_query=${q}+trailer`, t('searchTrailer'))}${ext(`https://www.imdb.com/find/?q=${q}`, 'IMDb')}</div>`;
+};
 function openSheet(id) {
   const s = byId[id];
   const on = marked.has(id);
+  delete sheet.dataset.film;
   const notes = notesHtml(s, analyse()[id]);
   const posters = s.films.filter(f => f.image).map(f => `<img src="${esc(f.image)}" alt="" loading="lazy">`).join('');
-  const films = s.films.map(f => `<li><a href="https://sitgesfilmfestival.com${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)} ↗</a><button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? t('watchOn') : t('watchAdd')}</button>${f.directors.length ? `<small>${esc(f.directors.join(', '))}</small>` : ''}${f.synopsis ? f.synopsis.split('\n').map(p => `<p class="syn">${esc(p)}</p>`).join('') : ''}</li>`).join('');
+  const films = s.films.map(f => `<li><a href="https://sitgesfilmfestival.com${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)} ↗</a><button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? t('watchOn') : t('watchAdd')}</button>${f.directors.length ? `<small>${esc(f.directors.join(', '))}</small>` : ''}${filmExtras(f)}${f.synopsis ? f.synopsis.split('\n').map(p => `<p class="syn">${esc(p)}</p>`).join('') : ''}</li>`).join('');
   sheet.innerHTML = `<button type="button" class="dlg-close" data-close aria-label="${t('close')}" title="${t('close')}">✕</button><form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
     ${posters ? `<div class="posters">${posters}</div>` : ''}
     <h2 id="sheetTitle" tabindex="-1" autofocus>${esc(s.title)}</h2>
@@ -942,12 +1020,16 @@ function openSheet(id) {
     ${notes ? `<div class="notes">${notes}</div>` : ''}
     <div class="walk-actions"><button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
   </form>`;
-  if (!sheet.open) sheet.showModal();
+  openPanel(sheet);
 }
 sheet.onclick = e => {
   const b = e.target.closest('[data-mark]');
   const w = e.target.closest('[data-watch]');
-  if (w) { toggleWatch(w.dataset.watch); openSheet(+sheet.querySelector('[data-mark]').dataset.mark); return; }
+  if (w) { toggleWatch(w.dataset.watch); if (activeView === 'films') renderFilms(); sheet.dataset.film ? openFilm(sheet.dataset.film) : openSheet(+sheet.querySelector('[data-mark]').dataset.mark); return; }
+  const go = e.target.closest('[data-goto]');
+  if (go) return goto(+go.dataset.goto);
+  const tr = e.target.closest('[data-trailer]');
+  if (tr) { (tr.closest('.film-head') || tr.closest('.extras')).insertAdjacentHTML('afterend', `<iframe class="trailer" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(tr.dataset.trailer)}?autoplay=1" title="${t('trailer')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`); tr.remove(); return; }
   if (b) { const id = +b.dataset.mark; toggleMark(id); openSheet(id); }
 };
 
@@ -983,7 +1065,7 @@ function openSync(prefill = '') {
   document.getElementById('syncCode').value = planCode();
   syncInput.value = prefill;
   previewImport();
-  syncDialog.showModal();
+  openPanel(syncDialog);
 }
 function flash(btn, text) { const old = btn.textContent; btn.textContent = text; setTimeout(() => btn.textContent = old, 1800); }
 async function copy(text, btn) {
@@ -1004,7 +1086,7 @@ syncImport.onclick = () => {
   marked.clear(); p.m.forEach(id => marked.add(id));
   hiddenVenues.clear(); p.h.forEach(l => hiddenVenues.add(l));
   walkTimes = { ...DEFAULT_WALK, ...p.w };
-  watch = p.l; saveWatch(); updateWatchCount();
+  watch = p.l; saveWatch(); updateCounts();
   minRest = p.r; store.set('minRest', minRest);
   store.set('marked', [...marked]); store.set('hiddenVenues', [...hiddenVenues]); store.set('walkTimes', walkOverrides());
   render(current);
@@ -1015,22 +1097,27 @@ syncImport.onclick = () => {
 };
 
 // Films view: all films or the watchlist, with the status of each watchlist film.
-const filmsDialog = document.getElementById('filmsDialog');
-const filmSearch = document.getElementById('filmSearch'), filmSection = document.getElementById('filmSection');
+const filmSearch = document.getElementById('filmSearch'), filmSections = document.getElementById('filmSections');
 let filmsTab = 'all';
-const updateWatchCount = () => { const n = Object.keys(watch).length; document.getElementById('watchCount').textContent = n || ''; };
-function toggleWatch(url, level) {
-  if (level === undefined) level = watch[url] ? 0 : 1;
-  if (level) watch[url] = level; else delete watch[url];
-  saveWatch(); updateWatchCount(); render(current);
+const chosenSecs = new Set(); // empty = all sections; a film matches if it is in any chosen one
+function toggleWatch(url) {
+  if (watch[url]) delete watch[url]; else watch[url] = 1;
+  saveWatch(); updateCounts(); render(current);
 }
 function renderSections() {
-  const perSection = {}, chosen = filmSection.value;
+  const perSection = {};
   for (const f of allFilms) for (const x of f.sections) perSection[x] = (perSection[x] || 0) + 1;
-  filmSection.innerHTML = `<option value="">${t('allSections')}</option>` + Object.keys(perSection).sort((a, b) => a.localeCompare(b, 'ca'))
-    .map(x => `<option value="${esc(x)}">${esc(x)} (${perSection[x]})</option>`).join('');
-  filmSection.value = chosen;
+  filmSections.innerHTML = `<button type="button" data-sec="" aria-pressed="${!chosenSecs.size}">${t('allSections')}</button>` + Object.keys(perSection).sort((a, b) => a.localeCompare(b, 'ca'))
+    .map(x => `<button type="button" data-sec="${esc(x)}" aria-pressed="${chosenSecs.has(x)}">${esc(x)} (${perSection[x]})</button>`).join('');
+  document.getElementById('secSummary').textContent = chosenSecs.size ? t('sectionsN', { n: chosenSecs.size }) : t('allSections');
 }
+filmSections.onclick = e => {
+  const b = e.target.closest('[data-sec]');
+  if (!b) return;
+  const x = b.dataset.sec;
+  if (!x) chosenSecs.clear(); else if (!chosenSecs.delete(x)) chosenSecs.add(x);
+  renderSections(); renderFilms();
+};
 const when = s => `${dayLabel(s.start)} ${hhmm(toDate(s.start))}`;
 
 // Why a screening can't be added: hidden venue, or it overlaps / leaves too little walk time with a marked session.
@@ -1054,15 +1141,52 @@ function filmStatus(f, mine) {
   return { key: 'blocked', rank: 0, text: t('cannotFit', { r: reasons.map(([s, r]) => `${when(s)} ${r}`).join('; ') }) };
 }
 
+const showButtons = (f, mine) => f.sessions.map(s => {
+  const r = !marked.has(s.id) && blockedBy(s, mine);
+  return `<button type="button" data-goto="${s.id}" class="${marked.has(s.id) ? 'on' : r ? 'off' : ''}" title="${esc(`${s.title} · ${s.location}${r ? ` · ${r}` : ''}`)}">${marked.has(s.id) ? '★ ' : ''}${when(s)} · ${esc(venue(s.location))}</button>`;
+}).join('');
+
+// Film sheet: the same detail panel as a session, for one film and all its screenings.
+function openFilm(url) {
+  const f = filmIndex[url], mine = [...marked].map(id => byId[id]).filter(Boolean);
+  sheet.dataset.film = url;
+  sheet.innerHTML = `<button type="button" class="dlg-close" data-close aria-label="${t('close')}" title="${t('close')}">✕</button><form method="dialog" class="sheet-body" style="--h:${hue(f.sections[0] || '')}">
+    <div class="film-head">
+      ${f.image ? `<img src="${esc(f.image)}" alt="" loading="lazy">` : ''}
+      <div>
+        <h2 id="sheetTitle" tabindex="-1" autofocus>${esc(f.title)}</h2>
+        ${f.directors.length ? `<div class="meta"><span>${esc(f.directors.join(', '))}</span></div>` : ''}
+        ${f.sections.length ? `<div class="secs">${f.sections.map(x => `<span style="--h:${hue(x)}">${esc(x)}</span>`).join('')}</div>` : ''}
+        <button type="button" class="wbtn${watch[url] ? ' on' : ''}" data-watch="${esc(url)}">${watch[url] ? t('watchOn') : t('watchAdd')}</button>
+        ${filmExtras(f, ext(`https://sitgesfilmfestival.com${esc(f.url)}`, t('festPage')))}
+      </div>
+    </div>
+    ${f.synopsis ? `<div>${f.synopsis.split('\n').map(p => `<p class="syn">${esc(p)}</p>`).join('')}</div>` : ''}
+    <h3 class="set-h">${t('screenings')}</h3>
+    <div class="fs">${showButtons(f, mine)}</div>
+  </form>`;
+  openPanel(sheet);
+}
+// A screening from Films or My plan: show it in the schedule with its details open.
+function goto(id) {
+  const show = () => {
+    if (hiddenVenues.has(byId[id].location)) setVenue(byId[id].location, false);
+    render(festDay(byId[id].start));
+    document.querySelector(`.s[data-id="${id}"]`)?.scrollIntoView({ block: 'center', inline: 'center' });
+    openSheet(id);
+  };
+  sheet.open ? closePanel(sheet, () => toSchedule(show)) : toSchedule(show);
+}
+
 function renderFilms() {
-  const q = norm(filmSearch.value), sec = filmSection.value;
+  const q = norm(filmSearch.value);
   const mine = [...marked].map(id => byId[id]).filter(Boolean);
   document.getElementById('tabWatch').textContent = t('tabWatch', { n: Object.keys(watch).length });
   document.querySelectorAll('.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === filmsTab));
-  let list = allFilms.filter(f => (filmsTab === 'all' || watch[f.url]) && (!sec || f.sections.includes(sec))
+  let list = allFilms.filter(f => (filmsTab === 'all' || watch[f.url]) && (!chosenSecs.size || f.sections.some(x => chosenSecs.has(x)))
     && (!q || norm(f.title).includes(q) || f.directors.some(d => norm(d).includes(q))));
   const status = new Map(list.filter(f => watch[f.url]).map(f => [f, filmStatus(f, mine)]));
-  if (filmsTab === 'watch') list.sort((a, b) => (watch[b.url] - watch[a.url]) || (status.get(a).rank - status.get(b).rank) || a.title.localeCompare(b.title, 'ca'));
+  if (filmsTab === 'watch') list.sort((a, b) => (status.get(a).rank - status.get(b).rank) || a.title.localeCompare(b.title, 'ca'));
 
   const wl = allFilms.filter(f => watch[f.url]).map(f => filmStatus(f, mine).key);
   const n = k => wl.filter(x => x === k).length;
@@ -1072,43 +1196,119 @@ function renderFilms() {
 
   document.getElementById('filmList').innerHTML = list.length ? list.map(f => {
     const w = watch[f.url], st = status.get(f);
-    const shows = f.sessions.map(s => {
-      const r = !marked.has(s.id) && blockedBy(s, mine);
-      return `<button type="button" data-goto="${s.id}" class="${marked.has(s.id) ? 'on' : r ? 'off' : ''}" title="${esc(`${s.title} · ${s.location}${r ? ` · ${r}` : ''}`)}">${marked.has(s.id) ? '★ ' : ''}${when(s)} · ${esc(venue(s.location))}</button>`;
-    }).join('');
-    return `<li class="film">
+    return `<li class="film" data-film="${esc(f.url)}">
       ${f.image ? `<img src="${esc(f.image)}" alt="" loading="lazy">` : '<span></span>'}
-      <div class="ft">${esc(f.title)}</div>
+      <button type="button" class="ft">${esc(f.title)}</button>
       <div class="acts">
-        ${w ? `<button type="button" class="must${w === 2 ? ' on' : ''}" data-must="${esc(f.url)}" title="${t('mustSee')}" aria-label="${t('mustSee')}" aria-pressed="${w === 2}">!</button>` : ''}
         <button type="button" class="${w ? 'on' : ''}" data-wl="${esc(f.url)}" aria-pressed="${!!w}" aria-label="${w ? t('removeFromList') : t('addToList')}">${w ? '✓' : '+'}</button>
       </div>
       <div class="fd">${esc(f.directors.join(', '))}${f.sections.length ? ` <span class="fsec">· ${esc(f.sections.join(' · '))}</span>` : ''}</div>
       ${st ? `<div class="st ${st.key}">${esc(st.text)}</div>` : ''}
-      <div class="fs">${shows}</div>
+      <div class="fs">${showButtons(f, mine)}</div>
     </li>`;
   }).join('') : `<li class="empty">${filmsTab === 'watch' && !Object.keys(watch).length ? t('emptyList') : t('noMatch')}</li>`;
 }
-document.getElementById('filmsOpen').onclick = () => { renderFilms(); filmsDialog.showModal(); };
-filmSearch.oninput = filmSection.onchange = renderFilms;
-filmsDialog.onclick = e => {
+filmSearch.oninput = renderFilms;
+document.getElementById('view-films').onclick = e => {
   const tab = e.target.closest('[data-tab]');
   if (tab) { filmsTab = tab.dataset.tab; document.getElementById('filmList').scrollTop = 0; return renderFilms(); }
   const add = e.target.closest('[data-wl]');
   if (add) { toggleWatch(add.dataset.wl); return renderFilms(); }
-  const must = e.target.closest('[data-must]');
-  if (must) { toggleWatch(must.dataset.must, watch[must.dataset.must] === 2 ? 1 : 2); return renderFilms(); }
   const go = e.target.closest('[data-goto]');
-  if (go) {
-    const id = +go.dataset.goto;
-    filmsDialog.close();
-    if (hiddenVenues.has(byId[id].location)) setVenue(byId[id].location, false);
-    render(festDay(byId[id].start));
-    document.querySelector(`.s[data-id="${id}"]`)?.scrollIntoView({ block: 'center', inline: 'center' });
-    openSheet(id);
-  }
+  if (go) return goto(+go.dataset.goto);
+  const film = e.target.closest('[data-film]');
+  if (film) openFilm(film.dataset.film);
 };
-updateWatchCount();
+
+// My plan: every marked session, by festival day, with the same warnings as the grid.
+function renderPlan(info = analyse()) {
+  const mine = [...marked].map(id => byId[id]).filter(Boolean).sort((a, b) => a.start.localeCompare(b.start));
+  const warnings = warningsHtml(mine, info);
+  document.getElementById('planSummary').innerHTML = mine.length
+    ? `<span>${tn('markedSessions', mine.length, { n: `<b>${mine.length}</b>` })}</span>${warnings || `<span class="ok">${t('noConflicts')}</span>`}` : '';
+  const at = now();
+  document.getElementById('planList').innerHTML = mine.length ? days.filter(d => mine.some(s => festDay(s.start) === d)).map(d => {
+    const date = new Date(d + 'T12:00').toLocaleDateString(LOCALE[LANG], { weekday: 'long', day: 'numeric', month: 'long' });
+    const rows = mine.filter(s => festDay(s.start) === d).map(s => {
+      const i = info[s.id];
+      const cls = ['prow', i.clash.length ? 'clash' : i.tight.length ? 'tight' : i.rest.length ? 'rest' : '', toDate(s.end) < at && 'past'].filter(Boolean).join(' ');
+      return `<li class="${cls}" role="button" tabindex="0" data-open="${s.id}" style="--h:${hue(s.sections[0] || '')}">
+        <div class="pt"><b>${hhmm(toDate(s.start))}</b><span>${hhmm(toDate(s.end))}</span></div>
+        <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)}</div>${notesHtml(s, i)}</div></li>`;
+    }).join('');
+    return `<section class="pday" id="plan-${d}"><h3><span>${esc(date)}</span><button type="button" data-day="${d}">${t('seeDay')}</button></h3><ol>${rows}</ol></section>`;
+  }).join('') : `<p class="empty">${t('planEmpty')}</p>`;
+}
+const planList = document.getElementById('planList');
+planList.onclick = e => {
+  const day = e.target.closest('[data-day]');
+  if (day) return toSchedule(() => render(day.dataset.day));
+  const row = e.target.closest('[data-open]');
+  if (row) openSheet(+row.dataset.open);
+};
+planList.onkeydown = e => { if (e.target.matches('[data-open]') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openSheet(+e.target.dataset.open); } };
+
+function updateCounts() {
+  document.getElementById('watchCount').textContent = Object.keys(watch).length || '';
+  document.getElementById('planCount').textContent = marked.size || '';
+}
+
+// Sections. The schedule is home: another section sits one history entry above it, so Back returns to the schedule
+// and Back on the schedule leaves the app. Every open panel is one more entry, so Back closes it first.
+let activeView = 'schedule';
+const scroller = document.getElementById('scroller');
+let scheduleScroll = null; // hiding the schedule loses its scroll position; keep it by hand
+const VIEWS = ['films', 'plan', 'settings']; // besides the schedule, which is home
+const urlFor = v => location.search.replace(/[?&]import=[^&]*/, '') + '#' + (v === 'schedule' ? current : v);
+function showView(v) {
+  if (v === activeView) return;
+  if (activeView === 'schedule') scheduleScroll = [scroller.scrollLeft, scroller.scrollTop];
+  const order = ['schedule', ...VIEWS], dx = order.indexOf(v) > order.indexOf(activeView) ? '32px' : '-32px';
+  activeView = v;
+  document.querySelectorAll('.view').forEach(el => el.hidden = el.id !== 'view-' + v);
+  const el = document.getElementById('view-' + v);
+  el.style.setProperty('--dx', dx);
+  el.classList.remove('entering'); void el.offsetWidth; el.classList.add('entering'); // restart the animation
+  document.querySelectorAll('#views [data-view]').forEach(b => b.dataset.view === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  if (v === 'schedule') { render(current); if (scheduleScroll) [scroller.scrollLeft, scroller.scrollTop] = scheduleScroll; }
+  if (v === 'films') renderFilms();
+  if (v === 'settings') { renderWalk(); renderClear(); document.getElementById('minRest').value = minRest; }
+  if (v === 'plan') { renderPlan(); document.getElementById('plan-' + nowDay())?.scrollIntoView(); }
+}
+function navigate(v) {
+  if (v === activeView) return;
+  if (v === 'schedule') return toSchedule();
+  if (activeView === 'schedule') history.pushState({ fromHome: true }, '', urlFor(v));
+  else history.replaceState(history.state, '', urlFor(v));
+  showView(v);
+}
+// Back to the schedule, then run `then` once it shows (going back is async).
+let afterPop = null;
+function toSchedule(then) {
+  if (activeView !== 'schedule' && history.state?.fromHome) { afterPop = then; history.back(); return; }
+  if (activeView !== 'schedule') { history.replaceState(null, '', urlFor('schedule')); showView('schedule'); }
+  then?.();
+}
+function openPanel(dlg) {
+  if (dlg.open) return;
+  dlg.showModal();
+  history.pushState({ ...history.state, panel: true }, '');
+}
+// Close a panel and run `then` after its history entry is gone.
+function closePanel(dlg, then) {
+  if (dlg.open && history.state?.panel) { afterPop = then; dlg.close(); return; }
+  dlg.close(); then?.();
+}
+// However a panel closes (✕, Esc, backdrop, Android back gesture), drop its history entry.
+document.querySelectorAll('dialog').forEach(dlg => dlg.addEventListener('close', () => { if (history.state?.panel) history.back(); }));
+addEventListener('popstate', () => {
+  document.querySelector('dialog[open]')?.close(); // Back with a panel open closes it
+  const h = location.hash.slice(1);
+  showView(VIEWS.includes(h) ? h : 'schedule');
+  if (activeView === 'schedule' && days.includes(h) && h !== current) render(h);
+  const then = afterPop; afterPop = null; then?.();
+});
+document.getElementById('views').onclick = e => { const b = e.target.closest('[data-view]'); if (b) navigate(b.dataset.view); };
 
 document.getElementById('next').onclick = e => {
   const id = +e.currentTarget.dataset.id;
@@ -1143,10 +1343,12 @@ applyLanguage();
 const hashDay = location.hash.slice(1);
 render(days.includes(hashDay) ? hashDay : days.includes(nowDay()) ? nowDay() : days[0]);
 if (current === nowDay()) scrollToNow();
+document.querySelector('#views [data-view="schedule"]').setAttribute('aria-current', 'page');
+if (VIEWS.includes(hashDay)) navigate(hashDay);
 setInterval(renderNow, 30000);
 const importCode = new URLSearchParams(location.search).get('import');
 if (importCode) {
-  history.replaceState(null, '', location.pathname + (NOW_OVERRIDE ? `?now=${encodeURIComponent(NOW_OVERRIDE)}` : '') + location.hash);
+  history.replaceState(history.state, '', location.pathname + (NOW_OVERRIDE ? `?now=${encodeURIComponent(NOW_OVERRIDE)}` : '') + location.hash);
   openSync(importCode);
 }
 matchMedia('(max-width: 640px)').addEventListener('change', () => render(current));

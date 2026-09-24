@@ -9,6 +9,7 @@ def load(pattern, key):
 films = {f['id']: f for f in load('films/*.json', 'films')}
 sessions = load('pages/*.json', 'sessions')
 directors = json.load(open('directors.json'))
+trailers = json.load(open('trailers.json'))
 cats = json.load(open('categories.json'))
 sections = {s['id']: s['name']['ca'] for s in cats['sections']}
 locations = {l['id']: l['name']['ca'] for l in json.load(open('locations.json'))['locations']}
@@ -21,13 +22,16 @@ def text(h):
     h = html.unescape(re.sub(r'<[^>]+>', '', h)).replace('\xa0', ' ')
     return '\n'.join(l.strip() for l in h.split('\n') if l.strip())
 
+def query(f):  # search text for YouTube and IMDb: original title and year
+    return (f['original_title'] or f['title']['en']).strip(' "') + (f' {f["year"]}' if f['year'] else '')
+
 out = []
 for s in sessions:
     fs = [films[i] for i in s['films'] if i in films]
     out.append({
         'id': s['internal_id'],
         'title': s['name']['ca'],
-        'films': [{'title': f['title']['ca'], 'directors': directors.get(f['id'], []), 'url': f['url']['ca'], 'image': f['image'], 'synopsis': text(f['synopsis']['ca']), 'sections': sorted({sections.get(x, x) for x in f['sections']})} for f in fs],
+        'films': [{'title': f['title']['ca'], 'directors': directors.get(f['id'], []), 'url': f['url']['ca'], 'image': f['image'], 'synopsis': text(f['synopsis']['ca']), 'sections': sorted({sections.get(x, x) for x in f['sections']}), 'trailer': trailers.get(f['id']), 'query': query(f)} for f in fs],
         'sections': sorted({sections.get(x, x) for f in fs for x in f['sections']}),
         'location': ', '.join(locations.get(x, x) for x in s['locations']),
         'start': s['start_date'],

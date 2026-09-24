@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-09-24
+
+### Added
+- The app now has three sections: Programa (the schedule), Pel·lícules and El meu pla. On phones they sit in a bar at the bottom of the screen, with an icon for each, and each section slides in when you switch.
+- El meu pla lists all your marked sessions day by day, with their warnings. Tap one to see its details, or jump to that day in the schedule.
+- The phone's Back button now closes the open panel or goes back to the schedule, instead of leaving the app.
+- Tap a film in Pel·lícules to see its details: poster, director, sections, synopsis and all its screenings.
+- In Pel·lícules you can pick several sections at once.
+- Film details show the trailer when the festival has one (it plays right there), or a link to search for it on YouTube, plus a link to search the film on IMDb.
+
+### Changed
+- Tapping a session now opens its details. To mark it, tap the ☆ on the session, or Marca in its details.
+- Ajustos is now a page of its own, and Sync is inside it.
+- In sessions with several films, each film now has a plain dot instead of a red star, so it no longer looks like the watchlist mark.
+- The red watchlist diamond on sessions is bigger and easier to spot.
+
+### Removed
+- The Imprescindible (!) mark on watchlist films. It only changed the order of the list.
+
 ## [1.8.2] - 2026-09-23
 
 ### Fixed

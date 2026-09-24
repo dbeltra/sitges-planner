@@ -11,6 +11,7 @@ The festival data is downloaded once and stored locally; the raw files are not c
 ```sh
 python3 data/fetch.py      # download the programme (only pages whose version changed)
 python3 data/directors.py  # director names; fetches only film pages not cached yet
+python3 data/trailers.py   # YouTube trailer ids from the film pages (same cache)
 python3 data/build.py      # write data/schedule.js for the app
 ```
 
