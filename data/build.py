@@ -31,7 +31,7 @@ for s in sessions:
     out.append({
         'id': s['internal_id'],
         'title': s['name']['ca'],
-        'films': [{'title': f['title']['ca'], 'directors': directors.get(f['id'], []), 'url': f['url']['ca'], 'image': f['image'], 'synopsis': text(f['synopsis']['ca']), 'sections': sorted({sections.get(x, x) for x in f['sections']}), 'trailer': trailers.get(f['id']), 'query': query(f)} for f in fs],
+        'films': [{'title': f['title']['ca'], 'directors': directors.get(f['id'], []), 'url': f['url']['ca'], 'image': f['image'], 'synopsis': text(f['synopsis']['ca']), 'sections': sorted({sections.get(x, x) for x in f['sections']}), 'trailer': trailers.get(f['id']), 'query': query(f), 'runtime': f['duration'] or None} for f in fs],
         'sections': sorted({sections.get(x, x) for f in fs for x in f['sections']}),
         'location': ', '.join(locations.get(x, x) for x in s['locations']),
         'start': s['start_date'],

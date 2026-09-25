@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-09-25
+
+### Added
+- Priorities for watchlist films: 1 Imprescindible, 2 M'agradaria (the default) and 3 Si hi cap. Change them in Pel·lícules or in a film's details. La meva llista is grouped by priority, with how many films of each are covered.
+- Automatic planning in El meu pla: it suggests one screening for each watchlist film, without touching the sessions you already marked. Must-see films come first and are never dropped for lower ones; "Si hi cap" films only fill gaps in days you already have. Suggestions show up in your plan, and you can remove any of them before adding them all (with Undo).
+- For every must-see or want-to-see film that doesn't fit, it tells you why, and which of your sessions is in the way.
+- Each film's running time, next to the director in Pel·lícules and in the details, including every film inside a session with several.
+- Ajustos: a maximum number of sessions a day for automatic planning (4 by default). Must-see films may go over it.
+
+### Changed
+- Hiding a venue only tidies the schedule now. Its sessions still count as free in Pel·lícules, and automatic planning can suggest them.
+- Films you had marked Imprescindible before become priority 1, and the rest priority 2. Plans shared from older versions convert the same way.
+
 ## [2.0.1] - 2026-09-24
 
 ### Changed

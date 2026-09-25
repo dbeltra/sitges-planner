@@ -248,6 +248,18 @@
   .film .acts { display: flex; gap: 4px; grid-row: 1 / span 2; grid-column: 3; }
   .film .acts button { min-width: 34px; height: 30px; padding: 0 8px; border: 1px solid var(--ink); background: none; font-weight: 700; cursor: pointer; }
   .film .acts button.on { background: var(--ink); color: var(--surface); }
+  .film .acts button.rm { min-width: 30px; border-color: var(--line); color: var(--muted); font-weight: 400; }
+  /* Priority tiers: 1 must see (red), 2 want (black), 3 if it fits (grey) */
+  .tiers { display: inline-flex; }
+  .tiers button { min-width: 30px; height: 30px; padding: 0; border: 1px solid var(--ink); background: none; font: 700 12px/1 var(--body); cursor: pointer; }
+  .tiers button + button { border-left: 0; }
+  .tiers button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+  .tiers button[data-tier="1"][aria-pressed="true"] { background: var(--red); border-color: var(--red); color: #fff; }
+  .tiers button[data-tier="3"][aria-pressed="true"] { background: var(--muted); border-color: var(--muted); }
+  .sheet .wrow { display: flex; gap: 8px; align-items: center; }
+  .sheet .wrow .tiers button { min-width: 26px; height: 24px; font-size: 11px; }
+  .film-list .tier-h { display: flex; justify-content: space-between; gap: 12px; padding: 16px 0 6px; border-bottom: 2px solid var(--ink); font-size: 12px; color: var(--muted); list-style: none; }
+  .film-list .tier-h b { font: 700 14px/1.1 var(--display); text-transform: uppercase; color: var(--ink); }
   .film .st { grid-column: 2 / -1; font-size: 12px; font-weight: 600; }
   .film .st.covered { color: #2E7D32; } .film .st.open { color: var(--muted); } .film .st.blocked { color: var(--clash); }
   .film-list .empty { padding: 30px 0; color: var(--muted); text-align: center; }
@@ -298,6 +310,20 @@
   .prow .pmeta { font-size: 12px; color: var(--muted); }
   .prow .note { display: block; margin-top: 3px; font-size: 12px; font-weight: 700; }
   .prow .warn { color: var(--clash); } .prow .tight { color: var(--tight); } .prow .repeat { color: #6B55B0; } .prow .rest { color: var(--rest); } .prow .gap { color: var(--muted); font-weight: 500; }
+  .auto { display: grid; gap: 10px; margin-top: 14px; padding: 12px 14px; background: var(--ground); font-size: 13px; }
+  .auto p { margin: 0; color: var(--muted); }
+  .auto p b { color: var(--ink); }
+  .auto.on { box-shadow: inset 4px 0 0 var(--ink); }
+  .auto .walk-actions { justify-content: flex-end; }
+  .unfit { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 12px; }
+  .unfit li { display: grid; gap: 1px; }
+  .unfit small { font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 9.5px; }
+  .unfit .t1 small { color: var(--clash); } .unfit .t2 small { color: var(--muted); }
+  .unfit span { color: var(--muted); }
+  .prow.prop { grid-template-columns: 50px 1fr auto; background: repeating-linear-gradient(-45deg, transparent 0 8px, rgb(0 0 0 / .03) 8px 16px); outline: 1px dashed var(--muted); outline-offset: -1px; }
+  .prow .plabel { font: 700 9.5px/1.3 var(--body); letter-spacing: 1px; text-transform: uppercase; color: var(--red); }
+  .prow .rej { align-self: start; width: 32px; height: 32px; border: 0; background: none; color: var(--muted); font-size: 15px; cursor: pointer; }
+  .prow .rej:hover { color: var(--clash); }
   .plan-list .empty { padding: 30px 0; color: var(--muted); text-align: center; }
 
   /* Sync */
@@ -420,6 +446,8 @@
   <form>
     <label class="rest-row" for="minRest"><span data-i18n-html="restHelp"></span>
       <span><input type="number" id="minRest" min="0" max="16" step="0.5"> <small data-i18n="hours">hours</small></span></label>
+    <label class="rest-row" for="maxPerDay"><span data-i18n-html="maxDayHelp"></span>
+      <span><input type="number" id="maxPerDay" min="0" max="12" step="1"> <small data-i18n="perDay">a day</small></span></label>
     <h3 class="set-h" data-i18n="walkTimes">Walk times</h3>
     <p data-i18n="walkHelp"></p>
     <div id="walkRows" class="walk-rows"></div>
@@ -467,7 +495,7 @@
 </dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.0.1'; // bump on every change so a device can show which code it runs
+const BUILD = '2.1.0'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -489,7 +517,17 @@ const STR = {
     hours: 'hores', walkTimes: 'Temps a peu',
     walkHelp: "Minuts que necessites per anar d'una sala a l'altra, en tots dos sentits. Un canvi de sala amb menys temps lliure es marca com a just.",
     reset: 'Restableix els valors per defecte', done: 'Fet', close: 'Tanca',
-    tabAll: 'Totes les pel·lícules', tabWatch: 'La meva llista ({n})', searchFilms: 'Cerca per títol o director', section: 'Secció', allSections: 'Totes les seccions', sectionsN: 'Seccions ({n})', screenings: 'Passis', otherScreenings: 'Altres passis', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
+    tabAll: 'Totes les pel·lícules', tabWatch: 'La meva llista ({n})', searchFilms: 'Cerca per títol o director', section: 'Secció', allSections: 'Totes les seccions', sectionsN: 'Seccions ({n})', screenings: 'Passis', otherScreenings: 'Altres passis',
+    tier1: 'Imprescindible', tier2: "M'agradaria", tier3: 'Si hi cap', priority: 'Prioritat', tierCounts: '{c} de {n} cobertes · {b} no hi caben',
+    maxDayHelp: "<b>Màxim de sessions per dia</b> a la planificació automàtica. Les imprescindibles el poden superar. 0 vol dir sense límit.", perDay: 'per dia',
+    autoPlan: 'Planifica automàticament', autoHelp: "Proposa sessions per a les pel·lícules de la teva llista, per ordre de prioritat, sense tocar les que ja has marcat.",
+    autoNeedsList: 'Per planificar automàticament, afegeix pel·lícules a la teva llista a Pel·lícules.',
+    proposedN: { one: '{n} sessió proposada', other: '{n} sessions proposades' }, coversN: { one: 'cobreix {n} pel·lícula de la llista', other: 'cobreix {n} pel·lícules de la llista' },
+    nothingToAdd: 'No hi ha cap sessió més que hi càpiga.', acceptAll: 'Afegeix-les totes', discard: 'Descarta', undo: 'Desfés',
+    addedN: { one: '{n} sessió afegida al pla.', other: '{n} sessions afegides al pla.' },
+    proposed: 'Proposada', propCovers: 'Per a {f}', rejectOne: 'Treu aquesta proposta',
+    isPast: 'ja ha passat', shortNight: 'deixa poc descans amb {t}', gapOnly: 'allargaria el dia', dayFull: { one: 'el dia ja té {n} sessió', other: 'el dia ja té {n} sessions' },
+    keptForOthers: 'deixada per encabir-ne d’altres', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
     syncTitle: 'Sincronització', syncHelp: "El teu pla només es desa en aquest dispositiu. Per passar-lo a un altre, envia'l des d'aquí i obre'l a l'altre.",
     sendPlan: 'Envia aquest pla', planCode: 'Codi del pla', copyCode: 'Copia el codi', shareLink: "Comparteix l'enllaç",
     receivePlan: 'Rep un pla', pastePlan: 'Enganxa un codi o un enllaç', replacePlan: 'Substitueix el meu pla',
@@ -515,7 +553,7 @@ const STR = {
     walkEdits: { one: '{n} temps a peu editat', other: '{n} temps a peu editats' },
     replacesWith: 'Això substituirà el teu pla per: {d}.', invalidPlan: "Això no és un codi ni un enllaç de pla vàlid. Torna'l a copiar de l'altre dispositiu.",
     thisDevice: 'Aquest dispositiu: {d}.', imported: 'Importat: {d}.', copied: 'Copiat', selectCopy: 'Selecciona i copia', shareTitle: 'El meu pla del Sitges 2026',
-    isHidden: '{v} està amagada', overlapsWith: 'se solapa amb {t}', tooClose: 'massa a prop de {t}',
+    overlapsWith: 'se solapa amb {t}', tooClose: 'massa a prop de {t}',
     covered: '✓ Coberta · {when} · {v}', notPlanned: { one: 'Encara no planificada · {free} de {n} passi lliure', other: 'Encara no planificada · {free} de {n} passis lliures' },
     cannotFit: '⚠ No hi cap: {r}',
     watchSummary: '<b>{c} de {n}</b> cobertes · {o} sense planificar · {b}',
@@ -537,7 +575,17 @@ const STR = {
     hours: 'hours', walkTimes: 'Walk times',
     walkHelp: 'Minutes you need to go from one venue to the other, in both directions. A change of location with less free time than this shows as tight.',
     reset: 'Reset to defaults', done: 'Done', close: 'Close',
-    tabAll: 'All films', tabWatch: 'My watchlist ({n})', searchFilms: 'Search title or director', section: 'Section', allSections: 'All sections', sectionsN: 'Sections ({n})', screenings: 'Screenings', otherScreenings: 'Other screenings', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
+    tabAll: 'All films', tabWatch: 'My watchlist ({n})', searchFilms: 'Search title or director', section: 'Section', allSections: 'All sections', sectionsN: 'Sections ({n})', screenings: 'Screenings', otherScreenings: 'Other screenings',
+    tier1: 'Must see', tier2: 'Want to see', tier3: 'If it fits', priority: 'Priority', tierCounts: '{c} of {n} covered · {b} cannot fit',
+    maxDayHelp: '<b>Maximum sessions a day</b> for auto-planning. Must-see films may go over it. 0 means no limit.', perDay: 'a day',
+    autoPlan: 'Auto-plan', autoHelp: 'Suggests sessions for your watchlist films, by priority, without touching the ones you already marked.',
+    autoNeedsList: 'To auto-plan, add films to your watchlist in Films.',
+    proposedN: { one: '{n} suggested session', other: '{n} suggested sessions' }, coversN: { one: 'covers {n} watchlist film', other: 'covers {n} watchlist films' },
+    nothingToAdd: 'No more sessions fit.', acceptAll: 'Add them all', discard: 'Discard', undo: 'Undo',
+    addedN: { one: '{n} session added to your plan.', other: '{n} sessions added to your plan.' },
+    proposed: 'Suggested', propCovers: 'For {f}', rejectOne: 'Remove this suggestion',
+    isPast: 'already over', shortNight: 'too little rest around {t}', gapOnly: 'would make the day longer', dayFull: { one: 'that day already has {n} session', other: 'that day already has {n} sessions' },
+    keptForOthers: 'left out to fit others in', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
     syncTitle: 'Sync', syncHelp: 'Your plan is saved only on this device. To move it, send it from this device and open it on the other one.',
     sendPlan: 'Send this plan', planCode: 'Plan code', copyCode: 'Copy code', shareLink: 'Share link',
     receivePlan: 'Receive a plan', pastePlan: 'Paste a code or a link', replacePlan: 'Replace my plan',
@@ -563,7 +611,7 @@ const STR = {
     walkEdits: { one: '{n} edited walk time', other: '{n} edited walk times' },
     replacesWith: 'This replaces your plan with {d}.', invalidPlan: 'This is not a valid plan code or link. Copy it again from the other device.',
     thisDevice: 'This device: {d}.', imported: 'Imported: {d}.', copied: 'Copied', selectCopy: 'Select and copy', shareTitle: 'My Sitges 2026 plan',
-    isHidden: '{v} is hidden', overlapsWith: 'overlaps {t}', tooClose: 'too close to {t}',
+    overlapsWith: 'overlaps {t}', tooClose: 'too close to {t}',
     covered: '✓ Covered · {when} · {v}', notPlanned: { one: 'Not planned yet · {free} of {n} screening free', other: 'Not planned yet · {free} of {n} screenings free' },
     cannotFit: '⚠ Cannot fit: {r}',
     watchSummary: '<b>{c} of {n}</b> covered · {o} not planned · {b}',
@@ -619,9 +667,13 @@ const days = Object.keys(byDay).sort();
 const ORDER = ['Cinema Casino Prado', 'Cinema Escorxador', 'Mercat Vell', 'Sala Auditori Meliá', 'Brigadoon', 'Sala Tramuntana Meliá'];
 const SHORT = { 'Cinema Casino Prado': 'Prado', 'Cinema Escorxador': 'Escorxador', 'Sala Auditori Meliá': 'Auditori', 'Sala Tramuntana Meliá': 'Tramuntana' };
 const locations = [...new Set(SCHEDULE.map(s => s.location))].sort((a, b) => (ORDER.indexOf(a) + 1 || 99) - (ORDER.indexOf(b) + 1 || 99));
-// Watchlist: film page URL -> 1 (older plans may hold 2, the dropped must-see level; any value counts as on the list). Films are keyed by URL, as in the repeat warnings.
+// Watchlist: film page URL -> priority tier: 1 must see, 2 want to see (the default), 3 if it fits. Films are keyed by URL, as in the repeat warnings.
+// Before tiers the values were 1 (want) and 2 (must see); oldTiers converts them, here and in old plan codes.
+const oldTiers = l => Object.fromEntries(Object.entries(l).map(([u, v]) => [u, v === 2 ? 1 : 2]));
 let watch = store.get('watch', {});
+if (store.get('watchTiers') !== 1) { watch = oldTiers(watch); store.set('watch', watch); store.set('watchTiers', 1); }
 const saveWatch = () => store.set('watch', watch);
+let maxPerDay = store.get('maxPerDay', 4); // auto-plan: sessions a day, 0 = no limit; must-see films may go over it
 const filmIndex = {};
 for (const s of SCHEDULE) for (const f of s.films) (filmIndex[f.url] ??= { ...f, sessions: [] }).sessions.push(s);
 for (const f of Object.values(filmIndex)) f.sessions.sort((a, b) => a.start.localeCompare(b.start));
@@ -992,6 +1044,11 @@ document.querySelector('.clear-row').onclick = e => {
   else { c.give(st.old); setClear(id, null); }
   render(current);
 };
+document.getElementById('maxPerDay').oninput = e => {
+  if (e.target.value === '') return;
+  maxPerDay = Math.min(12, Math.max(0, Math.round(+e.target.value) || 0));
+  store.set('maxPerDay', maxPerDay);
+};
 document.getElementById('minRest').oninput = e => {
   if (e.target.value === '') return;
   minRest = Math.min(16, Math.max(0, +e.target.value || 0));
@@ -1044,6 +1101,8 @@ sheet.onclick = e => {
   if (w) { toggleWatch(w.dataset.watch); if (activeView === 'films') renderFilms(); sheet.dataset.film ? openFilm(sheet.dataset.film) : openSheet(+sheet.querySelector('[data-mark]').dataset.mark); return; }
   const go = e.target.closest('[data-goto]');
   if (go) return goto(+go.dataset.goto);
+  const tier = e.target.closest('[data-tier]');
+  if (tier) { setTier(tier.dataset.url, +tier.dataset.tier); if (activeView === 'films') renderFilms(); sheet.dataset.film ? openFilm(sheet.dataset.film) : openSheet(+sheet.querySelector('[data-mark]').dataset.mark); return; }
   const tr = e.target.closest('[data-trailer]');
   if (tr) { (tr.closest('.film-head') || tr.closest('.extras')).insertAdjacentHTML('afterend', `<iframe class="trailer" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(tr.dataset.trailer)}?autoplay=1" title="${t('trailer')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`); tr.remove(); return; }
   if (b) { const id = +b.dataset.mark; toggleMark(id); openSheet(id); }
@@ -1054,7 +1113,7 @@ const syncDialog = document.getElementById('syncDialog');
 const b64 = { enc: str => btoa(String.fromCharCode(...new TextEncoder().encode(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
               dec: code => new TextDecoder().decode(Uint8Array.from(atob(code.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))) };
 const walkOverrides = () => Object.fromEntries(Object.entries(walkTimes).filter(([k, v]) => v !== DEFAULT_WALK[k]));
-const planCode = () => b64.enc(JSON.stringify({ v: 1, m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch, r: minRest }));
+const planCode = () => b64.enc(JSON.stringify({ v: 2, m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch, r: minRest, d: maxPerDay }));
 const planLink = () => `${location.origin}${location.pathname}?import=${planCode()}`;
 const describe = p => [tn('markedSessions', p.m.length), tn('watchFilms', Object.keys(p.l || {}).length), tn('hiddenVenues', p.h.length), tn('walkEdits', Object.keys(p.w).length)].join(', ');
 function parsePlan(text) {
@@ -1064,10 +1123,12 @@ function parsePlan(text) {
   try { code = new URL(raw).searchParams.get('import') || raw; } catch {}
   try {
     const p = JSON.parse(b64.dec(code));
-    if (p.v !== 1 || !Array.isArray(p.m) || !Array.isArray(p.h) || typeof p.w !== 'object') return null;
-    const l = p.l && typeof p.l === 'object' ? Object.fromEntries(Object.entries(p.l).filter(([u, v]) => filmIndex[u] && (v === 1 || v === 2))) : {};
+    if ((p.v !== 1 && p.v !== 2) || !Array.isArray(p.m) || !Array.isArray(p.h) || typeof p.w !== 'object') return null;
+    let l = p.l && typeof p.l === 'object' ? Object.fromEntries(Object.entries(p.l).filter(([u, v]) => filmIndex[u] && [1, 2, 3].includes(v))) : {};
+    if (p.v === 1) l = oldTiers(l); // v1 codes: 1 want, 2 must see
     const r = Number.isFinite(p.r) && p.r >= 0 && p.r <= 16 ? p.r : DEFAULT_REST;
-    return { r, m: p.m.filter(id => byId[id]), h: p.h.filter(l => locations.includes(l)), w: Object.fromEntries(Object.entries(p.w).filter(([k, v]) => k in DEFAULT_WALK && Number.isFinite(v) && v >= 0)), l };
+    const d = Number.isInteger(p.d) && p.d >= 0 && p.d <= 12 ? p.d : maxPerDay;
+    return { r, d, m: p.m.filter(id => byId[id]), h: p.h.filter(l => locations.includes(l)), w: Object.fromEntries(Object.entries(p.w).filter(([k, v]) => k in DEFAULT_WALK && Number.isFinite(v) && v >= 0)), l };
   } catch { return null; }
 }
 const syncInput = document.getElementById('syncInput'), syncPreview = document.getElementById('syncPreview'), syncImport = document.getElementById('syncImport');
@@ -1104,6 +1165,7 @@ syncImport.onclick = () => {
   walkTimes = { ...DEFAULT_WALK, ...p.w };
   watch = p.l; saveWatch(); updateCounts();
   minRest = p.r; store.set('minRest', minRest);
+  maxPerDay = p.d; store.set('maxPerDay', maxPerDay);
   store.set('marked', [...marked]); store.set('hiddenVenues', [...hiddenVenues]); store.set('walkTimes', walkOverrides());
   render(current);
   syncPreview.textContent = t('imported', { d: describe(p) });
@@ -1117,9 +1179,15 @@ const filmSearch = document.getElementById('filmSearch'), filmSections = documen
 let filmsTab = 'all';
 const chosenSecs = new Set(); // empty = all sections; a film matches if it is in any chosen one
 function toggleWatch(url) {
-  if (watch[url]) delete watch[url]; else watch[url] = 1;
+  if (watch[url]) delete watch[url]; else watch[url] = 2;
   saveWatch(); updateCounts(); render(current);
 }
+function setTier(url, tier) { watch[url] = tier; saveWatch(); render(current); }
+const TIERS = [1, 2, 3];
+const tierName = n => t('tier' + n);
+// Priority picker for a watchlist film: three small buttons, 1 = must see.
+const tierHtml = url => `<span class="tiers" role="group" aria-label="${t('priority')}">${TIERS.map(n =>
+  `<button type="button" data-tier="${n}" data-url="${esc(url)}" aria-pressed="${watch[url] === n}" title="${tierName(n)}" aria-label="${tierName(n)}">${n}</button>`).join('')}</span>`;
 function renderSections() {
   const perSection = {};
   for (const f of allFilms) for (const x of f.sections) perSection[x] = (perSection[x] || 0) + 1;
@@ -1136,9 +1204,8 @@ filmSections.onclick = e => {
 };
 const when = s => `${dayLabel(s.start)} ${hhmm(toDate(s.start))}`;
 
-// Why a screening can't be added: hidden venue, or it overlaps / leaves too little walk time with a marked session.
+// Why a screening can't be added: it overlaps or leaves too little walk time with a marked session. Hidden venues only tidy the grid; they block nothing.
 function blockedBy(s, mine) {
-  if (hiddenVenues.has(s.location)) return t('isHidden', { v: venue(s.location) });
   for (const o of mine) {
     if (o === s) continue;
     const [a, b] = o.start < s.start ? [o, s] : [s, o];
@@ -1172,9 +1239,9 @@ function filmHtml(f, sessionId, heading, small = false) {
       ${f.image ? `<img src="${esc(f.image)}" alt="" loading="lazy">` : ''}
       <div>
         ${heading}
-        ${f.directors.length ? `<div class="meta"><span>${esc(f.directors.join(', '))}</span></div>` : ''}
+        ${f.directors.length || f.runtime ? `<div class="meta"><span>${[esc(f.directors.join(', ')), f.runtime && dur(f.runtime)].filter(Boolean).join(' · ')}</span></div>` : ''}
         ${f.sections.length ? secsHtml(f.sections) : ''}
-        <button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? t('watchOn') : t('watchAdd')}</button>
+        <span class="wrow"><button type="button" class="wbtn${watch[f.url] ? ' on' : ''}" data-watch="${esc(f.url)}">${watch[f.url] ? t('watchOn') : t('watchAdd')}</button>${watch[f.url] ? tierHtml(f.url) : ''}</span>
         ${filmExtras(f, ext(`https://sitgesfilmfestival.com${esc(f.url)}`, t('festPage')))}
       </div>
     </div>
@@ -1211,7 +1278,7 @@ function renderFilms() {
   let list = allFilms.filter(f => (filmsTab === 'all' || watch[f.url]) && (!chosenSecs.size || f.sections.some(x => chosenSecs.has(x)))
     && (!q || norm(f.title).includes(q) || f.directors.some(d => norm(d).includes(q))));
   const status = new Map(list.filter(f => watch[f.url]).map(f => [f, filmStatus(f, mine)]));
-  if (filmsTab === 'watch') list.sort((a, b) => (status.get(a).rank - status.get(b).rank) || a.title.localeCompare(b.title, 'ca'));
+  if (filmsTab === 'watch') list.sort((a, b) => (watch[a.url] - watch[b.url]) || (status.get(a).rank - status.get(b).rank) || a.title.localeCompare(b.title, 'ca'));
 
   const wl = allFilms.filter(f => watch[f.url]).map(f => filmStatus(f, mine).key);
   const n = k => wl.filter(x => x === k).length;
@@ -1219,15 +1286,21 @@ function renderFilms() {
     ? (wl.length ? t('watchSummary', { c: n('covered'), n: wl.length, o: n('open'), b: tn('noFit', n('blocked'), { n: `<b>${n('blocked')}</b>` }) }) : '')
     : tn('filmCount', list.length) + (wl.length ? t('onYourList', { n: wl.length }) : '');
 
-  document.getElementById('filmList').innerHTML = list.length ? list.map(f => {
+  // Watchlist tab: a heading per tier with how its films stand.
+  const tierHead = n => {
+    const inTier = list.filter(f => watch[f.url] === n), k = key => inTier.filter(f => status.get(f).key === key).length;
+    return `<li class="tier-h"><b>${n} · ${tierName(n)}</b><span>${t('tierCounts', { c: k('covered'), n: inTier.length, b: k('blocked') })}</span></li>`;
+  };
+  document.getElementById('filmList').innerHTML = list.length ? list.map((f, i) => {
     const w = watch[f.url], st = status.get(f);
-    return `<li class="film" data-film="${esc(f.url)}">
+    const head = filmsTab === 'watch' && w !== watch[list[i - 1]?.url] ? tierHead(w) : '';
+    return `${head}<li class="film" data-film="${esc(f.url)}">
       ${f.image ? `<img src="${esc(f.image)}" alt="" loading="lazy">` : '<span></span>'}
       <button type="button" class="ft">${esc(f.title)}</button>
       <div class="acts">
-        <button type="button" class="${w ? 'on' : ''}" data-wl="${esc(f.url)}" aria-pressed="${!!w}" aria-label="${w ? t('removeFromList') : t('addToList')}">${w ? '✓' : '+'}</button>
+        ${w ? tierHtml(f.url) : ''}<button type="button" class="${w ? 'rm' : ''}" data-wl="${esc(f.url)}" aria-pressed="${!!w}" aria-label="${w ? t('removeFromList') : t('addToList')}" title="${w ? t('removeFromList') : t('addToList')}">${w ? '✕' : '+'}</button>
       </div>
-      <div class="fd">${esc(f.directors.join(', '))}${f.sections.length ? ` <span class="fsec">· ${esc(f.sections.join(' · '))}</span>` : ''}</div>
+      <div class="fd">${[esc(f.directors.join(', ')), f.runtime && dur(f.runtime)].filter(Boolean).join(' · ')}${f.sections.length ? ` <span class="fsec">· ${esc(f.sections.join(' · '))}</span>` : ''}</div>
       ${st ? `<div class="st ${st.key}">${esc(st.text)}</div>` : ''}
       <div class="fs">${showButtons(f, mine)}</div>
     </li>`;
@@ -1239,11 +1312,113 @@ document.getElementById('view-films').onclick = e => {
   if (tab) { filmsTab = tab.dataset.tab; document.getElementById('filmList').scrollTop = 0; return renderFilms(); }
   const add = e.target.closest('[data-wl]');
   if (add) { toggleWatch(add.dataset.wl); return renderFilms(); }
+  const tier = e.target.closest('[data-tier]');
+  if (tier) { setTier(tier.dataset.url, +tier.dataset.tier); return renderFilms(); }
   const go = e.target.closest('[data-goto]');
   if (go) return goto(+go.dataset.goto);
   const film = e.target.closest('[data-film]');
   if (film) openFilm(film.dataset.film);
 };
+
+// ---------- Auto-plan ----------
+// Picks one screening per watchlist film around the marked sessions, which it never touches. Plans are compared tier by tier:
+// more must-sees beats any number of lower tiers, then want-to-see, then if-it-fits; ties go to fewer late nights, less rushing
+// and more even days. Tier 3 only fills gaps: it never makes a day start earlier or end later. Must-sees may go over maxPerDay.
+const slot = s => ({ s, a: +toDate(s.start), b: +toDate(s.end), day: festDay(s.start) });
+// Why screening x can't join the plan for a film of this tier, or null if it can.
+function planConflict(x, plan, tier) {
+  if (x.a <= now().getTime()) return t('isPast');
+  const same = [];
+  for (const o of plan) {
+    if (o.s === x.s) continue;
+    const [p, q] = o.a < x.a ? [o, x] : [x, o];
+    const gap = (q.a - p.b) / 60000;
+    if (gap < 0) return t('overlapsWith', { t: o.s.title });
+    if (gap < need(p.s.location, q.s.location)) return t('tooClose', { t: o.s.title });
+    if (o.day === x.day) same.push(o);
+  }
+  const di = days.indexOf(x.day), prev = plan.filter(o => o.day === days[di - 1]), next = plan.filter(o => o.day === days[di + 1]);
+  const first = same.every(o => x.a < o.a), last = same.every(o => x.b > o.b);
+  // Rest: only when x becomes the first session of its day (after the night before) or the last one (before the next day).
+  if (first && prev.length) { const p = prev.reduce((m, o) => o.b > m.b ? o : m); if (x.a - p.b < minRest * 3600000) return t('shortNight', { t: p.s.title }); }
+  if (last && next.length) { const n = next.reduce((m, o) => o.a < m.a ? o : m); if (n.a - x.b < minRest * 3600000) return t('shortNight', { t: n.s.title }); }
+  if (tier === 3 && (!same.length || first || last)) return t('gapOnly');
+  if (maxPerDay && tier !== 1 && same.length >= maxPerDay) return tn('dayFull', same.length);
+  return null;
+}
+function autoPlan() {
+  const fixed = [...marked].map(id => byId[id]).filter(Boolean).map(slot);
+  const covered = new Set(fixed.flatMap(x => x.s.films.map(f => f.url)));
+  // Hardest first: by tier, then the fewest screenings left. Earlier, not-so-late screenings are tried first.
+  const late = x => (x.b - new Date(x.day + 'T00:00').getTime()) / 3600000 > 25; // ends after 01:00
+  const films = allFilms.filter(f => watch[f.url] && !covered.has(f.url))
+    .map(f => ({ f, tier: watch[f.url], opts: f.sessions.map(slot).filter(x => !planConflict(x, [], 1)).sort((a, b) => late(a) - late(b) || a.a - b.a) }))
+    .sort((a, b) => a.tier - b.tier || a.opts.length - b.opts.length);
+  const tierOf = Object.fromEntries(films.map(x => [x.f.url, x.tier]));
+  const penalty = chosen => {
+    const all = fixed.concat(chosen).sort((a, b) => a.a - b.a), perDay = {};
+    let p = 0;
+    for (const x of all) perDay[x.day] = (perDay[x.day] || 0) + 1;
+    for (const x of chosen) {
+      if (late(x)) p += 3;
+      const i = all.indexOf(x), before = all[i - 1], after = all[i + 1];
+      if (before?.day === x.day && (x.a - before.b) / 60000 < need(before.s.location, x.s.location) + 15) p += 2;
+      if (after?.day === x.day && (after.a - x.b) / 60000 < need(x.s.location, after.s.location) + 15) p += 2;
+    }
+    return p + Object.values(perDay).reduce((n, c) => n + c * c, 0) / 10;
+  };
+  const score = chosen => {
+    const got = new Set(chosen.flatMap(x => x.s.films.map(f => f.url)).filter(u => tierOf[u]));
+    return [...TIERS.map(n => [...got].filter(u => tierOf[u] === n).length), -penalty(chosen)];
+  };
+  const better = (a, b) => { for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] > b[i]; return false; };
+  let best = { score: score([]), chosen: [] }, nodes = 0;
+  const deadline = performance.now() + 600;
+  let stop = false;
+  const chosen = [], got = [0, 0, 0];
+  (function go(i) {
+    if (stop || (++nodes % 64 === 0 && (stop = performance.now() > deadline))) return; // ponytail: time budget; ~60 films finish well inside it, a huge watchlist keeps the best plan found so far
+    if (i === films.length) { const sc = score(chosen); if (better(sc, best.score)) best = { score: sc, chosen: [...chosen] }; return; }
+    const plan = fixed.concat(chosen);
+    // Bound: even if every film left that still has a screening fitting now got one, could this beat the best plan?
+    const can = [...got];
+    for (let j = i; j < films.length; j++) { const y = films[j]; if (y.opts.some(x => !planConflict(x, plan, y.tier))) can[y.tier - 1]++; }
+    if (!better([...can, 0], best.score)) return;
+    const { f, tier, opts } = films[i];
+    if (chosen.some(x => x.s.films.some(g => g.url === f.url))) { got[tier - 1]++; go(i + 1); got[tier - 1]--; return; } // a chosen multi-film session covers it
+    for (const x of opts) if (!planConflict(x, plan, tier)) { chosen.push(x); got[tier - 1]++; go(i + 1); got[tier - 1]--; chosen.pop(); }
+    go(i + 1); // leave it out
+  })(0);
+  const plan = fixed.concat(best.chosen), gotUrls = new Set(best.chosen.flatMap(x => x.s.films.map(f => f.url)));
+  const unplaced = films.filter(x => !gotUrls.has(x.f.url)).map(({ f, tier }) => ({ f, tier,
+    why: f.sessions.map(s => `${when(s)} ${planConflict(slot(s), plan, tier) || t('keptForOthers')}`).join('; ') }));
+  return { ids: best.chosen.map(x => x.s.id), tierOf, unplaced };
+}
+let proposal = null, added = null; // added: sessions from the last "Add them all", for Undo
+function runAutoPlan() { proposal = autoPlan(); added = null; renderPlan(); }
+// A suggestion stays only while it still fits the marked sessions and the other suggestions.
+function checkProposal() {
+  if (!proposal) return;
+  proposal.ids = proposal.ids.filter(id => !marked.has(id));
+  const plan = [...marked].map(id => byId[id]).filter(Boolean).map(slot);
+  for (const id of [...proposal.ids]) {
+    const others = proposal.ids.filter(o => o !== id).map(o => slot(byId[o]));
+    if (planConflict(slot(byId[id]), plan.concat(others), 1)) proposal.ids = proposal.ids.filter(o => o !== id);
+  }
+}
+function autoBoxHtml() {
+  if (added) return `<div class="auto"><p>${tn('addedN', added.length, { n: `<b>${added.length}</b>` })}</p><div class="walk-actions"><button type="button" data-undo-auto>${t('undo')}</button></div></div>`;
+  if (!proposal) return Object.keys(watch).length
+    ? `<div class="auto"><p>${t('autoHelp')}</p><div class="walk-actions"><button type="button" class="primary" data-auto>${t('autoPlan')}</button></div></div>`
+    : `<div class="auto"><p>${t('autoNeedsList')}</p></div>`;
+  const covers = new Set(proposal.ids.flatMap(id => byId[id].films.map(f => f.url)).filter(u => proposal.tierOf[u]));
+  const miss = proposal.unplaced.filter(x => x.tier < 3); // tier 3 not fitting is expected, not news
+  return `<div class="auto on">
+    <p>${proposal.ids.length ? `<b>${tn('proposedN', proposal.ids.length)}</b> · ${tn('coversN', covers.size)}` : t('nothingToAdd')}</p>
+    ${miss.length ? `<ul class="unfit">${miss.map(x => `<li class="t${x.tier}"><b>${esc(x.f.title)}</b> <small>${tierName(x.tier)}</small><span>${esc(x.why)}</span></li>`).join('')}</ul>` : ''}
+    <div class="walk-actions">${proposal.ids.length ? `<button type="button" data-discard>${t('discard')}</button><button type="button" class="primary" data-accept>${t('acceptAll')}</button>` : `<button type="button" data-discard>${t('close')}</button>`}</div>
+  </div>`;
+}
 
 // My plan: every marked session, by festival day, with the same warnings as the grid.
 function renderPlan(info = analyse()) {
@@ -1252,9 +1427,19 @@ function renderPlan(info = analyse()) {
   document.getElementById('planSummary').innerHTML = mine.length
     ? `<span>${tn('markedSessions', mine.length, { n: `<b>${mine.length}</b>` })}</span>${warnings || `<span class="ok">${t('noConflicts')}</span>`}` : '';
   const at = now();
-  document.getElementById('planList').innerHTML = mine.length ? days.filter(d => mine.some(s => festDay(s.start) === d)).map(d => {
+  checkProposal();
+  const props = (proposal?.ids || []).map(id => byId[id]);
+  const all = mine.concat(props).sort((a, b) => a.start.localeCompare(b.start));
+  document.getElementById('planList').innerHTML = autoBoxHtml() + (all.length ? days.filter(d => all.some(s => festDay(s.start) === d)).map(d => {
     const date = new Date(d + 'T12:00').toLocaleDateString(LOCALE[LANG], { weekday: 'long', day: 'numeric', month: 'long' });
-    const rows = mine.filter(s => festDay(s.start) === d).map(s => {
+    const rows = all.filter(s => festDay(s.start) === d).map(s => {
+      if (!marked.has(s.id)) {
+        const films = s.films.filter(f => proposal.tierOf[f.url]).map(f => `${esc(f.title)} (${watch[f.url]})`).join(', ');
+        return `<li class="prow prop" role="button" tabindex="0" data-open="${s.id}" style="--h:${hue(s.sections[0] || '')}">
+          <div class="pt"><b>${hhmm(toDate(s.start))}</b><span>${hhmm(toDate(s.end))}</span></div>
+          <div><div class="plabel">${t('proposed')}</div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)}</div><span class="note gap">${t('propCovers', { f: films })}</span></div>
+          <button type="button" class="rej" data-reject="${s.id}" aria-label="${t('rejectOne')}" title="${t('rejectOne')}">✕</button></li>`;
+      }
       const i = info[s.id];
       const cls = ['prow', i.clash.length ? 'clash' : i.tight.length ? 'tight' : i.rest.length ? 'rest' : '', toDate(s.end) < at && 'past'].filter(Boolean).join(' ');
       return `<li class="${cls}" role="button" tabindex="0" data-open="${s.id}" style="--h:${hue(s.sections[0] || '')}">
@@ -1262,10 +1447,24 @@ function renderPlan(info = analyse()) {
         <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)}</div>${notesHtml(s, i)}</div></li>`;
     }).join('');
     return `<section class="pday" id="plan-${d}"><h3><span>${esc(date)}</span><button type="button" data-day="${d}">${t('seeDay')}</button></h3><ol>${rows}</ol></section>`;
-  }).join('') : `<p class="empty">${t('planEmpty')}</p>`;
+  }).join('') : `<p class="empty">${t('planEmpty')}</p>`);
 }
 const planList = document.getElementById('planList');
 planList.onclick = e => {
+  if (e.target.closest('[data-auto]')) return runAutoPlan();
+  if (e.target.closest('[data-discard]')) { proposal = null; return renderPlan(); }
+  if (e.target.closest('[data-accept]')) {
+    const ids = added = proposal.ids; proposal = null;
+    added.forEach(id => marked.add(id)); store.set('marked', [...marked]);
+    setTimeout(() => { if (added === ids) { added = null; if (activeView === 'plan') renderPlan(); } }, 15000);
+    return render(current);
+  }
+  if (e.target.closest('[data-undo-auto]')) {
+    added.forEach(id => marked.delete(id)); store.set('marked', [...marked]); added = null;
+    return render(current);
+  }
+  const rej = e.target.closest('[data-reject]');
+  if (rej) { proposal.ids = proposal.ids.filter(id => id !== +rej.dataset.reject); return renderPlan(); }
   const day = e.target.closest('[data-day]');
   if (day) return toSchedule(() => render(day.dataset.day));
   const row = e.target.closest('[data-open]');
@@ -1297,7 +1496,7 @@ function showView(v) {
   document.querySelectorAll('#views [data-view]').forEach(b => b.dataset.view === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
   if (v === 'schedule') { render(current); if (scheduleScroll) [scroller.scrollLeft, scroller.scrollTop] = scheduleScroll; }
   if (v === 'films') renderFilms();
-  if (v === 'settings') { renderWalk(); renderClear(); document.getElementById('minRest').value = minRest; }
+  if (v === 'settings') { renderWalk(); renderClear(); document.getElementById('minRest').value = minRest; document.getElementById('maxPerDay').value = maxPerDay; }
   if (v === 'plan') { renderPlan(); document.getElementById('plan-' + nowDay())?.scrollIntoView(); }
 }
 function navigate(v) {
