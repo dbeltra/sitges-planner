@@ -331,6 +331,24 @@
   .auto.changes h4 { margin: 0; color: var(--clash); }
   .prow .tk { color: var(--muted); } .prow .tk.on { color: #2E7D32; font-weight: 700; }
   .sheet .walk-actions button.on { background: #2E7D32; border-color: #2E7D32; color: #fff; }
+  /* Friends: initials chips on sessions and screenings */
+  .fr { display: inline-block; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--gold); color: #fff; font: 700 9.5px/15px var(--body); letter-spacing: .5px; text-align: center; font-style: normal; }
+  .s .t .fr { flex: none; align-self: center; margin-left: auto; }
+  .s .t .fr + .wl, .s .t .fr + .mk { margin-left: 4px; }
+  .fs button .fr { margin-left: 5px; vertical-align: 1px; }
+  .going { font-size: 12px; font-weight: 600; color: var(--gold); }
+  .sheet .going { margin-top: 4px; }
+  .prow.frow { background: var(--ground); opacity: .85; }
+  .prow.frow .plabel { color: var(--gold); }
+  .ics[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+  .friend-add { display: flex; gap: 8px; }
+  .friend-add input { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); background: var(--ground); }
+  .friend-add button, .friend-list button { padding: 8px 12px; border: 1px solid var(--ink); background: none; font-weight: 700; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+  .friend-add button:disabled { opacity: .4; cursor: default; }
+  .friend-list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+  .friend-list li { display: flex; gap: 10px; align-items: center; padding: 6px 8px; background: var(--ground); font-size: 12px; }
+  .friend-list li > span:nth-child(2) { flex: 1; }
+  .friend-list .none { color: var(--muted); }
   .plan-list .empty { padding: 30px 0; color: var(--muted); text-align: center; }
 
   /* Sync */
@@ -457,7 +475,7 @@
 </section>
 <section id="view-plan" class="view plan" hidden data-i18n-attr="aria-label:plan">
   <div class="plan-head"><div class="status" id="planSummary"></div>
-    <div class="plan-acts"><button type="button" class="ics" data-auto data-i18n="autoPlanShort" data-i18n-attr="title:autoHelp">Auto-plan</button><button type="button" id="icsExport" class="ics" data-i18n="icsExport" data-i18n-attr="title:icsHelp">Add to calendar</button></div></div>
+    <div class="plan-acts"><button type="button" id="friendsToggle" class="ics" hidden aria-pressed="false" data-i18n="friendsShort" data-i18n-attr="title:showFriends">Friends</button><button type="button" class="ics" data-auto data-i18n="autoPlanShort" data-i18n-attr="title:autoHelp">Auto-plan</button><button type="button" id="icsExport" class="ics" data-i18n="icsExport" data-i18n-attr="title:icsHelp">Add to calendar</button></div></div>
   <div id="planList" class="plan-list"></div>
 </section>
 <div id="hiddenMenu" class="hidden-menu" popover></div>
@@ -482,6 +500,9 @@
     <h3 class="set-h" data-i18n="syncTitle">Sync</h3>
     <p data-i18n="syncHelp"></p>
     <div class="walk-actions"><button type="button" id="syncOpen" data-i18n="syncOpen">Sync with another device</button></div>
+    <h3 class="set-h" data-i18n="friendsTitle">Friends</h3>
+    <p data-i18n="friendsHelp"></p>
+    <ul id="friendList" class="friend-list"></ul>
     <label class="rest-row" for="lang"><span><b data-i18n="language">Language</b></span>
       <select id="lang"><option value="ca">Català</option><option value="en">English</option></select></label>
     <p class="build" id="build"></p>
@@ -509,12 +530,15 @@
       <div class="walk-actions">
         <button type="button" id="syncImport" class="primary" disabled data-i18n="replacePlan">Replace my plan</button>
       </div>
+      <p data-i18n="compareHelp"></p>
+      <div class="friend-add"><input type="text" id="friendName" maxlength="30" data-i18n-attr="placeholder:friendName,aria-label:friendName">
+        <button type="button" id="compareAs" disabled data-i18n="compareAs">Compare as a friend</button></div>
     </section>
   </form>
 </dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.2.0'; // bump on every change so a device can show which code it runs
+const BUILD = '2.3.0'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -550,6 +574,11 @@ const STR = {
     ticketAdd: "Tinc l'entrada", ticketOn: '✓ Entrada comprada', hasTicket: '✓ Entrada', noTicket: 'Sense entrada',
     needTickets: { one: '{n} sense entrada', other: '{n} sense entrada' },
     icsExport: 'Afegeix al calendari', icsHelp: 'Desa el pla com a fitxer .ics per al calendari, amb un avís 30 minuts abans de cada sessió',
+    friendsTitle: 'Amics', friendsShort: 'Amics', friendsHelp: "Compara el teu pla amb el d'amics: enganxa el seu codi o enllaç a Sincronitza i posa-hi un nom. Només es mostra al costat del teu; no el canvia.",
+    compareHelp: "O compara'l amb el teu, com a pla d'un amic (amb el mateix nom, s'actualitza):", friendName: "Nom de l'amic", compareAs: 'Compara',
+    friendAdded: 'Afegit el pla de {name}: {d}.', friendRemove: 'Treu', noFriends: 'Encara no has afegit cap amic.',
+    alsoGoing: 'També hi va: {names}', friendGoes: 'Hi va {names}', showFriends: 'Mostra també les sessions dels amics',
+    together: { one: '{n} amb amics', other: '{n} amb amics' },
     changesTitle: 'Canvis al programa', changeMoved: 'Ara {now} (abans {was})', changeGone: 'Ja no és al programa (era {was}). Altres passis:', noOthers: 'No en queden altres passis.', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
     syncTitle: 'Sincronització', syncHelp: "El teu pla només es desa en aquest dispositiu. Per passar-lo a un altre, envia'l des d'aquí i obre'l a l'altre.",
     sendPlan: 'Envia aquest pla', planCode: 'Codi del pla', copyCode: 'Copia el codi', shareLink: "Comparteix l'enllaç",
@@ -612,6 +641,11 @@ const STR = {
     ticketAdd: 'I have a ticket', ticketOn: '✓ Ticket bought', hasTicket: '✓ Ticket', noTicket: 'No ticket',
     needTickets: { one: '{n} without a ticket', other: '{n} without tickets' },
     icsExport: 'Add to calendar', icsHelp: 'Save the plan as an .ics file for your calendar, with an alert 30 minutes before each session',
+    friendsTitle: 'Friends', friendsShort: 'Friends', friendsHelp: "Compare your plan with friends': paste their code or link in Sync and give it a name. It's only shown next to yours; it doesn't change it.",
+    compareHelp: "Or compare it with yours, as a friend's plan (the same name updates it):", friendName: "Friend's name", compareAs: 'Compare',
+    friendAdded: "Added {name}'s plan: {d}.", friendRemove: 'Remove', noFriends: 'No friends added yet.',
+    alsoGoing: 'Also going: {names}', friendGoes: '{names} going', showFriends: "Also show your friends' sessions",
+    together: { one: '{n} with friends', other: '{n} with friends' },
     changesTitle: 'Programme changes', changeMoved: 'Now {now} (was {was})', changeGone: 'No longer in the programme (was {was}). Other screenings:', noOthers: 'No other screenings left.', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
     syncTitle: 'Sync', syncHelp: 'Your plan is saved only on this device. To move it, send it from this device and open it on the other one.',
     sendPlan: 'Send this plan', planCode: 'Plan code', copyCode: 'Copy code', shareLink: 'Share link',
@@ -708,6 +742,28 @@ function ackChanges() {
 }
 saveMarked(); // first run after an update: remember the marks as they are now
 const tickets = new Set(store.get('tickets', [])); // marked sessions with a ticket bought
+// Friends' plans: read-only layers pasted from their plan code, only shown next to yours. [{ name, m: [session ids], at: ISO date }]
+let friends = store.get('friends', []);
+let friendsBy = {}; // session id -> friends who marked it
+// Tag for a friend: the first letter, or when another friend shares it, the word initials ("Ana Pi" → AP) or the first and
+// last letters ("Marc" → MC). ponytail: two friends with identical tags get a number.
+const tagFor = name => { const n = name.trim().toUpperCase(), w = n.split(/\s+/);
+  return w.length > 1 ? w[0][0] + w[1][0] : n[0] + n.at(-1); };
+function initialOf(f) {
+  const first = n => n.trim()[0]?.toUpperCase() || '?';
+  if (friends.filter(o => first(o.name) === first(f.name)).length === 1) return first(f.name);
+  const tag = tagFor(f.name), same = friends.filter(o => tagFor(o.name) === tag);
+  return same.length > 1 ? tag + (same.indexOf(f) + 1) : tag;
+}
+function saveFriends() {
+  store.set('friends', friends);
+  friendsBy = {};
+  for (const f of friends) for (const id of f.m) (friendsBy[id] ??= []).push(f);
+}
+saveFriends();
+const namesOf = id => (friendsBy[id] || []).map(f => f.name).join(', ');
+const friendTag = id => friendsBy[id] ? `<span class="fr" title="${esc(t('alsoGoing', { names: namesOf(id) }))}">${friendsBy[id].map(initialOf).join('')}</span>` : '';
+let showFriends = store.get('showFriends', false); // My plan: also list friends' sessions you have not marked
 const saveTickets = () => store.set('tickets', [...tickets]);
 const byDay = {};
 for (const s of SCHEDULE) (byDay[festDay(s.start)] ??= []).push(s);
@@ -866,7 +922,7 @@ function render(day) {
       const creditsHtml = multi ? `<ul>${s.films.map(f => `<li>${esc(filmLine(f))}</li>`).join('')}</ul>` : credits ? `<div class="who">${esc(credits)}</div>` : '';
       const wl = s.films.some(f => watch[f.url]) ? `<span class="wl" title="${t('onWatchlist')}" aria-label="${t('onWatchlist')}">◆</span>` : '';
       const i = info[s.id];
-      const open = `${wl}<button type="button" class="mk" data-mk aria-pressed="${!!i}" aria-label="${esc(t(i ? 'unmarkSession' : 'markSession', { t: s.title }))}">${i ? '★' : '☆'}</button>`;
+      const open = `${friendTag(s.id)}${wl}<button type="button" class="mk" data-mk aria-pressed="${!!i}" aria-label="${esc(t(i ? 'unmarkSession' : 'markSession', { t: s.title }))}">${i ? '★' : '☆'}</button>`;
       const notes = notesHtml(s, i);
       const cls = ['s', i && 'on', i?.repeat.length && 'repeat', i?.rest.length && 'rest', i?.tight.length && 'tight', i?.clash.length && 'clash'].filter(Boolean).join(' ');
       const h = `calc(${min(s.end) - min(s.start)} * var(--px))`;
@@ -1141,7 +1197,7 @@ function openSheet(id) {
   delete sheet.dataset.film;
   const notes = notesHtml(s, analyse()[id]);
   const when = `<div class="meta"><span>${dayLabel(s.start)} · ${hhmm(toDate(s.start))}–${hhmm(toDate(s.end))}</span><span>${esc(s.location)}</span><span>${dur(s.duration)}</span></div>`;
-  const title = `<h2 id="sheetTitle" tabindex="-1" autofocus>${esc(s.title)}</h2>`;
+  const title = `<h2 id="sheetTitle" tabindex="-1" autofocus>${esc(s.title)}</h2>${friendsBy[id] ? `<div class="going">${esc(t('alsoGoing', { names: namesOf(id) }))}</div>` : ''}`;
   // One film under its own name: the film layout with the session's time. Several films (or a named session): each film in that layout.
   const body = listFilms(s) || !s.films.length
     ? `<div>${title}${when}</div>${s.sections.length ? secsHtml(s.sections) : ''}${s.films.map(f => filmHtml(f, id, `<h3 class="fh">${esc(f.title)}</h3>`, true)).join('')}`
@@ -1193,15 +1249,17 @@ function parsePlan(text) {
   } catch { return null; }
 }
 const syncInput = document.getElementById('syncInput'), syncPreview = document.getElementById('syncPreview'), syncImport = document.getElementById('syncImport');
+const friendName = document.getElementById('friendName'), compareAs = document.getElementById('compareAs');
 function previewImport() {
   const p = parsePlan(syncInput.value);
   syncImport.disabled = !p;
+  compareAs.disabled = !p || !friendName.value.trim();
   syncPreview.textContent = !syncInput.value.trim() ? '' : p ? t('replacesWith', { d: describe(p) }) : t('invalidPlan');
 }
 function openSync(prefill = '') {
   document.getElementById('syncSummary').textContent = t('thisDevice', { d: describe({ m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch }) });
   document.getElementById('syncCode').value = planCode();
-  syncInput.value = prefill;
+  syncInput.value = prefill; friendName.value = '';
   previewImport();
   openPanel(syncDialog);
 }
@@ -1211,13 +1269,31 @@ async function copy(text, btn) {
   catch { const code = document.getElementById('syncCode'); code.focus(); code.select(); flash(btn, t('selectCopy')); }
 }
 document.getElementById('syncOpen').onclick = () => openSync();
+function renderFriends() {
+  document.getElementById('friendList').innerHTML = friends.length ? friends.map((f, i) => `<li><span class="fr">${esc(initialOf(f))}</span><span><b>${esc(f.name)}</b> · ${tn('markedSessions', f.m.filter(id => byId[id]).length)} · ${esc(f.at)}</span>
+    <button type="button" data-unfriend="${i}">${t('friendRemove')}</button></li>`).join('') : `<li class="none">${t('noFriends')}</li>`;
+}
+document.getElementById('friendList').onclick = e => {
+  const b = e.target.closest('[data-unfriend]');
+  if (!b) return;
+  friends.splice(+b.dataset.unfriend, 1); saveFriends(); renderFriends(); render(current);
+};
 document.getElementById('syncCopy').onclick = e => copy(planCode(), e.currentTarget);
 document.getElementById('syncShare').onclick = async e => {
   const btn = e.currentTarget;
   if (navigator.share) { try { await navigator.share({ title: t('shareTitle'), url: planLink() }); return; } catch (err) { if (err.name === 'AbortError') return; } }
   copy(planLink(), btn);
 };
-syncInput.oninput = previewImport;
+syncInput.oninput = friendName.oninput = previewImport;
+// Same name again replaces that friend's plan: how an updated code comes in.
+compareAs.onclick = () => {
+  const p = parsePlan(syncInput.value), name = friendName.value.trim();
+  if (!p || !name) return;
+  friends = friends.filter(f => norm(f.name) !== norm(name)).concat({ name, m: p.m, at: new Date().toISOString().slice(0, 10) });
+  saveFriends(); render(current); renderFriends();
+  syncPreview.textContent = t('friendAdded', { name, d: tn('markedSessions', p.m.length) });
+  compareAs.disabled = syncImport.disabled = true;
+};
 syncImport.onclick = () => {
   const p = parsePlan(syncInput.value);
   if (!p) return;
@@ -1289,7 +1365,7 @@ function filmStatus(f, mine) {
 
 const showButtons = (f, mine) => f.sessions.map(s => {
   const r = !marked.has(s.id) && blockedBy(s, mine);
-  return `<button type="button" data-goto="${s.id}" class="${marked.has(s.id) ? 'on' : r ? 'off' : ''}" title="${esc(`${s.title} · ${s.location}${r ? ` · ${r}` : ''}`)}">${marked.has(s.id) ? '★ ' : ''}${when(s)} · ${esc(venue(s.location))}</button>`;
+  return `<button type="button" data-goto="${s.id}" class="${marked.has(s.id) ? 'on' : r ? 'off' : ''}" title="${esc(`${s.title} · ${s.location}${r ? ` · ${r}` : ''}${friendsBy[s.id] ? ` · ${t('alsoGoing', { names: namesOf(s.id) })}` : ''}`)}">${marked.has(s.id) ? '★ ' : ''}${when(s)} · ${esc(venue(s.location))}${friendTag(s.id)}</button>`;
 }).join('');
 
 const secsHtml = secs => `<div class="secs">${secs.map(x => `<span style="--h:${hue(x)}">${esc(x)}</span>`).join('')}</div>`;
@@ -1511,6 +1587,7 @@ function planIcs() {
   return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//sitges-planner//EN', 'CALSCALE:GREGORIAN', `X-WR-CALNAME:${txt(t('title'))}`, ...events, 'END:VCALENDAR'].map(fold).join('\r\n') + '\r\n';
 }
 document.querySelector('.plan-head [data-auto]').onclick = () => runAutoPlan();
+document.getElementById('friendsToggle').onclick = () => { showFriends = !showFriends; store.set('showFriends', showFriends); renderPlan(); };
 document.getElementById('icsExport').onclick = async () => {
   const file = new File([planIcs()], 'sitges-2026.ics', { type: 'text/calendar' });
   // Phones: the share sheet offers the calendar app. Elsewhere: a download.
@@ -1527,12 +1604,20 @@ function renderPlan(info = analyse()) {
   document.getElementById('planSummary').innerHTML = mine.length
     ? `<span>${tn('markedSessions', mine.length, { n: `<b>${mine.length}</b>` })}</span>${warnings || `<span class="ok">${t('noConflicts')}</span>`}${noTicket ? `<span>${tn('needTickets', noTicket, { n: `<b>${noTicket}</b>` })}</span>` : ''}` : '';
   document.getElementById('icsExport').hidden = !mine.length;
+  const together = mine.filter(s => friendsBy[s.id]).length;
+  if (together) document.getElementById('planSummary').insertAdjacentHTML('beforeend', `<span>${tn('together', together, { n: `<b>${together}</b>` })}</span>`);
+  const frBtn = document.getElementById('friendsToggle');
+  frBtn.hidden = !friends.length; frBtn.setAttribute('aria-pressed', showFriends);
   checkProposal();
   const props = (proposal?.ids || []).map(id => byId[id]);
-  const all = mine.concat(props).sort((a, b) => a.start.localeCompare(b.start));
+  const theirs = showFriends ? Object.keys(friendsBy).map(id => byId[id]).filter(s => s && !marked.has(s.id) && !props.includes(s)) : [];
+  const all = mine.concat(props, theirs).sort((a, b) => a.start.localeCompare(b.start));
   document.getElementById('planList').innerHTML = changesHtml() + autoBoxHtml() + (all.length ? days.filter(d => all.some(s => festDay(s.start) === d)).map(d => {
     const date = new Date(d + 'T12:00').toLocaleDateString(LOCALE[LANG], { weekday: 'long', day: 'numeric', month: 'long' });
     const rows = all.filter(s => festDay(s.start) === d).map(s => {
+      if (theirs.includes(s)) return `<li class="prow frow" role="button" tabindex="0" data-open="${s.id}" style="--h:${hue(s.sections[0] || '')}">
+          <div class="pt"><b>${hhmm(toDate(s.start))}</b><span>${hhmm(toDate(s.end))}</span></div>
+          <div><div class="plabel">${esc(t('friendGoes', { names: namesOf(s.id) }))}</div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)}</div></div></li>`;
       if (!marked.has(s.id)) {
         const films = s.films.filter(f => proposal.tierOf[f.url]).map(f => `${esc(f.title)} (${watch[f.url]})`).join(', ');
         return `<li class="prow prop" role="button" tabindex="0" data-open="${s.id}" style="--h:${hue(s.sections[0] || '')}">
@@ -1544,7 +1629,7 @@ function renderPlan(info = analyse()) {
       const cls = ['prow', i.clash.length ? 'clash' : i.tight.length ? 'tight' : i.rest.length ? 'rest' : '', toDate(s.end) < at && 'past'].filter(Boolean).join(' ');
       return `<li class="${cls}" role="button" tabindex="0" data-open="${s.id}" style="--h:${hue(s.sections[0] || '')}">
         <div class="pt"><b>${hhmm(toDate(s.start))}</b><span>${hhmm(toDate(s.end))}</span></div>
-        <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)} · ${tickets.has(s.id) ? `<span class="tk on">${t('hasTicket')}</span>` : `<span class="tk">${t('noTicket')}</span>`}</div>${notesHtml(s, i)}</div></li>`;
+        <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)} · ${tickets.has(s.id) ? `<span class="tk on">${t('hasTicket')}</span>` : `<span class="tk">${t('noTicket')}</span>`}</div>${friendsBy[s.id] ? `<div class="going">${esc(t('alsoGoing', { names: namesOf(s.id) }))}</div>` : ''}${notesHtml(s, i)}</div></li>`;
     }).join('');
     return `<section class="pday" id="plan-${d}"><h3><span>${esc(date)}</span><button type="button" data-day="${d}">${t('seeDay')}</button></h3><ol>${rows}</ol></section>`;
   }).join('') : `<p class="empty">${t('planEmpty')}</p>`);
@@ -1599,7 +1684,7 @@ function showView(v) {
   document.querySelectorAll('#views [data-view]').forEach(b => b.dataset.view === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
   if (v === 'schedule') { render(current); if (scheduleScroll) [scroller.scrollLeft, scroller.scrollTop] = scheduleScroll; }
   if (v === 'films') renderFilms();
-  if (v === 'settings') { renderWalk(); renderClear(); document.getElementById('minRest').value = minRest; document.getElementById('maxPerDay').value = maxPerDay; }
+  if (v === 'settings') { renderWalk(); renderClear(); renderFriends(); document.getElementById('minRest').value = minRest; document.getElementById('maxPerDay').value = maxPerDay; }
   if (v === 'plan') { renderPlan(); document.getElementById('plan-' + nowDay())?.scrollIntoView(); }
 }
 function navigate(v) {

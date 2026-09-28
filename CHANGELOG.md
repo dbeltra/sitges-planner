@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-09-28
+
+### Added
+- Compare plans with friends. Paste a friend's plan code or link in Sincronitza, give it a name and tap Compara: their plan is shown next to yours and never changes it. Send it again under the same name to update it; remove friends in Ajustos.
+- Sessions a friend has marked carry their initial in the schedule and on the screening buttons, and the details say who else is going.
+- El meu pla shows how many of your sessions are with friends and who goes to each; the Amics button also lists their sessions you haven't marked.
+
 ## [2.2.0] - 2026-09-28
 
 ### Added
