@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-09-28
+
+### Added
+- Remove one session's tickets from the list in Ajustos: tap ✕ next to it, then tap again to confirm. The session stays in your plan, without "ticket bought".
+
 ## [2.4.0] - 2026-09-28
 
 ### Added

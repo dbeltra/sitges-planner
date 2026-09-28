@@ -354,6 +354,9 @@
   .pass-status { font-size: 12px; }
   .pass-status:empty { display: none; }
   .pass-list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+  .pass-list li { display: flex; gap: 4px; }
+  .pass-list button.rm { flex: none; width: auto; min-width: 40px; justify-content: center; color: var(--muted); }
+  .pass-list button.rm.confirm { background: var(--clash); color: #fff; font-weight: 700; }
   .pass-list button { display: flex; width: 100%; gap: 10px; justify-content: space-between; padding: 8px 10px; border: 0; background: var(--ground); font-size: 12px; text-align: left; cursor: pointer; }
   .pass-list button b { font-weight: 700; }
   .pass-list button span:last-child { flex: none; color: #2E7D32; font-weight: 700; }
@@ -571,7 +574,7 @@
 <dialog id="door" class="door" aria-labelledby="doorTitle"></dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.4.0'; // bump on every change so a device can show which code it runs
+const BUILD = '2.4.1'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -607,7 +610,7 @@ const STR = {
     ticketAdd: "Tinc l'entrada", ticketOn: '✓ Entrada comprada', hasTicket: '✓ Entrada', noTicket: 'Sense entrada',
     needTickets: { one: '{n} sense entrada', other: '{n} sense entrada' },
     icsExport: 'Afegeix al calendari', icsHelp: 'Desa el pla com a fitxer .ics per al calendari, amb un avís 30 minuts abans de cada sessió',
-    passesTitle: 'Entrades', passesHelp: "Afegeix els PDF de les entrades del festival: l'app troba la sessió de cada una, la marca i en guarda el codi QR per ensenyar-lo a la porta. Es desen només en aquest dispositiu; conserva els PDF.",
+    passesTitle: 'Entrades', removeTickets: "Treu les entrades d'aquesta sessió", sure: 'Segur?', passesHelp: "Afegeix els PDF de les entrades del festival: l'app troba la sessió de cada una, la marca i en guarda el codi QR per ensenyar-lo a la porta. Es desen només en aquest dispositiu; conserva els PDF.",
     passesAdd: 'Afegeix entrades (PDF)', passesRead: 'Llegint {n} fitxers…', passesDone: '{n} entrades desades, de {s} sessions.',
     passesNoMatch: { one: "{n} no coincideix amb cap sessió del programa.", other: "{n} no coincideixen amb cap sessió del programa." }, passesBad: "{f} no sembla una entrada del festival.",
     passesFull: "No hi ha prou espai per desar les entrades en aquest dispositiu.", passGone: 'Hi tens entrada.',
@@ -681,7 +684,7 @@ const STR = {
     ticketAdd: 'I have a ticket', ticketOn: '✓ Ticket bought', hasTicket: '✓ Ticket', noTicket: 'No ticket',
     needTickets: { one: '{n} without a ticket', other: '{n} without tickets' },
     icsExport: 'Add to calendar', icsHelp: 'Save the plan as an .ics file for your calendar, with an alert 30 minutes before each session',
-    passesTitle: 'Tickets', passesHelp: "Add the festival's ticket PDFs: the app finds each ticket's session, marks it and keeps its QR code to show at the door. They are saved only on this device; keep the PDFs.",
+    passesTitle: 'Tickets', removeTickets: "Remove this session's tickets", sure: 'Sure?', passesHelp: "Add the festival's ticket PDFs: the app finds each ticket's session, marks it and keeps its QR code to show at the door. They are saved only on this device; keep the PDFs.",
     passesAdd: 'Add tickets (PDF)', passesRead: 'Reading {n} files…', passesDone: '{n} tickets saved, for {s} sessions.',
     passesNoMatch: { one: '{n} matches no session in the programme.', other: '{n} match no session in the programme.' }, passesBad: "{f} doesn't look like a festival ticket.",
     passesFull: 'Not enough space on this device to save the tickets.', passGone: 'You have a ticket for it.',
@@ -1631,15 +1634,32 @@ function renderPasses() {
   for (const p of passes) { const k = p.id ?? 'x' + p.a + p.t; (groups.get(k) || groups.set(k, []).get(k)).push(p); }
   document.getElementById('passList').innerHTML = [...groups.values()].sort((a, b) => a[0].a.localeCompare(b[0].a)).map(g => {
     const p = g[0], s = byId[p.id], start = s ? s.start : p.a + ':00';
-    return `<li><button type="button" data-door-group="${esc(p.id ?? p.ref)}"><span>${dayLabel(start)} ${hhmm(toDate(start))} · <b>${esc(s ? s.title : p.t)}</b> · ${esc(s ? venue(s.location) : p.v)}</span><span>${g.length} ×</span></button></li>`;
+    const key = esc(p.id ?? p.ref), confirm = removing === String(p.id ?? p.ref);
+    return `<li><button type="button" data-door-group="${key}"><span>${dayLabel(start)} ${hhmm(toDate(start))} · <b>${esc(s ? s.title : p.t)}</b> · ${esc(s ? venue(s.location) : p.v)}</span><span>${g.length} ×</span></button>
+      <button type="button" class="rm${confirm ? ' confirm' : ''}" data-rm-group="${key}" aria-label="${t('removeTickets')}" title="${t('removeTickets')}">${confirm ? t('sure') : '✕'}</button></li>`;
   }).join('');
 }
+// The tickets of one list entry: a session's, or those that match no session (same start and title).
+function passGroup(key) {
+  const one = passes.find(p => String(p.id) === key || p.ref === key);
+  return !one ? [] : one.id ? passesFor(one.id) : passes.filter(p => !p.id && p.a === one.a && p.t === one.t);
+}
+let removing = null, removingTimer; // ✕ needs a second tap within 4 s
 document.getElementById('passFiles').onchange = e => { const files = [...e.target.files]; e.target.value = ''; if (files.length) importPasses(files); };
 document.getElementById('passList').onclick = e => {
+  const rm = e.target.closest('[data-rm-group]');
+  if (rm) {
+    const key = rm.dataset.rmGroup;
+    clearTimeout(removingTimer);
+    if (removing !== key) { removing = key; removingTimer = setTimeout(() => { removing = null; renderPasses(); }, 4000); return renderPasses(); }
+    const gone = new Set(passGroup(key)), id = [...gone][0]?.id;
+    passes = passes.filter(p => !gone.has(p)); savePasses(); removing = null;
+    if (id) { tickets.delete(id); saveTickets(); } // the session stays marked, without "ticket bought"
+    renderPasses(); renderClear(); render(current);
+    return;
+  }
   const b = e.target.closest('[data-door-group]');
-  if (!b) return;
-  const key = b.dataset.doorGroup, one = passes.find(p => String(p.id) === key || p.ref === key);
-  openDoor(one.id ? passesFor(one.id) : passes.filter(p => !p.id && p.a === one.a && p.t === one.t));
+  if (b) openDoor(passGroup(b.dataset.doorGroup));
 };
 
 // Door view: the QR large with a white margin (scanners need it), row and seat in big type, the screen kept on.
