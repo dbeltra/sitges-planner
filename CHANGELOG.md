@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.3] - 2026-09-28
+
+### Changed
+- Importing a plan code, or comparing it as a friend's plan, now closes Sincronitza and shows a short message saying what was imported.
+
 ## [2.3.2] - 2026-09-28
 
 ### Changed
