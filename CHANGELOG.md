@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-09-28
+
+### Added
+- Tickets: in Ajustos, "Afegeix entrades (PDF)" reads the festival's ticket PDFs (you can pick them all at once), finds each ticket's session, marks it and saves its QR code on this device. The PDFs themselves are not kept, only their file name and page, so you can find the original in Files.
+- "Mostra l'entrada" opens the ticket full screen for the door: large QR code, row and seat, and the screen stays on. It's in the session's details, in El meu pla and in the Next bar at the top of the schedule; with two seats, swipe between them with Anterior / Següent.
+- Saved tickets are listed in Ajustos and can be deleted there (with Undo).
+
 ## [2.3.3] - 2026-09-28
 
 ### Changed

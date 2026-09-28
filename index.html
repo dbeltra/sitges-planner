@@ -349,6 +349,28 @@
   .friend-list li { display: flex; gap: 10px; align-items: center; padding: 6px 8px; background: var(--ground); font-size: 12px; }
   .friend-list li > span:nth-child(2) { flex: 1; }
   .friend-list .none { color: var(--muted); }
+  /* Tickets: import in Ajustos, door view full screen */
+  .passes-add .primary-btn { padding: 8px 14px; background: var(--ink); color: var(--surface); font-weight: 700; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+  .pass-status { font-size: 12px; }
+  .pass-status:empty { display: none; }
+  .pass-list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+  .pass-list button { display: flex; width: 100%; gap: 10px; justify-content: space-between; padding: 8px 10px; border: 0; background: var(--ground); font-size: 12px; text-align: left; cursor: pointer; }
+  .pass-list button b { font-weight: 700; }
+  .pass-list button span:last-child { flex: none; color: #2E7D32; font-weight: 700; }
+  .door { width: 100%; max-width: 100%; height: 100%; max-height: 100%; margin: 0; background: #fff; }
+  .door[open] { display: grid; align-content: center; justify-items: center; gap: 12px; padding: calc(24px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)); text-align: center; overflow: auto; }
+  .door h2 { padding: 0; font: 700 22px/1.1 var(--display); text-transform: none; max-width: 22ch; text-wrap: balance; }
+  .door .w { color: var(--muted); font-size: 13px; }
+  .door .qr { padding: 18px; background: #fff; border: 1px solid var(--line); }
+  .door .qr img { display: block; width: min(78vw, 46vh, 360px); height: auto; aspect-ratio: 1; image-rendering: pixelated; }
+  .door .rs { font: 700 30px/1 var(--display); }
+  .door .rs small { display: block; margin-bottom: 4px; font: 600 11px/1 var(--body); letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .door .nav { display: flex; gap: 8px; }
+  .door .nav button { padding: 10px 16px; border: 1px solid var(--ink); background: none; font-weight: 700; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+  .door .nav .close { background: var(--ink); color: var(--surface); }
+  .next .door-btn { margin-left: auto; padding: 3px 10px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); font-weight: 700; font-size: 11px; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; }
+  .prow button.tk { padding: 0; border: 0; background: none; font: inherit; color: #2E7D32; font-weight: 700; text-decoration: underline; cursor: pointer; }
+  .sheet .walk-actions .door-open { background: #2E7D32; border-color: #2E7D32; color: #fff; }
   .plan-list .empty { padding: 30px 0; color: var(--muted); text-align: center; }
 
   /* Sync */
@@ -459,7 +481,7 @@
 <div class="bar"><div class="status" id="status"></div>
   <label class="only-toggle"><input type="checkbox" id="only"> <span class="long" data-i18n="onlyLong">Only my sessions</span><span class="short" data-i18n="onlyShort">Only mine</span></label></div>
 <div id="tip" class="tip" hidden><span data-i18n="hint"></span><button type="button" id="tipClose" data-i18n="gotIt">Got it</button></div>
-<button type="button" id="next" class="next" hidden></button>
+<div id="next" class="next" role="button" tabindex="0" hidden></div>
 <div id="scroller"><div id="grid"></div></div>
 </section>
 <section id="view-films" class="view films" hidden data-i18n-attr="aria-label:films">
@@ -485,6 +507,11 @@
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <section id="view-settings" class="view settings" hidden data-i18n-attr="aria-label:settings">
   <form>
+    <h3 class="set-h" data-i18n="passesTitle">Tickets</h3>
+    <p data-i18n="passesHelp"></p>
+    <div class="walk-actions passes-add"><label class="primary-btn"><span data-i18n="passesAdd">Add tickets (PDF)</span><input type="file" id="passFiles" accept="application/pdf,.pdf" multiple hidden></label></div>
+    <p id="passStatus" class="pass-status" aria-live="polite"></p>
+    <ul id="passList" class="pass-list"></ul>
     <label class="rest-row" for="minRest"><span data-i18n-html="restHelp"></span>
       <span><input type="number" id="minRest" min="0" max="16" step="0.5"> <small data-i18n="hours">hours</small></span></label>
     <label class="rest-row" for="maxPerDay"><span data-i18n-html="maxDayHelp"></span>
@@ -500,6 +527,7 @@
     <div class="clear-row">
       <button type="button" id="clearMarks"></button>
       <button type="button" id="clearWatch"></button>
+      <button type="button" id="clearPasses"></button>
     </div>
     <h3 class="set-h" data-i18n="syncTitle">Sync</h3>
     <p data-i18n="syncHelp"></p>
@@ -540,9 +568,10 @@
     </section>
   </form>
 </dialog>
+<dialog id="door" class="door" aria-labelledby="doorTitle"></dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.3.3'; // bump on every change so a device can show which code it runs
+const BUILD = '2.4.0'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -578,6 +607,13 @@ const STR = {
     ticketAdd: "Tinc l'entrada", ticketOn: '✓ Entrada comprada', hasTicket: '✓ Entrada', noTicket: 'Sense entrada',
     needTickets: { one: '{n} sense entrada', other: '{n} sense entrada' },
     icsExport: 'Afegeix al calendari', icsHelp: 'Desa el pla com a fitxer .ics per al calendari, amb un avís 30 minuts abans de cada sessió',
+    passesTitle: 'Entrades', passesHelp: "Afegeix els PDF de les entrades del festival: l'app troba la sessió de cada una, la marca i en guarda el codi QR per ensenyar-lo a la porta. Es desen només en aquest dispositiu; conserva els PDF.",
+    passesAdd: 'Afegeix entrades (PDF)', passesRead: 'Llegint {n} fitxers…', passesDone: '{n} entrades desades, de {s} sessions.',
+    passesNoMatch: { one: "{n} no coincideix amb cap sessió del programa.", other: "{n} no coincideixen amb cap sessió del programa." }, passesBad: "{f} no sembla una entrada del festival.",
+    passesFull: "No hi ha prou espai per desar les entrades en aquest dispositiu.", passGone: 'Hi tens entrada.',
+    clearPasses: { zero: 'Cap entrada desada', one: 'Esborra {n} entrada', other: 'Esborra {n} entrades' },
+    showTicket: { one: "Mostra l'entrada", other: 'Mostra les entrades ({n})' }, doorRowSeat: 'Fila · Seient', doorOf: 'Entrada {i} de {n}', prevTicket: 'Anterior',
+    doorHint: 'Apuja la brillantor si costa escanejar-la.', doorPdf: 'PDF original: {f}, pàgina {pg} (obre-la des de Fitxers)',
     friendsTitle: 'Amics', friendsShort: 'Amics', friendsHelp: "Compara el teu pla amb el d'amics: enganxa el seu codi o enllaç a Sincronitza i posa-hi un nom. Només es mostra al costat del teu; no el canvia.",
     compareHelp: "O compara'l amb el teu, com a pla d'un amic (amb el mateix nom, s'actualitza):", friendName: "Nom de l'amic", compareAs: 'Compara',
     friendAdded: 'Afegit el pla de {name}: {d}.', friendRemove: 'Treu', noFriends: 'Encara no has afegit cap amic.',
@@ -645,6 +681,13 @@ const STR = {
     ticketAdd: 'I have a ticket', ticketOn: '✓ Ticket bought', hasTicket: '✓ Ticket', noTicket: 'No ticket',
     needTickets: { one: '{n} without a ticket', other: '{n} without tickets' },
     icsExport: 'Add to calendar', icsHelp: 'Save the plan as an .ics file for your calendar, with an alert 30 minutes before each session',
+    passesTitle: 'Tickets', passesHelp: "Add the festival's ticket PDFs: the app finds each ticket's session, marks it and keeps its QR code to show at the door. They are saved only on this device; keep the PDFs.",
+    passesAdd: 'Add tickets (PDF)', passesRead: 'Reading {n} files…', passesDone: '{n} tickets saved, for {s} sessions.',
+    passesNoMatch: { one: '{n} matches no session in the programme.', other: '{n} match no session in the programme.' }, passesBad: "{f} doesn't look like a festival ticket.",
+    passesFull: 'Not enough space on this device to save the tickets.', passGone: 'You have a ticket for it.',
+    clearPasses: { zero: 'No saved tickets', one: 'Delete {n} ticket', other: 'Delete {n} tickets' },
+    showTicket: { one: 'Show ticket', other: 'Show tickets ({n})' }, doorRowSeat: 'Row · Seat', doorOf: 'Ticket {i} of {n}', prevTicket: 'Previous',
+    doorHint: 'Turn the brightness up if it is hard to scan.', doorPdf: 'Original PDF: {f}, page {pg} (open it from Files)',
     friendsTitle: 'Friends', friendsShort: 'Friends', friendsHelp: "Compare your plan with friends': paste their code or link in Sync and give it a name. It's only shown next to yours; it doesn't change it.",
     compareHelp: "Or compare it with yours, as a friend's plan (the same name updates it):", friendName: "Friend's name", compareAs: 'Compare',
     friendAdded: "Added {name}'s plan: {d}.", friendRemove: 'Remove', noFriends: 'No friends added yet.',
@@ -747,6 +790,14 @@ function ackChanges() {
 }
 saveMarked(); // first run after an update: remember the marks as they are now
 const tickets = new Set(store.get('tickets', [])); // marked sessions with a ticket bought
+// Ticket PDFs: each ticket kept as its session, seat and QR code (a small JPEG as a data URL). The PDFs are not kept.
+// ponytail: localStorage, ~16 KB a ticket, so a few hundred fit in the ~5 MB limit; IndexedDB if that ever falls short.
+let passes = store.get('passes', []); // [{ ref, id: session id or null, t: title, a: start, v: venue, row, seat, qr, f: PDF file name, pg: page }]
+function savePasses() {
+  try { localStorage.setItem('sitges26:passes', JSON.stringify(passes)); return true; } catch { return false; } // not store.set: a full storage must be reported
+}
+const passesFor = id => passes.filter(p => p.id === id).sort((a, b) => a.ref.localeCompare(b.ref));
+
 // Friends' plans: read-only layers pasted from their plan code, only shown next to yours. [{ name, m: [session ids], at: ISO date }]
 let friends = store.get('friends', []);
 let friendsBy = {}; // session id -> friends who marked it
@@ -1014,8 +1065,10 @@ function renderNow() {
     }
     html += `<span class="lbl">${t('next')}</span><b>${esc(next.title)}</b><span class="when">${hhmm(toDate(next.start))} · ${esc(venue(next.location))} · ${t('inTime', { d: dur(mins) })}</span>${leave}`;
   }
+  const doorFor = (soon ? next : inside).id, n = passesFor(doorFor).length;
+  if (n) html += `<button type="button" class="door-btn" data-door="${doorFor}">${tn('showTicket', n)}</button>`;
   bar.innerHTML = html;
-  bar.dataset.id = (soon ? next : inside).id;
+  bar.dataset.id = doorFor;
   bar.hidden = false;
 }
 
@@ -1142,6 +1195,8 @@ function saveWalk() {
 const clears = {
   clearMarks: { count: () => marked.size, take: () => { const old = [...marked]; marked.clear(); saveMarked(); return old; },
                 give: old => { old.forEach(id => marked.add(id)); saveMarked(); } },
+  clearPasses: { count: () => passes.length, take: () => { const old = passes; passes = []; savePasses(); renderPasses(); return old; },
+                 give: old => { passes = old; savePasses(); renderPasses(); } },
   clearWatch: { count: () => Object.keys(watch).length, take: () => { const old = watch; watch = {}; saveWatch(); updateCounts(); return old; },
                 give: old => { watch = old; saveWatch(); updateCounts(); } },
 };
@@ -1215,7 +1270,7 @@ function openSheet(id) {
   sheet.innerHTML = `<button type="button" class="dlg-close" data-close aria-label="${t('close')}" title="${t('close')}">✕</button><form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
     ${body}
     ${notes ? `<div class="notes">${notes}</div>` : ''}
-    <div class="walk-actions">${on ? `<button type="button" class="${tickets.has(id) ? 'on' : ''}" data-ticket="${id}" aria-pressed="${tickets.has(id)}">${tickets.has(id) ? t('ticketOn') : t('ticketAdd')}</button>` : ''}<button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
+    <div class="walk-actions">${passesFor(id).length ? `<button type="button" class="door-open" data-door="${id}">${tn('showTicket', passesFor(id).length)}</button>` : ''}${on ? `<button type="button" class="${tickets.has(id) ? 'on' : ''}" data-ticket="${id}" aria-pressed="${tickets.has(id)}">${tickets.has(id) ? t('ticketOn') : t('ticketAdd')}</button>` : ''}<button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
   </form>`;
   openPanel(sheet);
 }
@@ -1225,6 +1280,8 @@ sheet.onclick = e => {
   if (w) { toggleWatch(w.dataset.watch); if (activeView === 'films') renderFilms(); sheet.dataset.film ? openFilm(sheet.dataset.film) : openSheet(+sheet.querySelector('[data-mark]').dataset.mark); return; }
   const go = e.target.closest('[data-goto]');
   if (go) return goto(+go.dataset.goto);
+  const dr = e.target.closest('[data-door]');
+  if (dr) return openDoor(passesFor(+dr.dataset.door));
   const tk = e.target.closest('[data-ticket]');
   if (tk) { const id = +tk.dataset.ticket; tickets.has(id) ? tickets.delete(id) : tickets.add(id); saveTickets(); render(current); return openSheet(id); }
   const tier = e.target.closest('[data-tier]');
@@ -1471,6 +1528,146 @@ document.getElementById('view-films').onclick = e => {
   if (film) openFilm(film.dataset.film);
 };
 
+// ---------- Ticket PDFs ----------
+// Festival ticket PDFs (iText, one ticket a page): the text in Helvetica/WinAnsi and the QR as a small square JPEG.
+// Read with browser built-ins only: the text streams are inflated with DecompressionStream, the JPEG copied out as is.
+const TicketPDF = (() => {
+  const latin1 = new TextDecoder('latin1');
+  const inflate = async bytes => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'))).arrayBuffer());
+  function objects(bytes) {
+    const s = latin1.decode(bytes), objs = {};
+    for (const m of s.matchAll(/(\d+) 0 obj\s*/g)) {
+      const start = m.index + m[0].length, end = s.indexOf('endobj', start);
+      const body = s.slice(start, end), si = body.indexOf('stream');
+      const dict = si < 0 ? body : body.slice(0, si);
+      let data = null;
+      if (si >= 0) {
+        let from = start + si + 6; if (s[from] === '\r') from++; if (s[from] === '\n') from++;
+        const len = +(dict.match(/\/Length (\d+)(?! \d+ R)/)?.[1] ?? NaN);
+        data = bytes.subarray(from, Number.isFinite(len) ? from + len : start + body.lastIndexOf('endstream'));
+      }
+      objs[m[1]] = { dict, data };
+    }
+    return objs;
+  }
+  const refs = str => [...str.matchAll(/(\d+) 0 R/g)].map(m => m[1]);
+  function textLines(content) {
+    const s = latin1.decode(content), out = [];
+    const lit = t => t.replace(/\\([nrtbf()\\]|[0-7]{1,3})/g, (m, e) => /[0-7]/.test(e[0]) ? String.fromCharCode(parseInt(e, 8)) : ({ n: '\n', r: '\r', t: '\t', b: '\b', f: '\f' }[e] ?? e));
+    for (const m of s.matchAll(/\[((?:[^\]\\]|\\.)*)\]\s*TJ|\(((?:[^()\\]|\\.)*)\)\s*(?:Tj|'|")/g))
+      out.push(m[1] !== undefined ? [...m[1].matchAll(/\(((?:[^()\\]|\\.)*)\)/g)].map(x => lit(x[1])).join('') : lit(m[2]));
+    return out.map(l => l.trim()).filter(Boolean);
+  }
+  async function pages(bytes) {
+    const objs = objects(bytes), out = [];
+    const root = Object.values(objs).find(o => /\/Type\s*\/Pages/.test(o.dict));
+    if (!root) return out;
+    for (const pid of refs(root.dict.match(/\/Kids\s*\[([^\]]*)\]/)?.[1] || '')) {
+      const page = objs[pid], cid = page?.dict.match(/\/Contents (\d+) 0 R/)?.[1];
+      if (!cid) continue;
+      const content = objs[cid];
+      const lines = textLines(/FlateDecode/.test(content.dict) ? await inflate(content.data) : content.data);
+      const seen = new Set(), stack = refs(page.dict.slice(page.dict.indexOf('/Resources'))), images = [];
+      while (stack.length) { // images reachable from the page, through form XObjects too
+        const id = stack.pop(); if (seen.has(id) || !objs[id]) continue; seen.add(id);
+        const o = objs[id];
+        if (/\/Subtype\s*\/Image/.test(o.dict)) images.push({ w: +o.dict.match(/\/Width (\d+)/)[1], h: +o.dict.match(/\/Height (\d+)/)[1], jpeg: /DCTDecode/.test(o.dict), data: o.data });
+        else if (/\/Subtype\s*\/Form/.test(o.dict) || /\/XObject/.test(o.dict)) stack.push(...refs(o.dict));
+      }
+      out.push({ lines, qr: images.filter(i => i.jpeg && i.w === i.h && i.w < 600).sort((a, b) => a.w - b.w)[0] });
+    }
+    return out;
+  }
+  // Text order in the stream: ENTRADA, title (one or two lines), price, venue, address, date…
+  function fields(lines) {
+    const text = lines.join('\n'), dt = text.match(/(\d{2})\/(\d{2})\/(\d{4})\s*-\s*(\d{2}):(\d{2})/);
+    const di = lines.findIndex(l => /\d{2}\/\d{2}\/\d{4}\s*-/.test(l)), ei = lines.indexOf('ENTRADA'), pi = lines.findIndex(l => /Eur\b/.test(l));
+    return { t: lines.slice(ei + 1, pi).join(' '), v: lines[di - 2] || '', a: dt && `${dt[3]}-${dt[2]}-${dt[1]}T${dt[4]}:${dt[5]}`,
+      row: text.match(/Fila:\s*(\S+)/)?.[1] || '', seat: text.match(/Seient:\s*(\S+)/)?.[1] || '', ref: text.match(/Ref:\s*(\d+)/)?.[1] };
+  }
+  const plain = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const VENUES = [['prado', 'Cinema Casino Prado'], ['escorxador', 'Cinema Escorxador'], ['mercat', 'Mercat Vell'], ['auditori', 'Sala Auditori Meliá'], ['tramuntana', 'Sala Tramuntana Meliá'], ['brigadoon', 'Brigadoon'], ['llevant', 'Brigadoon']];
+  // The session: same start and venue; when two start together there, the title decides.
+  function sessionOf(tk) {
+    const loc = VENUES.find(([k]) => plain(tk.v).includes(k))?.[1], t = plain(tk.t);
+    let same = SCHEDULE.filter(s => tk.a && s.start.startsWith(tk.a) && (!loc || s.location === loc));
+    const titled = same.filter(s => plain(s.title).includes(t) || s.films.some(f => plain(f.title).includes(t)));
+    if (same.length > 1 && titled.length === 1) same = titled;
+    return same.length === 1 ? same[0].id : null;
+  }
+  const dataUrl = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 8192) s += String.fromCharCode(...bytes.subarray(i, i + 8192)); return 'data:image/jpeg;base64,' + btoa(s); };
+  // A file -> its tickets; none when it is not a festival ticket PDF.
+  async function read(file) {
+    const out = [];
+    // Only the file name and page are kept: a web page can't store a file's path or reopen it later.
+    (await pages(new Uint8Array(await file.arrayBuffer()))).forEach((p, i) => {
+      const tk = fields(p.lines);
+      if (tk.ref && tk.a && p.qr) out.push({ ...tk, id: sessionOf(tk), qr: dataUrl(p.qr.data), f: file.name, pg: i + 1 });
+    });
+    return out;
+  }
+  return { read };
+})();
+
+async function importPasses(files) {
+  const status = document.getElementById('passStatus');
+  status.textContent = t('passesRead', { n: files.length });
+  const found = [], bad = [];
+  for (const f of files) {
+    try { const got = await TicketPDF.read(f); got.length ? found.push(...got) : bad.push(f.name); } catch { bad.push(f.name); }
+  }
+  const old = passes, refs = new Set(found.map(p => p.ref));
+  passes = passes.filter(p => !refs.has(p.ref)).concat(found); // same Ref again replaces the ticket
+  if (!savePasses()) { passes = old; status.textContent = t('passesFull'); return; }
+  navigator.storage?.persist?.().catch(() => {}); // ask the browser not to clear it when space runs low
+  const ids = [...new Set(found.filter(p => p.id).map(p => p.id))];
+  ids.forEach(id => { marked.add(id); tickets.add(id); }); saveMarked(); saveTickets();
+  const lost = found.filter(p => !p.id).length;
+  status.textContent = [t('passesDone', { n: found.length, s: ids.length }), lost && tn('passesNoMatch', lost), ...bad.map(f => t('passesBad', { f }))].filter(Boolean).join(' ');
+  render(current); renderPasses(); renderClear();
+}
+function renderPasses() {
+  const groups = new Map();
+  for (const p of passes) { const k = p.id ?? 'x' + p.a + p.t; (groups.get(k) || groups.set(k, []).get(k)).push(p); }
+  document.getElementById('passList').innerHTML = [...groups.values()].sort((a, b) => a[0].a.localeCompare(b[0].a)).map(g => {
+    const p = g[0], s = byId[p.id], start = s ? s.start : p.a + ':00';
+    return `<li><button type="button" data-door-group="${esc(p.id ?? p.ref)}"><span>${dayLabel(start)} ${hhmm(toDate(start))} · <b>${esc(s ? s.title : p.t)}</b> · ${esc(s ? venue(s.location) : p.v)}</span><span>${g.length} ×</span></button></li>`;
+  }).join('');
+}
+document.getElementById('passFiles').onchange = e => { const files = [...e.target.files]; e.target.value = ''; if (files.length) importPasses(files); };
+document.getElementById('passList').onclick = e => {
+  const b = e.target.closest('[data-door-group]');
+  if (!b) return;
+  const key = b.dataset.doorGroup, one = passes.find(p => String(p.id) === key || p.ref === key);
+  openDoor(one.id ? passesFor(one.id) : passes.filter(p => !p.id && p.a === one.a && p.t === one.t));
+};
+
+// Door view: the QR large with a white margin (scanners need it), row and seat in big type, the screen kept on.
+const door = document.getElementById('door');
+let doorList = [], doorAt = 0, wake = null;
+function drawDoor() {
+  const p = doorList[doorAt], s = byId[p.id], start = s ? s.start : p.a + ':00';
+  door.innerHTML = `<h2 id="doorTitle">${esc(s ? s.title : p.t)}</h2>
+    <div class="w">${dayLabel(start)} · ${hhmm(toDate(start))} · ${esc(s ? s.location : p.v)}</div>
+    <div class="qr"><img src="${p.qr}" alt="QR"></div>
+    <div class="rs"><small>${t('doorRowSeat')}</small>${esc(p.row)} · ${esc(p.seat)}</div>
+    <div class="w">${doorList.length > 1 ? t('doorOf', { i: doorAt + 1, n: doorList.length }) + ' · ' : ''}Ref ${esc(p.ref)}</div>
+    ${p.f ? `<div class="w">${t('doorPdf', { f: esc(p.f), pg: p.pg })}</div>` : ''}
+    <div class="w">${t('doorHint')}</div>
+    <div class="nav">${doorList.length > 1 ? `<button type="button" data-step="-1">‹ ${t('prevTicket')}</button><button type="button" data-step="1">${t('next')} ›</button>` : ''}<button type="button" class="close" data-close>${t('close')}</button></div>`;
+}
+async function openDoor(list) {
+  if (!list.length) return;
+  doorList = list; doorAt = 0; drawDoor(); openPanel(door);
+  try { wake = await navigator.wakeLock?.request('screen'); } catch {}
+}
+door.addEventListener('close', () => { wake?.release().catch(() => {}); wake = null; });
+door.addEventListener('click', e => {
+  const st = e.target.closest('[data-step]');
+  if (st) { doorAt = (doorAt + +st.dataset.step + doorList.length) % doorList.length; drawDoor(); }
+});
+door.addEventListener('keydown', e => { if (doorList.length > 1 && /Arrow(Left|Right)/.test(e.key)) { doorAt = (doorAt + (e.key === 'ArrowRight' ? 1 : doorList.length - 1)) % doorList.length; drawDoor(); } });
+
 // ---------- Auto-plan ----------
 // Picks one screening per watchlist film around the marked sessions, which it never touches. Plans are compared tier by tier:
 // more must-sees beats any number of lower tiers, then want-to-see, then if-it-fits; ties go to fewer late nights, less rushing
@@ -1578,7 +1775,7 @@ function changesHtml() {
   return `<div class="auto changes"><h4 class="set-h">${t('changesTitle')}</h4><ul class="unfit">${list.map(c => {
     if (!c.gone) return `<li><b>${esc(c.o.t)}</b>${c.moved ? `<span>${t('changeMoved', { now: esc(was({ a: c.s.start, l: c.s.location })), was: esc(was(c.o)) })}</span>` : ''}${c.films ? `<span>${t('changeFilms', { f: esc(c.s.films.map(f => f.title).join(', ') || c.s.title) })}</span>` : ''}</li>`;
     const others = c.o.f.flatMap(u => filmIndex[u] ? [filmIndex[u]] : []);
-    return `<li><b>${esc(c.o.t)}</b><span>${t('changeGone', { was: esc(was(c.o)) })}</span>${others.length ? others.map(f => `<div class="fs">${showButtons(f, mine)}</div>`).join('') : `<span>${t('noOthers')}</span>`}</li>`;
+    return `<li><b>${esc(c.o.t)}</b><span>${t('changeGone', { was: esc(was(c.o)) })}</span>${passesFor(c.id).length ? `<span>${t('passGone')}</span>` : ''}${others.length ? others.map(f => `<div class="fs">${showButtons(f, mine)}</div>`).join('') : `<span>${t('noOthers')}</span>`}</li>`;
   }).join('')}</ul><div class="walk-actions"><button type="button" class="primary" data-ack>${t('gotIt')}</button></div></div>`;
 }
 
@@ -1641,13 +1838,15 @@ function renderPlan(info = analyse()) {
       const cls = ['prow', i.clash.length ? 'clash' : i.tight.length ? 'tight' : i.rest.length ? 'rest' : '', toDate(s.end) < at && 'past'].filter(Boolean).join(' ');
       return `<li class="${cls}" role="button" tabindex="0" data-open="${s.id}" style="--h:${hue(s.sections[0] || '')}">
         <div class="pt"><b>${hhmm(toDate(s.start))}</b><span>${hhmm(toDate(s.end))}</span></div>
-        <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)} · ${tickets.has(s.id) ? `<span class="tk on">${t('hasTicket')}</span>` : `<span class="tk">${t('noTicket')}</span>`}</div>${friendsBy[s.id] ? `<div class="going">${esc(t('alsoGoing', { names: namesOf(s.id) }))}</div>` : ''}${notesHtml(s, i)}</div></li>`;
+        <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)} · ${passesFor(s.id).length ? `<button type="button" class="tk" data-door="${s.id}">${tn('showTicket', passesFor(s.id).length)}</button>` : tickets.has(s.id) ? `<span class="tk on">${t('hasTicket')}</span>` : `<span class="tk">${t('noTicket')}</span>`}</div>${friendsBy[s.id] ? `<div class="going">${esc(t('alsoGoing', { names: namesOf(s.id) }))}</div>` : ''}${notesHtml(s, i)}</div></li>`;
     }).join('');
     return `<section class="pday" id="plan-${d}"><h3><span>${esc(date)}</span><button type="button" data-day="${d}">${t('seeDay')}</button></h3><ol>${rows}</ol></section>`;
   }).join('') : `<p class="empty">${t('planEmpty')}</p>`);
 }
 const planList = document.getElementById('planList');
 planList.onclick = e => {
+  const dr = e.target.closest('[data-door]');
+  if (dr) return openDoor(passesFor(+dr.dataset.door));
   if (e.target.closest('[data-ack]')) { ackChanges(); return render(current); }
   const go = e.target.closest('[data-goto]');
   if (go) return goto(+go.dataset.goto);
@@ -1696,7 +1895,7 @@ function showView(v) {
   document.querySelectorAll('#views [data-view]').forEach(b => b.dataset.view === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
   if (v === 'schedule') { render(current); if (scheduleScroll) [scroller.scrollLeft, scroller.scrollTop] = scheduleScroll; }
   if (v === 'films') renderFilms();
-  if (v === 'settings') { renderWalk(); renderClear(); renderFriends(); document.getElementById('minRest').value = minRest; document.getElementById('maxPerDay').value = maxPerDay; }
+  if (v === 'settings') { renderWalk(); renderClear(); renderFriends(); renderPasses(); document.getElementById('minRest').value = minRest; document.getElementById('maxPerDay').value = maxPerDay; }
   if (v === 'plan') { renderPlan(); document.getElementById('plan-' + nowDay())?.scrollIntoView(); }
 }
 function navigate(v) {
@@ -1724,9 +1923,11 @@ function closePanel(dlg, then) {
   dlg.close(); then?.();
 }
 // However a panel closes (✕, Esc, backdrop, Android back gesture), drop its history entry.
-document.querySelectorAll('dialog').forEach(dlg => dlg.addEventListener('close', () => { if (history.state?.panel) history.back(); }));
+let ownBack = false; // a history.back() started here, after a panel already closed: closes nothing more
+document.querySelectorAll('dialog').forEach(dlg => dlg.addEventListener('close', () => { if (history.state?.panel) { ownBack = true; history.back(); } }));
 addEventListener('popstate', () => {
-  document.querySelector('dialog[open]')?.close(); // Back with a panel open closes it
+  // Back with a panel open closes it; the door sits after the others in the page, so the last open one is on top.
+  if (ownBack) ownBack = false; else [...document.querySelectorAll('dialog[open]')].pop()?.close();
   const h = location.hash.slice(1);
   showView(VIEWS.includes(h) ? h : 'schedule');
   if (activeView === 'schedule' && days.includes(h) && h !== current) render(h);
@@ -1734,7 +1935,10 @@ addEventListener('popstate', () => {
 });
 document.getElementById('views').onclick = e => { const b = e.target.closest('[data-view]'); if (b) navigate(b.dataset.view); };
 
+document.getElementById('next').onkeydown = e => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.currentTarget.click(); } };
 document.getElementById('next').onclick = e => {
+  const dr = e.target.closest('[data-door]');
+  if (dr) return openDoor(passesFor(+dr.dataset.door));
   const id = +e.currentTarget.dataset.id;
   render(festDay(byId[id].start));
   document.querySelector(`.s[data-id="${id}"]`)?.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
