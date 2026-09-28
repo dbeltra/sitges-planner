@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-09-28
+
+### Added
+- Programme changes: if the festival moves or cancels a session you marked, El meu pla tells you what changed, and for a cancelled one shows the film's other screenings. The My plan tab shows "!" until you confirm.
+- Tickets: in a marked session's details, "Tinc l'entrada" records that you bought the ticket. El meu pla shows which sessions have one and how many upcoming sessions still don't.
+- Automatic planning now starts from a "Planifica" button at the top of El meu pla, and only shows its box while you review the suggestions, so a finished plan shows just your sessions.
+- "Afegeix al calendari" in El meu pla saves your plan as a calendar file, with an alert 30 minutes before each session.
+
+### Fixed
+- Screenings that have already started no longer count as free in Pel·lícules during the festival.
+- On older iPhones (before iOS 17) the menu of hidden venues now opens, so a hidden venue can be shown again.
+- Section colours and scroll fades now also work on older phones.
+- The new app icon reaches installed apps.
+
 ## [2.1.0] - 2026-09-25
 
 ### Added

@@ -324,6 +324,13 @@
   .prow .plabel { font: 700 9.5px/1.3 var(--body); letter-spacing: 1px; text-transform: uppercase; color: var(--red); }
   .prow .rej { align-self: start; width: 32px; height: 32px; border: 0; background: none; color: var(--muted); font-size: 15px; cursor: pointer; }
   .prow .rej:hover { color: var(--clash); }
+  .plan-head { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; justify-content: space-between; }
+  .plan-acts { display: flex; gap: 6px; margin-left: auto; }
+  .ics { flex: none; padding: 5px 10px; border: 1px solid var(--ink); background: none; font-weight: 700; font-size: 11px; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; }
+  .auto.changes { box-shadow: inset 4px 0 0 var(--clash); }
+  .auto.changes h4 { margin: 0; color: var(--clash); }
+  .prow .tk { color: var(--muted); } .prow .tk.on { color: #2E7D32; font-weight: 700; }
+  .sheet .walk-actions button.on { background: #2E7D32; border-color: #2E7D32; color: #fff; }
   .plan-list .empty { padding: 30px 0; color: var(--muted); text-align: center; }
 
   /* Sync */
@@ -356,6 +363,7 @@
     .only-toggle { padding: 0 12px; font-size: 11.5px; }
     .films-head, .plan-head { padding-top: calc(12px + env(safe-area-inset-top, 0px)) !important; }
     .plan-list { padding: 0 12px 16px; }
+    .plan-head .status { flex-wrap: wrap; row-gap: 2px; white-space: normal; overflow: visible; }
     .settings form { padding: calc(14px + env(safe-area-inset-top, 0px)) 12px 20px; }
     #days { justify-content: flex-start; padding-top: 8px; margin-top: -4px; } /* pull up only by the header's 4px padding, or the badges leave the screen */
     #days button { min-width: 38px; padding: 3px 5px; gap: 1px; }
@@ -387,9 +395,19 @@
   @keyframes gridIn { from { opacity: .35; translate: 0 6px; } }
   #grid.enter .col:not(.axis) { animation: gridIn .22s ease-out; }
   /* More to scroll sideways (days, venues on phones): fade that edge. Classes set from JS. */
-  .fade-r { mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
-  .fade-l { mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent); }
-  .fade-l.fade-r { mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent); }
+  .fade-r { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
+  .fade-l { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent); }
+  .fade-l.fade-r { -webkit-mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent); }
+  /* Browsers without oklch() (Chrome < 111, iOS < 15.4): the same section colours in hsl. */
+  @supports not (color: oklch(0 0 0)) {
+    .s { box-shadow: inset 4px 0 0 hsl(var(--h) 55% 45%); }
+    .s:hover, .s:focus-visible { box-shadow: inset 4px 0 0 hsl(var(--h) 55% 45%), 0 6px 18px rgb(0 0 0 / .15); }
+    .s .sec { color: hsl(var(--h) 55% 40%); }
+    .s.on .sec { color: hsl(var(--h) 60% 75%); }
+    .sheet .secs span { background: hsl(var(--h) 55% 42%); }
+    .prow { --bar: hsl(var(--h) 55% 45%); }
+  }
+  .hidden-menu.fallback { position: fixed; z-index: 30; }
   /* Sections: the new one slides in from the side of its tab (--dx is set from JS) */
   @keyframes viewIn { from { opacity: 0; translate: var(--dx, 0) 0; } }
   .view.entering { animation: viewIn .24s cubic-bezier(.2, .8, .2, 1); } /* headers and time axis stay put; columns slide in under them */
@@ -438,7 +456,8 @@
   <ul id="filmList" class="film-list"></ul>
 </section>
 <section id="view-plan" class="view plan" hidden data-i18n-attr="aria-label:plan">
-  <div class="plan-head"><div class="status" id="planSummary"></div></div>
+  <div class="plan-head"><div class="status" id="planSummary"></div>
+    <div class="plan-acts"><button type="button" class="ics" data-auto data-i18n="autoPlanShort" data-i18n-attr="title:autoHelp">Auto-plan</button><button type="button" id="icsExport" class="ics" data-i18n="icsExport" data-i18n-attr="title:icsHelp">Add to calendar</button></div></div>
   <div id="planList" class="plan-list"></div>
 </section>
 <div id="hiddenMenu" class="hidden-menu" popover></div>
@@ -495,7 +514,7 @@
 </dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.1.0'; // bump on every change so a device can show which code it runs
+const BUILD = '2.2.0'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -520,14 +539,18 @@ const STR = {
     tabAll: 'Totes les pel·lícules', tabWatch: 'La meva llista ({n})', searchFilms: 'Cerca per títol o director', section: 'Secció', allSections: 'Totes les seccions', sectionsN: 'Seccions ({n})', screenings: 'Passis', otherScreenings: 'Altres passis',
     tier1: 'Imprescindible', tier2: "M'agradaria", tier3: 'Si hi cap', priority: 'Prioritat', tierCounts: '{c} de {n} cobertes · {b} no hi caben',
     maxDayHelp: "<b>Màxim de sessions per dia</b> a la planificació automàtica. Les imprescindibles el poden superar. 0 vol dir sense límit.", perDay: 'per dia',
-    autoPlan: 'Planifica automàticament', autoHelp: "Proposa sessions per a les pel·lícules de la teva llista, per ordre de prioritat, sense tocar les que ja has marcat.",
+    autoPlanShort: 'Planifica', autoHelp: "Proposa sessions per a les pel·lícules de la teva llista, per ordre de prioritat, sense tocar les que ja has marcat.",
     autoNeedsList: 'Per planificar automàticament, afegeix pel·lícules a la teva llista a Pel·lícules.',
     proposedN: { one: '{n} sessió proposada', other: '{n} sessions proposades' }, coversN: { one: 'cobreix {n} pel·lícula de la llista', other: 'cobreix {n} pel·lícules de la llista' },
     nothingToAdd: 'No hi ha cap sessió més que hi càpiga.', acceptAll: 'Afegeix-les totes', discard: 'Descarta', undo: 'Desfés',
     addedN: { one: '{n} sessió afegida al pla.', other: '{n} sessions afegides al pla.' },
     proposed: 'Proposada', propCovers: 'Per a {f}', rejectOne: 'Treu aquesta proposta',
     isPast: 'ja ha passat', shortNight: 'deixa poc descans amb {t}', gapOnly: 'allargaria el dia', dayFull: { one: 'el dia ja té {n} sessió', other: 'el dia ja té {n} sessions' },
-    keptForOthers: 'deixada per encabir-ne d’altres', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
+    keptForOthers: 'deixada per encabir-ne d’altres',
+    ticketAdd: "Tinc l'entrada", ticketOn: '✓ Entrada comprada', hasTicket: '✓ Entrada', noTicket: 'Sense entrada',
+    needTickets: { one: '{n} sense entrada', other: '{n} sense entrada' },
+    icsExport: 'Afegeix al calendari', icsHelp: 'Desa el pla com a fitxer .ics per al calendari, amb un avís 30 minuts abans de cada sessió',
+    changesTitle: 'Canvis al programa', changeMoved: 'Ara {now} (abans {was})', changeGone: 'Ja no és al programa (era {was}). Altres passis:', noOthers: 'No en queden altres passis.', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
     syncTitle: 'Sincronització', syncHelp: "El teu pla només es desa en aquest dispositiu. Per passar-lo a un altre, envia'l des d'aquí i obre'l a l'altre.",
     sendPlan: 'Envia aquest pla', planCode: 'Codi del pla', copyCode: 'Copia el codi', shareLink: "Comparteix l'enllaç",
     receivePlan: 'Rep un pla', pastePlan: 'Enganxa un codi o un enllaç', replacePlan: 'Substitueix el meu pla',
@@ -578,14 +601,18 @@ const STR = {
     tabAll: 'All films', tabWatch: 'My watchlist ({n})', searchFilms: 'Search title or director', section: 'Section', allSections: 'All sections', sectionsN: 'Sections ({n})', screenings: 'Screenings', otherScreenings: 'Other screenings',
     tier1: 'Must see', tier2: 'Want to see', tier3: 'If it fits', priority: 'Priority', tierCounts: '{c} of {n} covered · {b} cannot fit',
     maxDayHelp: '<b>Maximum sessions a day</b> for auto-planning. Must-see films may go over it. 0 means no limit.', perDay: 'a day',
-    autoPlan: 'Auto-plan', autoHelp: 'Suggests sessions for your watchlist films, by priority, without touching the ones you already marked.',
+    autoPlanShort: 'Auto-plan', autoHelp: 'Suggests sessions for your watchlist films, by priority, without touching the ones you already marked.',
     autoNeedsList: 'To auto-plan, add films to your watchlist in Films.',
     proposedN: { one: '{n} suggested session', other: '{n} suggested sessions' }, coversN: { one: 'covers {n} watchlist film', other: 'covers {n} watchlist films' },
     nothingToAdd: 'No more sessions fit.', acceptAll: 'Add them all', discard: 'Discard', undo: 'Undo',
     addedN: { one: '{n} session added to your plan.', other: '{n} sessions added to your plan.' },
     proposed: 'Suggested', propCovers: 'For {f}', rejectOne: 'Remove this suggestion',
     isPast: 'already over', shortNight: 'too little rest around {t}', gapOnly: 'would make the day longer', dayFull: { one: 'that day already has {n} session', other: 'that day already has {n} sessions' },
-    keptForOthers: 'left out to fit others in', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
+    keptForOthers: 'left out to fit others in',
+    ticketAdd: 'I have a ticket', ticketOn: '✓ Ticket bought', hasTicket: '✓ Ticket', noTicket: 'No ticket',
+    needTickets: { one: '{n} without a ticket', other: '{n} without tickets' },
+    icsExport: 'Add to calendar', icsHelp: 'Save the plan as an .ics file for your calendar, with an alert 30 minutes before each session',
+    changesTitle: 'Programme changes', changeMoved: 'Now {now} (was {was})', changeGone: 'No longer in the programme (was {was}). Other screenings:', noOthers: 'No other screenings left.', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
     syncTitle: 'Sync', syncHelp: 'Your plan is saved only on this device. To move it, send it from this device and open it on the other one.',
     sendPlan: 'Send this plan', planCode: 'Plan code', copyCode: 'Copy code', shareLink: 'Share link',
     receivePlan: 'Receive a plan', pastePlan: 'Paste a code or a link', replacePlan: 'Replace my plan',
@@ -661,6 +688,27 @@ let minRest = store.get('minRest', DEFAULT_REST);
 const hiddenVenues = new Set(store.get('hiddenVenues', []));
 
 const byId = Object.fromEntries(SCHEDULE.map(s => [s.id, s]));
+// Programme changes: how each marked session looked when it was marked, to spot one that moved or left the programme
+// after a data update. A session missing from the data stays in `marked` until the change is acknowledged.
+let seen = store.get('seen', {}); // id -> { t: title, a: start, b: end, l: location, f: film URLs }
+const snap = s => ({ t: s.title, a: s.start, b: s.end, l: s.location, f: s.films.map(f => f.url) });
+function saveMarked() {
+  for (const id of marked) if (byId[id] && !seen[id]) seen[id] = snap(byId[id]);
+  for (const id of Object.keys(seen)) if (!marked.has(+id)) delete seen[id];
+  store.set('marked', [...marked]); store.set('seen', seen);
+}
+const programmeChanges = () => Object.entries(seen).map(([id, o]) => {
+  const s = byId[id];
+  if (!s) return { id: +id, o, gone: true };
+  if (s.start !== o.a || s.end !== o.b || s.location !== o.l) return { id: +id, o, s };
+}).filter(Boolean);
+function ackChanges() {
+  for (const c of programmeChanges()) c.gone ? marked.delete(c.id) : seen[c.id] = snap(c.s);
+  saveMarked();
+}
+saveMarked(); // first run after an update: remember the marks as they are now
+const tickets = new Set(store.get('tickets', [])); // marked sessions with a ticket bought
+const saveTickets = () => store.set('tickets', [...tickets]);
 const byDay = {};
 for (const s of SCHEDULE) (byDay[festDay(s.start)] ??= []).push(s);
 const days = Object.keys(byDay).sort();
@@ -916,7 +964,7 @@ function toggleMark(id, x, y) {
   const ghost = old?.cloneNode(true);
   const box = old?.getBoundingClientRect();
   marked.has(id) ? marked.delete(id) : marked.add(id);
-  store.set('marked', [...marked]);
+  saveMarked();
   render(current);
   const el = document.querySelector(`.s[data-id="${id}"]`);
   if (!el || !ghost || !box || !el.offsetParent) return el;
@@ -974,18 +1022,28 @@ function renderHiddenMenu() {
     return `<li><button type="button" data-show="${esc(l)}"><span>${esc(l)}${n ? ` <i>★${n}</i>` : ''}</span><span>${t('showVenue')}</span></button></li>`;
   }).join('')}</ul>${list.length > 1 ? `<button type="button" class="all" data-show-all>${t('showAll')}</button>` : ''}`;
 }
-hiddenMenu.addEventListener('beforetoggle', e => {
-  if (e.newState !== 'open') return;
+function openHiddenMenu() {
   renderHiddenMenu();
   const r = grid.querySelector('.hidden-btn')?.getBoundingClientRect();
   if (r) { hiddenMenu.style.inset = 'auto'; hiddenMenu.style.left = `${Math.max(8, r.left)}px`; hiddenMenu.style.top = `${r.bottom + 4}px`; }
-});
+}
+// Without the Popover API (iOS < 17, Chrome < 114) the menu is a plain box toggled by the "+N" button, closed by a tap elsewhere.
+const hasPopover = 'showPopover' in HTMLElement.prototype;
+const closeHiddenMenu = () => hasPopover ? hiddenMenu.hidePopover() : hiddenMenu.hidden = true;
+if (hasPopover) hiddenMenu.addEventListener('beforetoggle', e => { if (e.newState === 'open') openHiddenMenu(); });
+else {
+  hiddenMenu.removeAttribute('popover'); hiddenMenu.hidden = true; hiddenMenu.classList.add('fallback');
+  document.addEventListener('click', e => {
+    if (e.target.closest('.hidden-btn')) { hiddenMenu.hidden = !hiddenMenu.hidden; if (!hiddenMenu.hidden) openHiddenMenu(); }
+    else if (!hiddenMenu.hidden && !e.composedPath().includes(hiddenMenu)) hiddenMenu.hidden = true; // the path, not contains(): a tap inside may have redrawn the menu
+  });
+}
 hiddenMenu.onclick = e => {
   const one = e.target.closest('[data-show]');
   if (one) setVenue(one.dataset.show, false);
   else if (e.target.closest('[data-show-all]')) { hiddenVenues.clear(); store.set('hiddenVenues', []); render(current); }
   else return;
-  if (hiddenVenues.size) renderHiddenMenu(); else hiddenMenu.hidePopover();
+  if (hiddenVenues.size) renderHiddenMenu(); else closeHiddenMenu();
 };
 
 // First-run tip; the same text stays in Settings.
@@ -1016,8 +1074,8 @@ function saveWalk() {
 
 // Replan: each clear needs a second tap within 4 s, then offers Undo for 10 s.
 const clears = {
-  clearMarks: { count: () => marked.size, take: () => { const old = [...marked]; marked.clear(); store.set('marked', []); return old; },
-                give: old => { old.forEach(id => marked.add(id)); store.set('marked', [...marked]); } },
+  clearMarks: { count: () => marked.size, take: () => { const old = [...marked]; marked.clear(); saveMarked(); return old; },
+                give: old => { old.forEach(id => marked.add(id)); saveMarked(); } },
   clearWatch: { count: () => Object.keys(watch).length, take: () => { const old = watch; watch = {}; saveWatch(); updateCounts(); return old; },
                 give: old => { watch = old; saveWatch(); updateCounts(); } },
 };
@@ -1091,7 +1149,7 @@ function openSheet(id) {
   sheet.innerHTML = `<button type="button" class="dlg-close" data-close aria-label="${t('close')}" title="${t('close')}">✕</button><form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
     ${body}
     ${notes ? `<div class="notes">${notes}</div>` : ''}
-    <div class="walk-actions"><button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
+    <div class="walk-actions">${on ? `<button type="button" class="${tickets.has(id) ? 'on' : ''}" data-ticket="${id}" aria-pressed="${tickets.has(id)}">${tickets.has(id) ? t('ticketOn') : t('ticketAdd')}</button>` : ''}<button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
   </form>`;
   openPanel(sheet);
 }
@@ -1101,6 +1159,8 @@ sheet.onclick = e => {
   if (w) { toggleWatch(w.dataset.watch); if (activeView === 'films') renderFilms(); sheet.dataset.film ? openFilm(sheet.dataset.film) : openSheet(+sheet.querySelector('[data-mark]').dataset.mark); return; }
   const go = e.target.closest('[data-goto]');
   if (go) return goto(+go.dataset.goto);
+  const tk = e.target.closest('[data-ticket]');
+  if (tk) { const id = +tk.dataset.ticket; tickets.has(id) ? tickets.delete(id) : tickets.add(id); saveTickets(); render(current); return openSheet(id); }
   const tier = e.target.closest('[data-tier]');
   if (tier) { setTier(tier.dataset.url, +tier.dataset.tier); if (activeView === 'films') renderFilms(); sheet.dataset.film ? openFilm(sheet.dataset.film) : openSheet(+sheet.querySelector('[data-mark]').dataset.mark); return; }
   const tr = e.target.closest('[data-trailer]');
@@ -1113,7 +1173,7 @@ const syncDialog = document.getElementById('syncDialog');
 const b64 = { enc: str => btoa(String.fromCharCode(...new TextEncoder().encode(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
               dec: code => new TextDecoder().decode(Uint8Array.from(atob(code.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))) };
 const walkOverrides = () => Object.fromEntries(Object.entries(walkTimes).filter(([k, v]) => v !== DEFAULT_WALK[k]));
-const planCode = () => b64.enc(JSON.stringify({ v: 2, m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch, r: minRest, d: maxPerDay }));
+const planCode = () => b64.enc(JSON.stringify({ v: 2, m: [...marked], h: [...hiddenVenues], w: walkOverrides(), l: watch, r: minRest, d: maxPerDay, t: [...tickets] }));
 const planLink = () => `${location.origin}${location.pathname}?import=${planCode()}`;
 const describe = p => [tn('markedSessions', p.m.length), tn('watchFilms', Object.keys(p.l || {}).length), tn('hiddenVenues', p.h.length), tn('walkEdits', Object.keys(p.w).length)].join(', ');
 function parsePlan(text) {
@@ -1128,7 +1188,8 @@ function parsePlan(text) {
     if (p.v === 1) l = oldTiers(l); // v1 codes: 1 want, 2 must see
     const r = Number.isFinite(p.r) && p.r >= 0 && p.r <= 16 ? p.r : DEFAULT_REST;
     const d = Number.isInteger(p.d) && p.d >= 0 && p.d <= 12 ? p.d : maxPerDay;
-    return { r, d, m: p.m.filter(id => byId[id]), h: p.h.filter(l => locations.includes(l)), w: Object.fromEntries(Object.entries(p.w).filter(([k, v]) => k in DEFAULT_WALK && Number.isFinite(v) && v >= 0)), l };
+    const tk = Array.isArray(p.t) ? p.t.filter(id => byId[id]) : [];
+    return { r, d, tk, m: p.m.filter(id => byId[id]), h: p.h.filter(l => locations.includes(l)), w: Object.fromEntries(Object.entries(p.w).filter(([k, v]) => k in DEFAULT_WALK && Number.isFinite(v) && v >= 0)), l };
   } catch { return null; }
 }
 const syncInput = document.getElementById('syncInput'), syncPreview = document.getElementById('syncPreview'), syncImport = document.getElementById('syncImport');
@@ -1161,12 +1222,13 @@ syncImport.onclick = () => {
   const p = parsePlan(syncInput.value);
   if (!p) return;
   marked.clear(); p.m.forEach(id => marked.add(id));
+  tickets.clear(); p.tk.forEach(id => tickets.add(id)); saveTickets();
   hiddenVenues.clear(); p.h.forEach(l => hiddenVenues.add(l));
   walkTimes = { ...DEFAULT_WALK, ...p.w };
   watch = p.l; saveWatch(); updateCounts();
   minRest = p.r; store.set('minRest', minRest);
   maxPerDay = p.d; store.set('maxPerDay', maxPerDay);
-  store.set('marked', [...marked]); store.set('hiddenVenues', [...hiddenVenues]); store.set('walkTimes', walkOverrides());
+  saveMarked(); store.set('hiddenVenues', [...hiddenVenues]); store.set('walkTimes', walkOverrides());
   render(current);
   syncPreview.textContent = t('imported', { d: describe(p) });
   syncImport.disabled = true;
@@ -1204,8 +1266,9 @@ filmSections.onclick = e => {
 };
 const when = s => `${dayLabel(s.start)} ${hhmm(toDate(s.start))}`;
 
-// Why a screening can't be added: it overlaps or leaves too little walk time with a marked session. Hidden venues only tidy the grid; they block nothing.
+// Why a screening can't be added: it has started, or it overlaps or leaves too little walk time with a marked session. Hidden venues only tidy the grid; they block nothing.
 function blockedBy(s, mine) {
+  if (toDate(s.start) <= now()) return t('isPast');
   for (const o of mine) {
     if (o === s) continue;
     const [a, b] = o.start < s.start ? [o, s] : [s, o];
@@ -1395,7 +1458,7 @@ function autoPlan() {
   return { ids: best.chosen.map(x => x.s.id), tierOf, unplaced };
 }
 let proposal = null, added = null; // added: sessions from the last "Add them all", for Undo
-function runAutoPlan() { proposal = autoPlan(); added = null; renderPlan(); }
+function runAutoPlan() { proposal = Object.keys(watch).length ? autoPlan() : { ids: [], tierOf: {}, unplaced: [], needsList: true }; added = null; renderPlan(); planList.scrollTop = 0; }
 // A suggestion stays only while it still fits the marked sessions and the other suggestions.
 function checkProposal() {
   if (!proposal) return;
@@ -1408,9 +1471,8 @@ function checkProposal() {
 }
 function autoBoxHtml() {
   if (added) return `<div class="auto"><p>${tn('addedN', added.length, { n: `<b>${added.length}</b>` })}</p><div class="walk-actions"><button type="button" data-undo-auto>${t('undo')}</button></div></div>`;
-  if (!proposal) return Object.keys(watch).length
-    ? `<div class="auto"><p>${t('autoHelp')}</p><div class="walk-actions"><button type="button" class="primary" data-auto>${t('autoPlan')}</button></div></div>`
-    : `<div class="auto"><p>${t('autoNeedsList')}</p></div>`;
+  if (!proposal) return ''; // idle: just the header button, so a finished plan shows only the plan
+  if (proposal.needsList) return `<div class="auto on"><p>${t('autoNeedsList')}</p><div class="walk-actions"><button type="button" data-discard>${t('close')}</button></div></div>`;
   const covers = new Set(proposal.ids.flatMap(id => byId[id].films.map(f => f.url)).filter(u => proposal.tierOf[u]));
   const miss = proposal.unplaced.filter(x => x.tier < 3); // tier 3 not fitting is expected, not news
   return `<div class="auto on">
@@ -1420,17 +1482,55 @@ function autoBoxHtml() {
   </div>`;
 }
 
+// Marked sessions that moved or left the programme since they were marked; other screenings for the ones that left.
+function changesHtml() {
+  const list = programmeChanges();
+  if (!list.length) return '';
+  const was = o => `${dayLabel(o.a)} ${hhmm(toDate(o.a))} · ${venue(o.l)}`, mine = [...marked].map(id => byId[id]).filter(Boolean);
+  return `<div class="auto changes"><h4 class="set-h">${t('changesTitle')}</h4><ul class="unfit">${list.map(c => {
+    if (!c.gone) return `<li><b>${esc(c.o.t)}</b><span>${t('changeMoved', { now: esc(was({ a: c.s.start, l: c.s.location })), was: esc(was(c.o)) })}</span></li>`;
+    const others = c.o.f.flatMap(u => filmIndex[u] ? [filmIndex[u]] : []);
+    return `<li><b>${esc(c.o.t)}</b><span>${t('changeGone', { was: esc(was(c.o)) })}</span>${others.length ? others.map(f => `<div class="fs">${showButtons(f, mine)}</div>`).join('') : `<span>${t('noOthers')}</span>`}</li>`;
+  }).join('')}</ul><div class="walk-actions"><button type="button" class="primary" data-ack>${t('gotIt')}</button></div></div>`;
+}
+
+// Calendar file of the plan, one event per marked session with an alarm 30 minutes before.
+// ponytail: festival times are Sitges local time, all CEST (UTC+2): the festival ends before the clocks change on 25 October.
+function planIcs() {
+  const utc = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const txt = v => String(v).replace(/[\\;,]/g, m => '\\' + m).replace(/\n/g, '\\n');
+  const fold = l => l.length <= 74 ? l : l.slice(0, 74) + '\r\n ' + fold(l.slice(74));
+  const stamp = utc(new Date());
+  const events = [...marked].map(id => byId[id]).filter(Boolean).map(s => [
+    'BEGIN:VEVENT', `UID:session-${s.id}@sitges-planner`, `DTSTAMP:${stamp}`,
+    `DTSTART:${utc(new Date(s.start + '+02:00'))}`, `DTEND:${utc(new Date(s.end + '+02:00'))}`,
+    `SUMMARY:${txt(s.title)}`, `LOCATION:${txt(s.location + ', Sitges')}`,
+    `DESCRIPTION:${txt([...s.films.map(f => f.title + (f.directors.length ? ' — ' + f.directors.join(', ') : '')), tickets.has(s.id) ? t('hasTicket') : t('noTicket')].join('\n'))}`,
+    ...(s.films[0] ? [`URL:https://sitgesfilmfestival.com${s.films[0].url}`] : []),
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:-PT30M', `DESCRIPTION:${txt(s.title)}`, 'END:VALARM', 'END:VEVENT']).flat();
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//sitges-planner//EN', 'CALSCALE:GREGORIAN', `X-WR-CALNAME:${txt(t('title'))}`, ...events, 'END:VCALENDAR'].map(fold).join('\r\n') + '\r\n';
+}
+document.querySelector('.plan-head [data-auto]').onclick = () => runAutoPlan();
+document.getElementById('icsExport').onclick = async () => {
+  const file = new File([planIcs()], 'sitges-2026.ics', { type: 'text/calendar' });
+  // Phones: the share sheet offers the calendar app. Elsewhere: a download.
+  if (navigator.canShare?.({ files: [file] }) && matchMedia('(max-width: 640px)').matches) { try { await navigator.share({ files: [file], title: t('title') }); return; } catch (err) { if (err.name === 'AbortError') return; } }
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(file), download: file.name });
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
 // My plan: every marked session, by festival day, with the same warnings as the grid.
 function renderPlan(info = analyse()) {
   const mine = [...marked].map(id => byId[id]).filter(Boolean).sort((a, b) => a.start.localeCompare(b.start));
   const warnings = warningsHtml(mine, info);
+  const at = now(), noTicket = mine.filter(s => !tickets.has(s.id) && toDate(s.end) > at).length;
   document.getElementById('planSummary').innerHTML = mine.length
-    ? `<span>${tn('markedSessions', mine.length, { n: `<b>${mine.length}</b>` })}</span>${warnings || `<span class="ok">${t('noConflicts')}</span>`}` : '';
-  const at = now();
+    ? `<span>${tn('markedSessions', mine.length, { n: `<b>${mine.length}</b>` })}</span>${warnings || `<span class="ok">${t('noConflicts')}</span>`}${noTicket ? `<span>${tn('needTickets', noTicket, { n: `<b>${noTicket}</b>` })}</span>` : ''}` : '';
+  document.getElementById('icsExport').hidden = !mine.length;
   checkProposal();
   const props = (proposal?.ids || []).map(id => byId[id]);
   const all = mine.concat(props).sort((a, b) => a.start.localeCompare(b.start));
-  document.getElementById('planList').innerHTML = autoBoxHtml() + (all.length ? days.filter(d => all.some(s => festDay(s.start) === d)).map(d => {
+  document.getElementById('planList').innerHTML = changesHtml() + autoBoxHtml() + (all.length ? days.filter(d => all.some(s => festDay(s.start) === d)).map(d => {
     const date = new Date(d + 'T12:00').toLocaleDateString(LOCALE[LANG], { weekday: 'long', day: 'numeric', month: 'long' });
     const rows = all.filter(s => festDay(s.start) === d).map(s => {
       if (!marked.has(s.id)) {
@@ -1444,23 +1544,25 @@ function renderPlan(info = analyse()) {
       const cls = ['prow', i.clash.length ? 'clash' : i.tight.length ? 'tight' : i.rest.length ? 'rest' : '', toDate(s.end) < at && 'past'].filter(Boolean).join(' ');
       return `<li class="${cls}" role="button" tabindex="0" data-open="${s.id}" style="--h:${hue(s.sections[0] || '')}">
         <div class="pt"><b>${hhmm(toDate(s.start))}</b><span>${hhmm(toDate(s.end))}</span></div>
-        <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)}</div>${notesHtml(s, i)}</div></li>`;
+        <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)} · ${tickets.has(s.id) ? `<span class="tk on">${t('hasTicket')}</span>` : `<span class="tk">${t('noTicket')}</span>`}</div>${notesHtml(s, i)}</div></li>`;
     }).join('');
     return `<section class="pday" id="plan-${d}"><h3><span>${esc(date)}</span><button type="button" data-day="${d}">${t('seeDay')}</button></h3><ol>${rows}</ol></section>`;
   }).join('') : `<p class="empty">${t('planEmpty')}</p>`);
 }
 const planList = document.getElementById('planList');
 planList.onclick = e => {
-  if (e.target.closest('[data-auto]')) return runAutoPlan();
+  if (e.target.closest('[data-ack]')) { ackChanges(); return render(current); }
+  const go = e.target.closest('[data-goto]');
+  if (go) return goto(+go.dataset.goto);
   if (e.target.closest('[data-discard]')) { proposal = null; return renderPlan(); }
   if (e.target.closest('[data-accept]')) {
     const ids = added = proposal.ids; proposal = null;
-    added.forEach(id => marked.add(id)); store.set('marked', [...marked]);
+    added.forEach(id => marked.add(id)); saveMarked();
     setTimeout(() => { if (added === ids) { added = null; if (activeView === 'plan') renderPlan(); } }, 15000);
     return render(current);
   }
   if (e.target.closest('[data-undo-auto]')) {
-    added.forEach(id => marked.delete(id)); store.set('marked', [...marked]); added = null;
+    added.forEach(id => marked.delete(id)); saveMarked(); added = null;
     return render(current);
   }
   const rej = e.target.closest('[data-reject]');
@@ -1474,7 +1576,8 @@ planList.onkeydown = e => { if (e.target.matches('[data-open]') && (e.key === 'E
 
 function updateCounts() {
   document.getElementById('watchCount').textContent = Object.keys(watch).length || '';
-  document.getElementById('planCount').textContent = marked.size || '';
+  const n = [...marked].filter(id => byId[id]).length;
+  document.getElementById('planCount').textContent = programmeChanges().length ? '!' : n || '';
 }
 
 // Sections. The schedule is home: another section sits one history entry above it, so Back returns to the schedule
