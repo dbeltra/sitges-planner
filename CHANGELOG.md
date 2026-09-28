@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-09-28
+
+### Fixed
+- Installed apps now notice the new icon. On Android it updates within a day or so of opening the app (Chrome may ask you to confirm); on iPhone, remove the app from the home screen and add it again.
+
 ## [2.3.0] - 2026-09-28
 
 ### Added
