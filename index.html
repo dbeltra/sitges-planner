@@ -330,7 +330,6 @@
   .auto.changes { box-shadow: inset 4px 0 0 var(--clash); }
   .auto.changes h4 { margin: 0; color: var(--clash); }
   .prow .tk { color: var(--muted); } .prow .tk.on { color: #2E7D32; font-weight: 700; }
-  .sheet .walk-actions button.on { background: #2E7D32; border-color: #2E7D32; color: #fff; }
   /* Friends: initials chips on sessions and screenings */
   .fr { display: inline-block; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--gold); color: #fff; font: 700 9.5px/15px var(--body); letter-spacing: .5px; text-align: center; font-style: normal; }
   .s .t .fr { flex: none; align-self: center; margin-left: auto; }
@@ -354,12 +353,15 @@
   .pass-status { font-size: 12px; }
   .pass-status:empty { display: none; }
   .pass-list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
-  .pass-list li { display: flex; gap: 4px; }
-  .pass-list button.rm { flex: none; width: auto; min-width: 40px; justify-content: center; color: var(--muted); }
-  .pass-list button.rm.confirm { background: var(--clash); color: #fff; font-weight: 700; }
-  .pass-list button { display: flex; width: 100%; gap: 10px; justify-content: space-between; padding: 8px 10px; border: 0; background: var(--ground); font-size: 12px; text-align: left; cursor: pointer; }
-  .pass-list button b { font-weight: 700; }
-  .pass-list button span:last-child { flex: none; color: #2E7D32; font-weight: 700; }
+  /* One card per session: when and where on a small line, the title below, the ticket chip, then a light ✕ */
+  .pass-list li { display: flex; align-items: center; background: var(--ground); }
+  .pass-list .open { flex: 1; min-width: 0; display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 8px 4px 8px 10px; border: 0; background: none; text-align: left; cursor: pointer; }
+  .pass-list .open > span:first-child { display: grid; gap: 1px; min-width: 0; }
+  .pass-list .open small { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .pass-list .open b { font-size: 13px; font-weight: 700; line-height: 1.25; }
+  .pass-list .tchip { align-self: center; margin: 0; }
+  .pass-list .rm { flex: none; align-self: center; min-width: 36px; height: 36px; margin-right: 4px; padding: 0 6px; border: 0; background: none; color: var(--muted); font-size: 14px; cursor: pointer; }
+  .pass-list .rm.confirm { background: var(--clash); color: #fff; font-weight: 700; font-size: 12px; }
   .door { width: 100%; max-width: 100%; height: 100%; max-height: 100%; margin: 0; background: #fff; }
   .door[open] { display: grid; align-content: center; justify-items: center; gap: 12px; padding: calc(24px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)); text-align: center; overflow: auto; }
   .door h2 { padding: 0; font: 700 22px/1.1 var(--display); text-transform: none; max-width: 22ch; text-wrap: balance; }
@@ -368,12 +370,34 @@
   .door .qr img { display: block; width: min(78vw, 46vh, 360px); height: auto; aspect-ratio: 1; image-rendering: pixelated; }
   .door .rs { font: 700 30px/1 var(--display); }
   .door .rs small { display: block; margin-bottom: 4px; font: 600 11px/1 var(--body); letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .door-track { display: flex; width: calc(100% + 32px); margin: 0 -16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .door-track::-webkit-scrollbar { display: none; }
+  .door-track:focus { outline: none; }
+  .door-card { flex: 0 0 100%; display: grid; justify-items: center; align-content: start; gap: 10px; margin: 0; padding: 0 16px; scroll-snap-align: center; }
+  .dots { display: flex; gap: 10px; }
+  .dots button { width: 10px; height: 10px; padding: 0; border: 1.5px solid var(--ink); border-radius: 50%; background: none; cursor: pointer; }
+  .dots button[aria-current="true"] { background: var(--ink); }
+  .dots button::after { content: ""; display: block; margin: -10px; width: 30px; height: 30px; } /* bigger tap target */
   .door .nav { display: flex; gap: 8px; }
   .door .nav button { padding: 10px 16px; border: 1px solid var(--ink); background: none; font-weight: 700; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
   .door .nav .close { background: var(--ink); color: var(--surface); }
-  .next .door-btn { margin-left: auto; padding: 3px 10px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); font-weight: 700; font-size: 11px; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; }
-  .prow button.tk { padding: 0; border: 0; background: none; font: inherit; color: #2E7D32; font-weight: 700; text-decoration: underline; cursor: pointer; }
-  .sheet .walk-actions .door-open { background: #2E7D32; border-color: #2E7D32; color: #fff; }
+  .ticon { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
+  .ticon .cut { stroke-dasharray: 1.6 2; }
+  .tchip { grid-column: 3; grid-row: 1; align-self: start; display: inline-flex; align-items: center; gap: 3px; margin: -2px 0 0; padding: 5px 7px; border: 0; background: none; color: var(--line); font: 700 12px/1 var(--body); }
+  .tchip.bought { color: #2E7D32; }
+  .tchip.has { background: #2E7D32; color: #fff; cursor: pointer; }
+  .tchip.has .ticon { fill: currentColor; } .tchip.has .ticon .cut { stroke: #2E7D32; }
+  .prow:not(.frow) { grid-template-columns: 50px 1fr auto; }
+  .next.has-door { position: relative; padding-right: 72px; }
+  .next .door-btn { position: absolute; top: 50%; right: 12px; translate: 0 -50%; display: inline-flex; align-items: center; gap: 4px; padding: 8px 10px; border: 0; background: #2E7D32; color: #fff; font: 700 13px/1 var(--body); cursor: pointer; }
+  .next .door-btn .ticon { width: 20px; height: 20px; fill: currentColor; } .next .door-btn .ticon .cut { stroke: #2E7D32; }
+  /* Session details: sentence-case actions, the ticket one with its icon */
+  .sheet .sheet-acts { flex-wrap: wrap; justify-content: flex-end; }
+  .sheet .sheet-acts button { display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; text-transform: none; letter-spacing: 0; font-size: 13px; }
+  .sheet .sheet-acts .door-open { margin-right: auto; background: #2E7D32; border-color: #2E7D32; color: #fff; }
+  .sheet .sheet-acts .door-open .ticon { fill: currentColor; } .sheet .sheet-acts .door-open .ticon .cut { stroke: #2E7D32; }
+  .sheet .sheet-acts .tick { margin-right: auto; border-color: var(--line); color: var(--muted); }
+  .sheet .sheet-acts .tick.on { border-color: #2E7D32; background: none; color: #2E7D32; font-weight: 700; }
   .plan-list .empty { padding: 30px 0; color: var(--muted); text-align: center; }
 
   /* Sync */
@@ -574,7 +598,7 @@
 <dialog id="door" class="door" aria-labelledby="doorTitle"></dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.4.1'; // bump on every change so a device can show which code it runs
+const BUILD = '2.5.0'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -607,7 +631,7 @@ const STR = {
     proposed: 'Proposada', propCovers: 'Per a {f}', rejectOne: 'Treu aquesta proposta',
     isPast: 'ja ha passat', shortNight: 'deixa poc descans amb {t}', gapOnly: 'allargaria el dia', dayFull: { one: 'el dia ja té {n} sessió', other: 'el dia ja té {n} sessions' },
     keptForOthers: 'deixada per encabir-ne d’altres',
-    ticketAdd: "Tinc l'entrada", ticketOn: '✓ Entrada comprada', hasTicket: '✓ Entrada', noTicket: 'Sense entrada',
+    ticketAdd: "Tinc l'entrada", ticketOn: 'Entrada comprada', hasTicket: '✓ Entrada', noTicket: 'Sense entrada',
     needTickets: { one: '{n} sense entrada', other: '{n} sense entrada' },
     icsExport: 'Afegeix al calendari', icsHelp: 'Desa el pla com a fitxer .ics per al calendari, amb un avís 30 minuts abans de cada sessió',
     passesTitle: 'Entrades', removeTickets: "Treu les entrades d'aquesta sessió", sure: 'Segur?', passesHelp: "Afegeix els PDF de les entrades del festival: l'app troba la sessió de cada una, la marca i en guarda el codi QR per ensenyar-lo a la porta. Es desen només en aquest dispositiu; conserva els PDF.",
@@ -615,7 +639,7 @@ const STR = {
     passesNoMatch: { one: "{n} no coincideix amb cap sessió del programa.", other: "{n} no coincideixen amb cap sessió del programa." }, passesBad: "{f} no sembla una entrada del festival.",
     passesFull: "No hi ha prou espai per desar les entrades en aquest dispositiu.", passGone: 'Hi tens entrada.',
     clearPasses: { zero: 'Cap entrada desada', one: 'Esborra {n} entrada', other: 'Esborra {n} entrades' },
-    showTicket: { one: "Mostra l'entrada", other: 'Mostra les entrades ({n})' }, doorRowSeat: 'Fila · Seient', doorOf: 'Entrada {i} de {n}', prevTicket: 'Anterior',
+    showTicket: { one: 'Entrada', other: 'Entrades' }, doorRowSeat: 'Fila · Seient', doorOf: 'Entrada {i} de {n}',
     doorHint: 'Apuja la brillantor si costa escanejar-la.', doorPdf: 'PDF original: {f}, pàgina {pg} (obre-la des de Fitxers)',
     friendsTitle: 'Amics', friendsShort: 'Amics', friendsHelp: "Compara el teu pla amb el d'amics: enganxa el seu codi o enllaç a Sincronitza i posa-hi un nom. Només es mostra al costat del teu; no el canvia.",
     compareHelp: "O compara'l amb el teu, com a pla d'un amic (amb el mateix nom, s'actualitza):", friendName: "Nom de l'amic", compareAs: 'Compara',
@@ -681,7 +705,7 @@ const STR = {
     proposed: 'Suggested', propCovers: 'For {f}', rejectOne: 'Remove this suggestion',
     isPast: 'already over', shortNight: 'too little rest around {t}', gapOnly: 'would make the day longer', dayFull: { one: 'that day already has {n} session', other: 'that day already has {n} sessions' },
     keptForOthers: 'left out to fit others in',
-    ticketAdd: 'I have a ticket', ticketOn: '✓ Ticket bought', hasTicket: '✓ Ticket', noTicket: 'No ticket',
+    ticketAdd: 'I have a ticket', ticketOn: 'Ticket bought', hasTicket: '✓ Ticket', noTicket: 'No ticket',
     needTickets: { one: '{n} without a ticket', other: '{n} without tickets' },
     icsExport: 'Add to calendar', icsHelp: 'Save the plan as an .ics file for your calendar, with an alert 30 minutes before each session',
     passesTitle: 'Tickets', removeTickets: "Remove this session's tickets", sure: 'Sure?', passesHelp: "Add the festival's ticket PDFs: the app finds each ticket's session, marks it and keeps its QR code to show at the door. They are saved only on this device; keep the PDFs.",
@@ -689,7 +713,7 @@ const STR = {
     passesNoMatch: { one: '{n} matches no session in the programme.', other: '{n} match no session in the programme.' }, passesBad: "{f} doesn't look like a festival ticket.",
     passesFull: 'Not enough space on this device to save the tickets.', passGone: 'You have a ticket for it.',
     clearPasses: { zero: 'No saved tickets', one: 'Delete {n} ticket', other: 'Delete {n} tickets' },
-    showTicket: { one: 'Show ticket', other: 'Show tickets ({n})' }, doorRowSeat: 'Row · Seat', doorOf: 'Ticket {i} of {n}', prevTicket: 'Previous',
+    showTicket: { one: 'Ticket', other: 'Tickets' }, doorRowSeat: 'Row · Seat', doorOf: 'Ticket {i} of {n}',
     doorHint: 'Turn the brightness up if it is hard to scan.', doorPdf: 'Original PDF: {f}, page {pg} (open it from Files)',
     friendsTitle: 'Friends', friendsShort: 'Friends', friendsHelp: "Compare your plan with friends': paste their code or link in Sync and give it a name. It's only shown next to yours; it doesn't change it.",
     compareHelp: "Or compare it with yours, as a friend's plan (the same name updates it):", friendName: "Friend's name", compareAs: 'Compare',
@@ -800,6 +824,13 @@ function savePasses() {
   try { localStorage.setItem('sitges26:passes', JSON.stringify(passes)); return true; } catch { return false; } // not store.set: a full storage must be reported
 }
 const passesFor = id => passes.filter(p => p.id === id).sort((a, b) => a.ref.localeCompare(b.ref));
+// Ticket icon (the app icon's shape): solid = ticket saved, outline = bought, faint = none. The state is in the CSS class around it.
+const TICKET = '<svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16a1 1 0 0 1 1 1v3a2 2 0 0 0 0 4v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2 2 0 0 0 0-4V7a1 1 0 0 1 1-1z"/><path class="cut" d="M15 6.5v11"/></svg>';
+function ticketChip(id) {
+  const n = passesFor(id).length;
+  if (n) return `<button type="button" class="tchip has" data-door="${id}" aria-label="${esc(tn('showTicket', n))}" title="${esc(tn('showTicket', n))}">${TICKET}<span>${n}</span></button>`;
+  return tickets.has(id) ? `<span class="tchip bought" title="${t('ticketOn')}" aria-label="${t('ticketOn')}">${TICKET}</span>` : `<span class="tchip none" title="${t('noTicket')}" aria-label="${t('noTicket')}">${TICKET}</span>`;
+}
 
 // Friends' plans: read-only layers pasted from their plan code, only shown next to yours. [{ name, m: [session ids], at: ISO date }]
 let friends = store.get('friends', []);
@@ -1069,7 +1100,8 @@ function renderNow() {
     html += `<span class="lbl">${t('next')}</span><b>${esc(next.title)}</b><span class="when">${hhmm(toDate(next.start))} · ${esc(venue(next.location))} · ${t('inTime', { d: dur(mins) })}</span>${leave}`;
   }
   const doorFor = (soon ? next : inside).id, n = passesFor(doorFor).length;
-  if (n) html += `<button type="button" class="door-btn" data-door="${doorFor}">${tn('showTicket', n)}</button>`;
+  if (n) html += `<button type="button" class="door-btn" data-door="${doorFor}" aria-label="${esc(tn('showTicket', n))}" title="${esc(tn('showTicket', n))}">${TICKET}<span>${n}</span></button>`;
+  bar.classList.toggle('has-door', !!n);
   bar.innerHTML = html;
   bar.dataset.id = doorFor;
   bar.hidden = false;
@@ -1273,7 +1305,8 @@ function openSheet(id) {
   sheet.innerHTML = `<button type="button" class="dlg-close" data-close aria-label="${t('close')}" title="${t('close')}">✕</button><form method="dialog" class="sheet-body" style="--h:${hue(s.sections[0] || '')}">
     ${body}
     ${notes ? `<div class="notes">${notes}</div>` : ''}
-    <div class="walk-actions">${passesFor(id).length ? `<button type="button" class="door-open" data-door="${id}">${tn('showTicket', passesFor(id).length)}</button>` : ''}${on ? `<button type="button" class="${tickets.has(id) ? 'on' : ''}" data-ticket="${id}" aria-pressed="${tickets.has(id)}">${tickets.has(id) ? t('ticketOn') : t('ticketAdd')}</button>` : ''}<button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
+    <div class="walk-actions sheet-acts">${passesFor(id).length ? `<button type="button" class="door-open" data-door="${id}">${TICKET}${tn('showTicket', passesFor(id).length)}</button>`
+      : on ? `<button type="button" class="tick${tickets.has(id) ? ' on' : ''}" data-ticket="${id}" aria-pressed="${tickets.has(id)}">${TICKET}${tickets.has(id) ? t('ticketOn') : t('ticketAdd')}</button>` : ''}<button type="button" class="primary" data-mark="${id}">${on ? t('unmark') : t('mark')}</button></div>
   </form>`;
   openPanel(sheet);
 }
@@ -1635,7 +1668,7 @@ function renderPasses() {
   document.getElementById('passList').innerHTML = [...groups.values()].sort((a, b) => a[0].a.localeCompare(b[0].a)).map(g => {
     const p = g[0], s = byId[p.id], start = s ? s.start : p.a + ':00';
     const key = esc(p.id ?? p.ref), confirm = removing === String(p.id ?? p.ref);
-    return `<li><button type="button" data-door-group="${key}"><span>${dayLabel(start)} ${hhmm(toDate(start))} · <b>${esc(s ? s.title : p.t)}</b> · ${esc(s ? venue(s.location) : p.v)}</span><span>${g.length} ×</span></button>
+    return `<li><button type="button" class="open" data-door-group="${key}"><span><small>${dayLabel(start)} ${hhmm(toDate(start))} · ${esc(s ? venue(s.location) : p.v)}</small><b>${esc(s ? s.title : p.t)}</b></span><span class="tchip has">${TICKET}<span>${g.length}</span></span></button>
       <button type="button" class="rm${confirm ? ' confirm' : ''}" data-rm-group="${key}" aria-label="${t('removeTickets')}" title="${t('removeTickets')}">${confirm ? t('sure') : '✕'}</button></li>`;
   }).join('');
 }
@@ -1663,30 +1696,34 @@ document.getElementById('passList').onclick = e => {
 };
 
 // Door view: the QR large with a white margin (scanners need it), row and seat in big type, the screen kept on.
+// Several seats: a carousel, one ticket per slide, swiped with native scroll snapping; a dot per ticket.
 const door = document.getElementById('door');
-let doorList = [], doorAt = 0, wake = null;
-function drawDoor() {
-  const p = doorList[doorAt], s = byId[p.id], start = s ? s.start : p.a + ':00';
-  door.innerHTML = `<h2 id="doorTitle">${esc(s ? s.title : p.t)}</h2>
-    <div class="w">${dayLabel(start)} · ${hhmm(toDate(start))} · ${esc(s ? s.location : p.v)}</div>
-    <div class="qr"><img src="${p.qr}" alt="QR"></div>
-    <div class="rs"><small>${t('doorRowSeat')}</small>${esc(p.row)} · ${esc(p.seat)}</div>
-    <div class="w">${doorList.length > 1 ? t('doorOf', { i: doorAt + 1, n: doorList.length }) + ' · ' : ''}Ref ${esc(p.ref)}</div>
-    ${p.f ? `<div class="w">${t('doorPdf', { f: esc(p.f), pg: p.pg })}</div>` : ''}
-    <div class="w">${t('doorHint')}</div>
-    <div class="nav">${doorList.length > 1 ? `<button type="button" data-step="-1">‹ ${t('prevTicket')}</button><button type="button" data-step="1">${t('next')} ›</button>` : ''}<button type="button" class="close" data-close>${t('close')}</button></div>`;
-}
+let wake = null;
 async function openDoor(list) {
   if (!list.length) return;
-  doorList = list; doorAt = 0; drawDoor(); openPanel(door);
+  const p = list[0], s = byId[p.id], start = s ? s.start : p.a + ':00';
+  door.innerHTML = `<h2 id="doorTitle">${esc(s ? s.title : p.t)}</h2>
+    <div class="w">${dayLabel(start)} · ${hhmm(toDate(start))} · ${esc(s ? s.location : p.v)}</div>
+    <div class="door-track" tabindex="0">${list.map((p, i) => `<figure class="door-card" aria-label="${t('doorOf', { i: i + 1, n: list.length })}">
+      <div class="qr"><img src="${p.qr}" alt="QR"></div>
+      <div class="rs"><small>${t('doorRowSeat')}</small>${esc(p.row)} · ${esc(p.seat)}</div>
+      <div class="w">Ref ${esc(p.ref)}</div>
+      ${p.f ? `<div class="w">${t('doorPdf', { f: esc(p.f), pg: p.pg })}</div>` : ''}</figure>`).join('')}</div>
+    ${list.length > 1 ? `<div class="dots">${list.map((_, i) => `<button type="button" data-dot="${i}" aria-label="${t('doorOf', { i: i + 1, n: list.length })}" aria-current="${!i}"></button>`).join('')}</div>` : ''}
+    <div class="w">${t('doorHint')}</div>
+    <div class="nav"><button type="button" class="close" data-close>${t('close')}</button></div>`;
+  const track = door.querySelector('.door-track');
+  track.onscroll = () => { const i = Math.round(track.scrollLeft / track.clientWidth); door.querySelectorAll('[data-dot]').forEach(d => d.setAttribute('aria-current', +d.dataset.dot === i)); };
+  openPanel(door);
   try { wake = await navigator.wakeLock?.request('screen'); } catch {}
 }
+const doorGo = i => { const track = door.querySelector('.door-track'); track?.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' }); };
 door.addEventListener('close', () => { wake?.release().catch(() => {}); wake = null; });
-door.addEventListener('click', e => {
-  const st = e.target.closest('[data-step]');
-  if (st) { doorAt = (doorAt + +st.dataset.step + doorList.length) % doorList.length; drawDoor(); }
+door.addEventListener('click', e => { const d = e.target.closest('[data-dot]'); if (d) doorGo(+d.dataset.dot); });
+door.addEventListener('keydown', e => {
+  const track = door.querySelector('.door-track');
+  if (track && /Arrow(Left|Right)/.test(e.key)) doorGo(Math.round(track.scrollLeft / track.clientWidth) + (e.key === 'ArrowRight' ? 1 : -1));
 });
-door.addEventListener('keydown', e => { if (doorList.length > 1 && /Arrow(Left|Right)/.test(e.key)) { doorAt = (doorAt + (e.key === 'ArrowRight' ? 1 : doorList.length - 1)) % doorList.length; drawDoor(); } });
 
 // ---------- Auto-plan ----------
 // Picks one screening per watchlist film around the marked sessions, which it never touches. Plans are compared tier by tier:
@@ -1858,7 +1895,7 @@ function renderPlan(info = analyse()) {
       const cls = ['prow', i.clash.length ? 'clash' : i.tight.length ? 'tight' : i.rest.length ? 'rest' : '', toDate(s.end) < at && 'past'].filter(Boolean).join(' ');
       return `<li class="${cls}" role="button" tabindex="0" data-open="${s.id}" style="--h:${hue(s.sections[0] || '')}">
         <div class="pt"><b>${hhmm(toDate(s.start))}</b><span>${hhmm(toDate(s.end))}</span></div>
-        <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)} · ${passesFor(s.id).length ? `<button type="button" class="tk" data-door="${s.id}">${tn('showTicket', passesFor(s.id).length)}</button>` : tickets.has(s.id) ? `<span class="tk on">${t('hasTicket')}</span>` : `<span class="tk">${t('noTicket')}</span>`}</div>${friendsBy[s.id] ? `<div class="going">${esc(t('alsoGoing', { names: namesOf(s.id) }))}</div>` : ''}${notesHtml(s, i)}</div></li>`;
+        <div><div class="ptitle">${esc(s.title)}</div><div class="pmeta">${esc(s.location)} · ${dur(s.duration)}</div>${friendsBy[s.id] ? `<div class="going">${esc(t('alsoGoing', { names: namesOf(s.id) }))}</div>` : ''}${notesHtml(s, i)}</div>${ticketChip(s.id)}</li>`;
     }).join('');
     return `<section class="pday" id="plan-${d}"><h3><span>${esc(date)}</span><button type="button" data-day="${d}">${t('seeDay')}</button></h3><ol>${rows}</ol></section>`;
   }).join('') : `<p class="empty">${t('planEmpty')}</p>`);

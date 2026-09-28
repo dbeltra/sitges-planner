@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-09-28
+
+### Changed
+- Tickets have a ticket icon instead of long text buttons. In El meu pla each session shows it on the right: green with the number of seats when the ticket is saved (tap it to show the ticket), a green outline when it's marked as bought, faint when there is none. The Next bar has the same compact button, and a session's details have one "Entrades" button next to Desmarca.
+- The list of saved tickets in Ajustos is tidier on narrow phones: each session is one card with when and where, the title, the ticket icon and a light ✕.
+- With several seats, the ticket view is a carousel: swipe between tickets, with a dot for each one (tap a dot to jump to it).
+
 ## [2.4.1] - 2026-09-28
 
 ### Added
