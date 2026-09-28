@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.2] - 2026-09-28
+
+### Changed
+- Updated programme from the festival: 49 sessions moved (some to another day), 8 removed and 4 added. If any of your sessions changed, El meu pla lists them.
+
+### Fixed
+- A session that now shows a different film is also listed under programme changes.
+- Films the festival renamed stay on your watchlist; films no longer in the programme leave it.
+
 ## [2.3.1] - 2026-09-28
 
 ### Fixed

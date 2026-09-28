@@ -538,7 +538,7 @@
 </dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.3.1'; // bump on every change so a device can show which code it runs
+const BUILD = '2.3.2'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -579,7 +579,7 @@ const STR = {
     friendAdded: 'Afegit el pla de {name}: {d}.', friendRemove: 'Treu', noFriends: 'Encara no has afegit cap amic.',
     alsoGoing: 'També hi va: {names}', friendGoes: 'Hi va {names}', showFriends: 'Mostra també les sessions dels amics',
     together: { one: '{n} amb amics', other: '{n} amb amics' },
-    changesTitle: 'Canvis al programa', changeMoved: 'Ara {now} (abans {was})', changeGone: 'Ja no és al programa (era {was}). Altres passis:', noOthers: 'No en queden altres passis.', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
+    changesTitle: 'Canvis al programa', changeMoved: 'Ara {now} (abans {was})', changeFilms: 'Ara s’hi projecta: {f}', changeGone: 'Ja no és al programa (era {was}). Altres passis:', noOthers: 'No en queden altres passis.', trailer: 'Tràiler', searchTrailer: 'Cerca el tràiler', festPage: 'Fitxa al web del festival',
     syncTitle: 'Sincronització', syncHelp: "El teu pla només es desa en aquest dispositiu. Per passar-lo a un altre, envia'l des d'aquí i obre'l a l'altre.",
     sendPlan: 'Envia aquest pla', planCode: 'Codi del pla', copyCode: 'Copia el codi', shareLink: "Comparteix l'enllaç",
     receivePlan: 'Rep un pla', pastePlan: 'Enganxa un codi o un enllaç', replacePlan: 'Substitueix el meu pla',
@@ -646,7 +646,7 @@ const STR = {
     friendAdded: "Added {name}'s plan: {d}.", friendRemove: 'Remove', noFriends: 'No friends added yet.',
     alsoGoing: 'Also going: {names}', friendGoes: '{names} going', showFriends: "Also show your friends' sessions",
     together: { one: '{n} with friends', other: '{n} with friends' },
-    changesTitle: 'Programme changes', changeMoved: 'Now {now} (was {was})', changeGone: 'No longer in the programme (was {was}). Other screenings:', noOthers: 'No other screenings left.', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
+    changesTitle: 'Programme changes', changeMoved: 'Now {now} (was {was})', changeFilms: 'Now showing: {f}', changeGone: 'No longer in the programme (was {was}). Other screenings:', noOthers: 'No other screenings left.', trailer: 'Trailer', searchTrailer: 'Search trailer', festPage: 'Page on the festival site',
     syncTitle: 'Sync', syncHelp: 'Your plan is saved only on this device. To move it, send it from this device and open it on the other one.',
     sendPlan: 'Send this plan', planCode: 'Plan code', copyCode: 'Copy code', shareLink: 'Share link',
     receivePlan: 'Receive a plan', pastePlan: 'Paste a code or a link', replacePlan: 'Replace my plan',
@@ -734,7 +734,8 @@ function saveMarked() {
 const programmeChanges = () => Object.entries(seen).map(([id, o]) => {
   const s = byId[id];
   if (!s) return { id: +id, o, gone: true };
-  if (s.start !== o.a || s.end !== o.b || s.location !== o.l) return { id: +id, o, s };
+  const moved = s.start !== o.a || s.end !== o.b || s.location !== o.l, films = String(s.films.map(f => f.url)) !== String(o.f);
+  if (moved || films) return { id: +id, o, s, moved, films };
 }).filter(Boolean);
 function ackChanges() {
   for (const c of programmeChanges()) c.gone ? marked.delete(c.id) : seen[c.id] = snap(c.s);
@@ -782,6 +783,11 @@ const filmIndex = {};
 for (const s of SCHEDULE) for (const f of s.films) (filmIndex[f.url] ??= { ...f, sessions: [] }).sessions.push(s);
 for (const f of Object.values(filmIndex)) f.sessions.sort((a, b) => a.start.localeCompare(b.start));
 const allFilms = Object.values(filmIndex).sort((a, b) => a.title.localeCompare(b.title, 'ca'));
+// After a data update: watchlist films the festival renamed follow their new page; films no longer in the programme drop out.
+{ let changed = false;
+  for (const [o, n] of Object.entries(window.RENAMED || {})) if (watch[o]) { watch[n] ??= watch[o]; delete watch[o]; changed = true; }
+  for (const u of Object.keys(watch)) if (!filmIndex[u]) { delete watch[u]; changed = true; }
+  if (changed) saveWatch(); }
 let current, view = null; // view: what the grid was drawn with, so the now line can move without a redraw
 
 // ?now=2026-10-08T21:30 pretends it is that time, to try the festival-day features early.
@@ -1564,7 +1570,7 @@ function changesHtml() {
   if (!list.length) return '';
   const was = o => `${dayLabel(o.a)} ${hhmm(toDate(o.a))} · ${venue(o.l)}`, mine = [...marked].map(id => byId[id]).filter(Boolean);
   return `<div class="auto changes"><h4 class="set-h">${t('changesTitle')}</h4><ul class="unfit">${list.map(c => {
-    if (!c.gone) return `<li><b>${esc(c.o.t)}</b><span>${t('changeMoved', { now: esc(was({ a: c.s.start, l: c.s.location })), was: esc(was(c.o)) })}</span></li>`;
+    if (!c.gone) return `<li><b>${esc(c.o.t)}</b>${c.moved ? `<span>${t('changeMoved', { now: esc(was({ a: c.s.start, l: c.s.location })), was: esc(was(c.o)) })}</span>` : ''}${c.films ? `<span>${t('changeFilms', { f: esc(c.s.films.map(f => f.title).join(', ') || c.s.title) })}</span>` : ''}</li>`;
     const others = c.o.f.flatMap(u => filmIndex[u] ? [filmIndex[u]] : []);
     return `<li><b>${esc(c.o.t)}</b><span>${t('changeGone', { was: esc(was(c.o)) })}</span>${others.length ? others.map(f => `<div class="fs">${showButtons(f, mine)}</div>`).join('') : `<span>${t('noOthers')}</span>`}</li>`;
   }).join('')}</ul><div class="walk-actions"><button type="button" class="primary" data-ack>${t('gotIt')}</button></div></div>`;

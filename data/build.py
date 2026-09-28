@@ -39,10 +39,29 @@ for s in sessions:
         'duration': s['duration'],
     })
 out.sort(key=lambda x: (x['start'], x['location']))
+PREVIOUS = 'schedule-previous.json'
+if os.path.exists('schedule.json'):
+    os.replace('schedule.json', PREVIOUS)
 json.dump(out, open('schedule.json', 'w'), ensure_ascii=False, indent=1)
 
 missing = [s['films'] for s in sessions if any(i not in films for i in s['films'])]
 assert not missing, missing
 print(len(out), 'sessions,', len({s['location'] for s in out}), 'locations')
 # ponytail: JS wrapper so index.html works from file:// without a server
-open('schedule.js', 'w').write('window.SCHEDULE = ' + json.dumps(out, ensure_ascii=False) + ';\n')
+# Film pages that changed address (the festival renamed the film): old URL -> new URL, so watchlists follow them.
+# Found by comparing with the previous build: same session, different film URL at the same position. The map is kept in
+# schedule.js (committed), so it survives later builds.
+renamed = {}
+if os.path.exists('schedule.js'):
+    m = re.search(r'^window\.RENAMED = (\{.*\});$', open('schedule.js').read(), re.M)
+    renamed = json.loads(m.group(1)) if m else {}
+if os.path.exists(PREVIOUS):
+    urls = {f['url'] for s in out for f in s['films']}
+    now = {s['id']: s for s in out}
+    for o in json.load(open(PREVIOUS)):
+        for fo, fn in zip(o['films'], now.get(o['id'], {}).get('films', [])):
+            if fo['url'] != fn['url'] and fo['url'] not in urls:
+                renamed[fo['url']] = fn['url']
+    renamed = {k: v for k, v in renamed.items() if k not in urls}
+open('schedule.js', 'w').write('window.SCHEDULE = ' + json.dumps(out, ensure_ascii=False) + ';\nwindow.RENAMED = ' + json.dumps(renamed, ensure_ascii=False) + ';\n')
+print(len(renamed), 'renamed films')
