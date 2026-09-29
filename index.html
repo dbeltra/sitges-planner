@@ -98,8 +98,6 @@
   #days button[aria-pressed="true"] { background: #000; color: #fff; }
   #days button[aria-pressed="true"] small::before { content: "★ "; color: var(--red); }
   #days button i { position: absolute; top: -7px; right: -4px; z-index: 1; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--yellow); color: #000; font: 700 10px/15px var(--body); font-style: normal; }
-  #days button i.bad { background: #000; color: var(--yellow); }
-  #days button[aria-pressed="true"] i.bad { background: var(--yellow); color: #000; }
 
   /* Summary line */
   .status { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
@@ -227,6 +225,7 @@
   .films-filters { display: flex; gap: 8px; flex-wrap: wrap; }
   .films-filters input, .films-filters select { flex: 1 1 200px; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); border-radius: 0; background: var(--ground); font: inherit; }
   .secpick summary { width: fit-content; padding: 7px 9px; border: 1px solid var(--line); background: var(--ground); cursor: pointer; }
+  .secpick > .walk-rows { padding-top: 8px; } .secpick > .walk-actions { margin-top: 8px; }
   .secpick .chips { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 8px; }
   .secpick .chips button { padding: 3px 8px; border: 1px solid var(--line); background: var(--ground); font: 600 11px/1.4 var(--body); cursor: pointer; }
   .secpick .chips button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
@@ -247,6 +246,7 @@
   .film .fsec { font: 700 9.5px/1.3 var(--body); text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
   .film .acts { display: flex; gap: 4px; grid-row: 1 / span 2; grid-column: 3; }
   .film .acts button { min-width: 34px; height: 30px; padding: 0 8px; border: 1px solid var(--ink); background: none; font-weight: 700; cursor: pointer; }
+  .film .acts [data-wl]:not(.rm) { white-space: nowrap; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
   .film .acts button.on { background: var(--ink); color: var(--surface); }
   .film .acts button.rm { min-width: 30px; border-color: var(--line); color: var(--muted); font-weight: 400; }
   /* Priority tiers: 1 must see (red), 2 want (black), 3 if it fits (grey) */
@@ -392,7 +392,7 @@
   .next .door-btn { position: absolute; top: 50%; right: 12px; translate: 0 -50%; display: inline-flex; align-items: center; gap: 4px; padding: 8px 10px; border: 0; background: #2E7D32; color: #fff; font: 700 13px/1 var(--body); cursor: pointer; }
   .next .door-btn .ticon { width: 20px; height: 20px; fill: currentColor; } .next .door-btn .ticon .cut { stroke: #2E7D32; }
   /* Session details: sentence-case actions, the ticket one with its icon */
-  .sheet .sheet-acts { flex-wrap: wrap; justify-content: flex-end; }
+  .sheet .sheet-acts { flex-wrap: wrap; justify-content: flex-end; position: sticky; bottom: 0; margin: 0 -20px -20px; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--surface); } /* Mark stays in reach under long synopses */
   .sheet .sheet-acts button { display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; text-transform: none; letter-spacing: 0; font-size: 13px; }
   .sheet .sheet-acts .door-open { margin-right: auto; background: #2E7D32; border-color: #2E7D32; color: #fff; }
   .sheet .sheet-acts .door-open .ticon { fill: currentColor; } .sheet .sheet-acts .door-open .ticon .cut { stroke: #2E7D32; }
@@ -495,7 +495,7 @@
   <div class="dates"><span data-i18n="dates">8-18 octubre 2026</span><span data-i18n="edition">59a edició</span></div>
   <nav class="views" id="views" data-i18n-attr="aria-label:sections">
     <button type="button" data-view="schedule"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span data-i18n="schedule">Schedule</span></button>
-    <button type="button" data-view="films"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span data-i18n="films">Films</span><i id="watchCount"></i></button>
+    <button type="button" data-view="films"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg><span data-i18n="films">Films</span></button>
     <button type="button" data-view="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><span data-i18n="plan">My plan</span><i id="planCount"></i></button>
     <button type="button" data-view="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span data-i18n="settings">Settings</span></button>
   </nav>
@@ -545,10 +545,12 @@
       <span><input type="number" id="maxPerDay" min="0" max="12" step="1"> <small data-i18n="perDay">a day</small></span></label>
     <h3 class="set-h" data-i18n="walkTimes">Walk times</h3>
     <p data-i18n="walkHelp"></p>
-    <div id="walkRows" class="walk-rows"></div>
-    <div class="walk-actions">
-      <button type="button" id="walkReset" data-i18n="reset">Reset to defaults</button>
-    </div>
+    <details class="secpick"><summary data-i18n="walkEdit">Change the times</summary>
+      <div id="walkRows" class="walk-rows"></div>
+      <div class="walk-actions">
+        <button type="button" id="walkReset" data-i18n="reset">Reset to defaults</button>
+      </div>
+    </details>
     <h3 class="set-h" data-i18n="replan">Replan</h3>
     <p data-i18n="replanHelp"></p>
     <div class="clear-row">
@@ -598,7 +600,7 @@
 <dialog id="door" class="door" aria-labelledby="doorTitle"></dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.5.0'; // bump on every change so a device can show which code it runs
+const BUILD = '2.6.0'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -617,7 +619,7 @@ const STR = {
     planEmpty: 'Encara no has marcat cap sessió. Toca ☆ en una sessió del programa.', seeDay: 'Veure al programa →', markSession: 'Marca {t}', unmarkSession: 'Desmarca {t}',
     festivalDays: 'Dies del festival', language: 'Idioma',
     restHelp: "<b>Descans mínim</b> entre l'última sessió d'una nit i la primera de l'endemà. Inclou-hi el trajecte d'anada i tornada a casa.",
-    hours: 'hores', walkTimes: 'Temps a peu',
+    hours: 'hores', walkTimes: 'Temps a peu', walkEdit: 'Canvia els temps',
     walkHelp: "Minuts que necessites per anar d'una sala a l'altra, en tots dos sentits. Un canvi de sala amb menys temps lliure es marca com a just.",
     reset: 'Restableix els valors per defecte', done: 'Fet', close: 'Tanca',
     tabAll: 'Totes les pel·lícules', tabWatch: 'La meva llista ({n})', searchFilms: 'Cerca per títol o director', section: 'Secció', allSections: 'Totes les seccions', sectionsN: 'Seccions ({n})', screenings: 'Passis', otherScreenings: 'Altres passis',
@@ -691,7 +693,7 @@ const STR = {
     planEmpty: 'You have not marked any session yet. Tap ☆ on a session in the schedule.', seeDay: 'See in schedule →', markSession: 'Mark {t}', unmarkSession: 'Unmark {t}',
     festivalDays: 'Festival days', language: 'Language',
     restHelp: '<b>Minimum rest</b> between your last session of a night and your first one the next day. Include your trip home and back.',
-    hours: 'hours', walkTimes: 'Walk times',
+    hours: 'hours', walkTimes: 'Walk times', walkEdit: 'Change the times',
     walkHelp: 'Minutes you need to go from one venue to the other, in both directions. A change of location with less free time than this shows as tight.',
     reset: 'Reset to defaults', done: 'Done', close: 'Close',
     tabAll: 'All films', tabWatch: 'My watchlist ({n})', searchFilms: 'Search title or director', section: 'Section', allSections: 'All sections', sectionsN: 'Sections ({n})', screenings: 'Screenings', otherScreenings: 'Other screenings',
@@ -891,9 +893,11 @@ const venue = l => SHORT[l] || l;
 function analyse() {
   const list = [...marked].map(id => byId[id]).filter(Boolean).sort((a, b) => a.start.localeCompare(b.start));
   const info = Object.fromEntries(list.map(s => [s.id, { clash: [], tight: [], repeat: [], rest: [], gap: null }]));
+  // A warning only while it can still change a plan: once the later session has started, the choice is made.
+  const started = s => toDate(s.start) <= now();
   // ponytail: O(n²) over marked sessions only, fine for a few hundred
   for (const a of list) for (const b of list) {
-    if (a === b || b.start < a.start || (b.start === a.start && b.id < a.id)) continue;
+    if (a === b || b.start < a.start || (b.start === a.start && b.id < a.id) || started(b)) continue;
     const gap = (toDate(b.start) - toDate(a.end)) / 60000;
     if (gap < 0) { info[a.id].clash.push(b); info[b.id].clash.push(a); }
     else if (gap < need(a.location, b.location)) { info[a.id].tight.push([b, gap]); info[b.id].tight.push([a, gap]); }
@@ -902,7 +906,7 @@ function analyse() {
   const byFilm = {};
   for (const s of list) for (const f of s.films) (byFilm[f.url] ??= []).push([s, f]);
   for (const hits of Object.values(byFilm)) if (hits.length > 1)
-    for (const [s, f] of hits) for (const [o] of hits) if (o !== s) info[s.id].repeat.push([f, o]);
+    for (const [s, f] of hits) for (const [o] of hits) if (o !== s && !started(s)) info[s.id].repeat.push([f, o]);
   list.forEach((s, i) => {
     const next = list[i + 1];
     if (next && festDay(next.start) === festDay(s.start)) info[s.id].gap = [(toDate(next.start) - toDate(s.end)) / 60000, next];
@@ -914,7 +918,7 @@ function analyse() {
     const last = tonight.reduce((a, b) => b.end > a.end ? b : a), first = tomorrow[0];
     const rest = (toDate(first.start) - toDate(last.end)) / 60000;
     if (!info[last.id].gap) info[last.id].gap = [rest, first, true];
-    if (rest < minRest * 60) { info[last.id].rest.push([first, rest, 'before']); info[first.id].rest.push([last, rest, 'after']); }
+    if (rest < minRest * 60 && !started(first)) { info[last.id].rest.push([first, rest, 'before']); info[first.id].rest.push([last, rest, 'after']); }
   });
   return info;
 }
@@ -946,7 +950,7 @@ function renderDays(info) {
     const date = new Date(d + 'T12:00');
     const wd = date.toLocaleDateString(LOCALE[LANG], { weekday: 'short' }).replace('.', '');
     return `<button data-day="${d}" aria-pressed="${d === current}" aria-label="${date.toLocaleDateString(LOCALE[LANG], { weekday: 'long', day: 'numeric', month: 'long' })}">
-      <small>${wd}</small><strong>${date.getDate()}</strong>${mine.length ? `<i class="${bad ? 'bad' : ''}">${mine.length}</i>` : ''}</button>`;
+      <small>${wd}</small><strong>${date.getDate()}</strong>${bad ? '<i>!</i>' : ''}</button>`;
   }).join('');
 }
 
@@ -1542,7 +1546,7 @@ function renderFilms() {
       ${f.image ? `<img src="${esc(f.image)}" alt="" loading="lazy">` : '<span></span>'}
       <button type="button" class="ft">${esc(f.title)}</button>
       <div class="acts">
-        ${w ? tierHtml(f.url) : ''}<button type="button" class="${w ? 'rm' : ''}" data-wl="${esc(f.url)}" aria-pressed="${!!w}" aria-label="${w ? t('removeFromList') : t('addToList')}" title="${w ? t('removeFromList') : t('addToList')}">${w ? '✕' : '+'}</button>
+        ${w ? tierHtml(f.url) : ''}<button type="button" class="${w ? 'rm' : ''}" data-wl="${esc(f.url)}" aria-pressed="${!!w}" aria-label="${w ? t('removeFromList') : t('addToList')}" title="${w ? t('removeFromList') : t('addToList')}">${w ? '✕' : t('watchAdd')}</button>
       </div>
       <div class="fd">${[esc(f.directors.join(', ')), f.runtime && dur(f.runtime)].filter(Boolean).join(' · ')}${f.sections.length ? ` <span class="fsec">· ${esc(f.sections.join(' · '))}</span>` : ''}</div>
       ${st ? `<div class="st ${st.key}">${esc(st.text)}</div>` : ''}
@@ -1928,9 +1932,7 @@ planList.onclick = e => {
 planList.onkeydown = e => { if (e.target.matches('[data-open]') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openSheet(+e.target.dataset.open); } };
 
 function updateCounts() {
-  document.getElementById('watchCount').textContent = Object.keys(watch).length || '';
-  const n = [...marked].filter(id => byId[id]).length;
-  document.getElementById('planCount').textContent = programmeChanges().length ? '!' : n || '';
+  document.getElementById('planCount').textContent = programmeChanges().length ? '!' : '';
 }
 
 // Sections. The schedule is home: another section sits one history entry above it, so Back returns to the schedule

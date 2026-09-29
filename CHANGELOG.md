@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-09-29
+
+### Changed
+
+- Fewer badges on the main screen. The Films button no longer counts your watchlist, and My plan no longer counts your
+  sessions; it shows a "!" only when the programme changes.
+- The day tabs no longer count your sessions. A day shows a yellow "!" only when something needs a look: a clash, a
+  tight change, a repeated film or too little rest.
+- Warnings stop once they can no longer change your plan: when the later of two clashing sessions has started, the clash
+  is no longer flagged or counted.
+- In a session's details, the Mark button stays at the bottom of the screen while you scroll through long synopses.
+- In Films, the add button now reads "+ Watchlist", like in a film's details.
+- In Settings, the walking times between venues are folded away under "Change the times".
+
 ## [2.5.0] - 2026-09-28
 
 ### Changed
