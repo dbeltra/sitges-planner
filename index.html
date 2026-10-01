@@ -392,7 +392,7 @@
   .next .door-btn { position: absolute; top: 50%; right: 12px; translate: 0 -50%; display: inline-flex; align-items: center; gap: 4px; padding: 8px 10px; border: 0; background: #2E7D32; color: #fff; font: 700 13px/1 var(--body); cursor: pointer; }
   .next .door-btn .ticon { width: 20px; height: 20px; fill: currentColor; } .next .door-btn .ticon .cut { stroke: #2E7D32; }
   /* Session details: sentence-case actions, the ticket one with its icon */
-  .sheet .sheet-acts { flex-wrap: wrap; justify-content: flex-end; position: sticky; bottom: 0; margin: 0 -20px -20px; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--surface); } /* Mark stays in reach under long synopses */
+  .sheet .sheet-acts { flex-wrap: wrap; justify-content: flex-end; position: sticky; bottom: -20px; margin: 0 -20px -20px; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--surface); } /* Mark stays in reach under long synopses */
   .sheet .sheet-acts button { display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; text-transform: none; letter-spacing: 0; font-size: 13px; }
   .sheet .sheet-acts .door-open { margin-right: auto; background: #2E7D32; border-color: #2E7D32; color: #fff; }
   .sheet .sheet-acts .door-open .ticon { fill: currentColor; } .sheet .sheet-acts .door-open .ticon .cut { stroke: #2E7D32; }
@@ -600,7 +600,7 @@
 <dialog id="door" class="door" aria-labelledby="doorTitle"></dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.6.0'; // bump on every change so a device can show which code it runs
+const BUILD = '2.6.1'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);

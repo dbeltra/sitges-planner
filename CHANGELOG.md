@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.1] - 2026-09-30
+
+### Fixed
+
+- In a session's details, the bar with the Mark button now sits flush with the bottom of the screen, so the text no
+  longer shows through underneath it.
+
 ## [2.6.0] - 2026-09-29
 
 ### Changed
