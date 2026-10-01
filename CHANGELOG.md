@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-10-01
+
+### Added
+
+- Tap a poster in a film's details to open it full size, ready to save and share, for example as an Instagram story.
+  A small ↗ in the corner marks it. Some originals are large files, so they can take a moment on mobile data.
+
 ## [2.7.0] - 2026-10-01
 
 ### Added

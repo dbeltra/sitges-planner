@@ -305,6 +305,8 @@
   .film-head { display: grid; grid-template-columns: 130px 1fr; gap: 16px; align-items: start; }
   .film-head:not(:has(img)) { grid-template-columns: 1fr; }
   .film-head img { width: 100%; aspect-ratio: 291 / 434; object-fit: cover; background: var(--ground); }
+  .film-head .poster { position: relative; display: block; }
+  .film-head .poster::after { content: "↗"; position: absolute; right: 0; bottom: 0; padding: 2px 5px; background: rgb(0 0 0 / .6); color: #fff; font: 700 12px/1.2 var(--body); } /* tap for the full-size poster */
   .film-head > div { display: grid; gap: 10px; justify-items: start; }
   .film-head .wbtn { margin-left: 0; vertical-align: 0; }
   .film-head .extras { margin-top: 0; }
@@ -624,7 +626,7 @@
 <dialog id="door" class="door" aria-labelledby="doorTitle"></dialog>
 <script src="data/schedule.js"></script>
 <script>
-const BUILD = '2.7.0'; // bump on every change so a device can show which code it runs
+const BUILD = '2.8.0'; // bump on every change so a device can show which code it runs
 const DAY_START_HOUR = 6; // ponytail: a session starting before 06:00 belongs to the previous festival day
 const toDate = s => new Date(s); // "YYYY-MM-DDTHH:MM:SS" parses as local time
 const festDay = s => { const d = toDate(s); d.setHours(d.getHours() - DAY_START_HOUR);
@@ -641,7 +643,7 @@ const STR = {
     title: 'Planificador Sitges 2026', dates: '8-18 octubre 2026', edition: '59a edició',
     onlyLong: 'Només les meves sessions', onlyShort: 'Les meves', settings: 'Ajustos', films: 'Pel·lícules', schedule: 'Programa', plan: 'El meu pla', sections: 'Seccions de l’aplicació', syncOpen: 'Sincronitza amb un altre dispositiu',
     planEmpty: 'Encara no has marcat cap sessió. Toca ☆ en una sessió del programa.', seeDay: 'Veure al programa', markSession: 'Marca {t}', unmarkSession: 'Desmarca {t}',
-    festivalDays: 'Dies del festival', language: 'Idioma', theme: 'Aparença', themeAuto: 'Automàtica', themeLight: 'Clara', themeDark: 'Fosca',
+    fullPoster: 'Obre el cartell a mida completa', festivalDays: 'Dies del festival', language: 'Idioma', theme: 'Aparença', themeAuto: 'Automàtica', themeLight: 'Clara', themeDark: 'Fosca',
     restHelp: "<b>Descans mínim</b> entre l'última sessió d'una nit i la primera de l'endemà. Inclou-hi el trajecte d'anada i tornada a casa.",
     hours: 'hores', walkTimes: 'Temps a peu', walkEdit: 'Canvia els temps',
     walkHelp: "Minuts que necessites per anar d'una sala a l'altra, en tots dos sentits. Un canvi de sala amb menys temps lliure es marca com a just.",
@@ -715,7 +717,7 @@ const STR = {
     title: 'Sitges 2026 Planner', dates: '8–18 October 2026', edition: '59th edition',
     onlyLong: 'Only my sessions', onlyShort: 'Only mine', settings: 'Settings', films: 'Films', schedule: 'Schedule', plan: 'My plan', sections: 'App sections', syncOpen: 'Sync with another device',
     planEmpty: 'You have not marked any session yet. Tap ☆ on a session in the schedule.', seeDay: 'See in schedule', markSession: 'Mark {t}', unmarkSession: 'Unmark {t}',
-    festivalDays: 'Festival days', language: 'Language', theme: 'Appearance', themeAuto: 'Automatic', themeLight: 'Light', themeDark: 'Dark',
+    fullPoster: 'Open the full-size poster', festivalDays: 'Festival days', language: 'Language', theme: 'Appearance', themeAuto: 'Automatic', themeLight: 'Light', themeDark: 'Dark',
     restHelp: '<b>Minimum rest</b> between your last session of a night and your first one the next day. Include your trip home and back.',
     hours: 'hours', walkTimes: 'Walk times', walkEdit: 'Change the times',
     walkHelp: 'Minutes you need to go from one venue to the other, in both directions. A change of location with less free time than this shows as tight.',
@@ -1504,11 +1506,13 @@ const showButtons = (f, mine) => f.sessions.map(s => {
 const secsHtml = secs => `<div class="secs">${secs.map(x => `<span style="--h:${hue(x)}">${esc(x)}</span>`).join('')}</div>`;
 // One film as the detail panels show it: poster beside title, director, sections, watchlist and links; then synopsis
 // and its screenings. From a session (`sessionId`), the list skips that session: "can I see it another time?".
+// The festival's original upload behind its thumbnail style: big enough for a story (some are very large files).
+const fullPoster = url => url.replace(/\/styles\/[^/]+\/public\//, '/').split('?')[0];
 function filmHtml(f, sessionId, heading, small = false) {
   const film = filmIndex[f.url] || { ...f, sessions: [] }, mine = [...marked].map(id => byId[id]).filter(Boolean);
   const others = { ...film, sessions: film.sessions.filter(s => s.id !== sessionId) };
   return `<div class="film-block${small ? ' small' : ''}"><div class="film-head">
-      ${f.image ? `<img src="${esc(f.image)}" alt="" loading="lazy">` : ''}
+      ${f.image ? `<a class="poster" href="${esc(fullPoster(f.image))}" target="_blank" rel="noopener" title="${t('fullPoster')}" aria-label="${t('fullPoster')}"><img src="${esc(f.image)}" alt="" loading="lazy"></a>` : ''}
       <div>
         ${heading}
         ${f.directors.length || f.runtime ? `<div class="meta"><span>${[esc(f.directors.join(', ')), f.runtime && dur(f.runtime)].filter(Boolean).join(' · ')}</span></div>` : ''}
