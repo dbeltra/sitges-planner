@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-10-01
+
+### Added
+
+- A night look: black background with light text, easier on the eyes in a dark cinema. By default it follows your
+  phone's dark mode; Settings → Appearance lets you pick Light or Dark instead. Your marked sessions show in cream so
+  they still stand out, and the ticket at the door stays white so the QR code scans.
+
+### Changed
+
+- Clashes are easier to spot: the session gets a striped red edge and its warning starts with "!", in the programme,
+  in My plan and in the overlaps key.
+- Buttons are written in normal case instead of capitals, the same everywhere.
+- The star on each session is easier to tap; it looks the same.
+- "See in schedule" no longer ends with an arrow.
+
 ## [2.6.1] - 2026-09-30
 
 ### Fixed
